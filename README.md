@@ -1,4 +1,7 @@
 # Optimizers
+
+This is an application for showing how optimization algorithms work.
+
 Это программа написана на Python с использованием библиотек <b>PyQt5</b> для интерфейса, 
 <b>Matplotlib</b> для графиков и <b>Numpy</b> для расчётов. 
 
