@@ -103,6 +103,9 @@ class Graphics:
         self.interval = 30
         self.frames_per_tick = 1
 
+        self.start_marker_style = dict(marker="o", markersize=8, color="white", markeredgecolor="black")
+        self.start_marker = None
+
         self.end_animation_func = None
         self.step_function = None
 
@@ -170,12 +173,26 @@ class Graphics:
     def draw_start_markers(self, ax, xs, ys):
         # стартовые точки могут различаться: без галочки сброса каждый
         # оптимизатор продолжает со своей последней позиции
-        marker_style = dict(marker="o", markersize=8, color="white", markeredgecolor="black")
         for x, y in zip(xs, ys):
             if self.threedimensional:
-                ax.plot([x[0][0]], [x[0][1]], [y[0]], zorder=101, **marker_style)
+                ax.plot([x[0][0]], [x[0][1]], [y[0]], zorder=101, **self.start_marker_style)
             else:
-                ax.plot([x[0][0]], [x[0][1]], zorder=4, **marker_style)
+                ax.plot([x[0][0]], [x[0][1]], zorder=4, **self.start_marker_style)
+
+    def move_start_marker(self, ax, x, y):
+        # предпросмотр стартовой точки: маркер создаётся один раз на текущих
+        # осях (после перестроения графика оси меняются) и потом только
+        # передвигается
+        if self.start_marker is None or self.start_marker.axes is not ax:
+            zorder = 101 if self.threedimensional else 4
+            (self.start_marker,) = ax.plot([x], [y], zorder=zorder, **self.start_marker_style)
+            # точка за пределами области функции не должна растягивать
+            # автомасштаб превью
+            self.fix_limits(ax)
+        if self.threedimensional:
+            self.start_marker.set_data_3d([x], [y], [self.function(np.array([x, y]))])
+        else:
+            self.start_marker.set_data([x], [y])
 
     def draw_2d_plot(self, ax, xs, ys, names):
         self.draw_function_plot(ax)
