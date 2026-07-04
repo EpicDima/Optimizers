@@ -99,7 +99,7 @@ class Ui_MainWindow(object):
         self.speed_slider.setObjectName(u"speed_slider")
         self.speed_slider.setGeometry(QRect(300, 510, 70, 25))
         self.speed_slider.setMinimum(-2)
-        self.speed_slider.setMaximum(5)
+        self.speed_slider.setMaximum(6)
         self.speed_slider.setPageStep(1)
         self.speed_slider.setValue(0)
         self.speed_slider.setOrientation(Qt.Orientation.Horizontal)
