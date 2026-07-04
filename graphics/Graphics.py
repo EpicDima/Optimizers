@@ -198,7 +198,8 @@ class Graphics:
         self.draw_function_plot(ax)
         self.draw_start_markers(ax, xs, ys)
         for idx, x in enumerate(xs):
-            ax.plot(x[:, 0], x[:, 1], color=self.colors[idx], label=self.value_label(names[idx], ys[idx][-1]))
+            start = self.tail_start(len(x) - 1)
+            ax.plot(x[start:, 0], x[start:, 1], color=self.colors[idx], label=self.value_label(names[idx], ys[idx][-1]))
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
 
@@ -206,9 +207,24 @@ class Graphics:
         self.draw_function_plot(ax)
         self.draw_start_markers(ax, xs, ys)
         for idx, (x, y) in enumerate(zip(xs, ys)):
-            ax.plot(x[:, 0], x[:, 1], y, zorder=100, color=self.colors[idx], label=self.value_label(names[idx], y[-1]))
+            start = self.tail_start(len(x) - 1)
+            ax.plot(
+                x[start:, 0],
+                x[start:, 1],
+                y[start:],
+                zorder=100,
+                color=self.colors[idx],
+                label=self.value_label(names[idx], y[-1]),
+            )
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
+
+    def tail_start(self, last_index):
+        # с какой точки показывать траекторию, чтобы до последней точки
+        # last_index оставалось не больше not_disappearing шагов (0 — вся)
+        if self.not_disappearing == 0:
+            return 0
+        return max(last_index - self.not_disappearing, 0)
 
     def value_label(self, name, value, lr=None):
         label = f"{name} = {value:.4g}"
@@ -247,11 +263,7 @@ class Graphics:
     def draw_animation_plot(self, frame_idx, lines, legend, names, xs, ys, lrs):
         self.step_function(frame_idx)
 
-        if self.not_disappearing == 0:
-            start = 0
-        else:
-            start = frame_idx - self.not_disappearing
-            start = start if start >= 0 else 0
+        start = self.tail_start(frame_idx)
 
         for idx, line in enumerate(lines):
             x = xs[idx]

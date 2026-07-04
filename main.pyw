@@ -78,6 +78,8 @@ class Application(QMainWindow, Ui_MainWindow):
         self.speed_slider.valueChanged.connect(self.change_speed)
         self.change_speed(self.speed_slider.value())
 
+        self.tail_textedit.textChanged.connect(self.change_tail)
+
         self.initial_x_textedit.textChanged.connect(self.preview_start_point)
         self.initial_y_textedit.textChanged.connect(self.preview_start_point)
 
@@ -133,15 +135,20 @@ class Application(QMainWindow, Ui_MainWindow):
         controls.addWidget(self.label, 0, 2)
         controls.addWidget(self.steps_textedit, 0, 3)
         controls.addWidget(self.label_3, 0, 4)
+        controls.addWidget(self.tail_textedit, 0, 5)
+        controls.addWidget(self.label_5, 0, 6)
         controls.addWidget(self.animation_checkbox, 1, 0)
         controls.addWidget(self.initial_y_textedit, 1, 1)
         controls.addWidget(self.label_2, 1, 2)
         controls.addWidget(self.speed_slider, 1, 3)
         controls.addWidget(self.speed_label, 1, 4)
+        tail_tooltip = "Сколько последних шагов показывать на графике и в анимации (0 — все)"
+        self.tail_textedit.setToolTip(tail_tooltip)
+        self.label_5.setToolTip(tail_tooltip)
         # ширина резервируется под самый длинный текст, иначе колонка
         # дёргается при смене множителя скорости
         self.speed_label.setMinimumWidth(self.speed_label.fontMetrics().horizontalAdvance("Speed ×0.125"))
-        controls.setColumnStretch(5, 1)
+        controls.setColumnStretch(7, 1)
         left.addLayout(controls)
 
         function_row = QHBoxLayout()
@@ -396,6 +403,14 @@ class Application(QMainWindow, Ui_MainWindow):
 
     def change_step(self, step):
         self.step_label.setText(f"Step: {step}")
+
+    def change_tail(self):
+        # длина хвоста читается анимацией на каждом кадре, поэтому идущая
+        # анимация подхватывает новое значение сразу; статичный график —
+        # при следующем построении. Недописанное число молча игнорируется
+        value = self.safe_input(self.tail_textedit.text(), int, None)
+        if value is not None and value >= 0:
+            self.graphics.not_disappearing = value
 
     def plot(self, xs, ys, names, lrs):
         self.stop_animation()
