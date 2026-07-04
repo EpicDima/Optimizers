@@ -3,7 +3,11 @@ from .Optimizer import Optimizer, np
 
 class AdEMAMix(Optimizer):
     """
-    AdEMAMix (arXiv:2409.03137)
+    AdEMAMix.
+
+    Первоисточник: Pagliardini et al. "The AdEMAMix Optimizer:
+    Better, Faster, Older". 2024.
+    https://arxiv.org/abs/2409.03137
 
     Adam с дополнительной медленной EMA момента m2, которая добавляется
     к шагу с коэффициентом alpha. Отклонение от статьи: там beta3 = 0.9999

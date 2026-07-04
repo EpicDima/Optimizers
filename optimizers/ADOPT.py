@@ -3,9 +3,11 @@ from .Optimizer import Optimizer, np
 
 class ADOPT(Optimizer):
     """
-    Оптимизатор ADOPT
-    из статьи "ADOPT: Modified Adam Can Converge with Any beta2
-    with the Optimal Rate" (arXiv:2411.02853)
+    Оптимизатор ADOPT.
+
+    Первоисточник: Taniguchi et al. "ADOPT: Modified Adam Can Converge
+    with Any beta2 with the Optimal Rate". 2024.
+    https://arxiv.org/abs/2411.02853
     """
 
     v: np.ndarray

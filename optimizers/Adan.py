@@ -3,7 +3,13 @@ from .Optimizer import Optimizer, np
 
 class Adan(Optimizer):
     """
-    Adan - Adaptive Nesterov Momentum Algorithm (arXiv:2208.06677)
+    Adan - Adaptive Nesterov Momentum Algorithm.
+
+    Первоисточник: Xie et al. "Adan: Adaptive Nesterov Momentum Algorithm
+    for Faster Optimizing Deep Models". 2022.
+    https://arxiv.org/abs/2208.06677
+    Реализация/конвенции: официальная реализация авторов sail-sg/Adan
+    https://github.com/sail-sg/Adan
 
     Беты заданы в Adam-конвенции референсной реализации sail-sg/Adan:
     m = beta1 * m + (1 - beta1) * g и т.д. (в самой статье те же

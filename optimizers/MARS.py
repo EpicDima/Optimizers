@@ -3,7 +3,11 @@ from .Optimizer import Optimizer, np
 
 class MARS(Optimizer):
     """
-    MARS - Unleashing the Power of Variance Reduction (arXiv:2411.10438)
+    MARS - оптимизатор с вариационной редукцией.
+
+    Первоисточник: Yuan et al. "MARS: Unleashing the Power of Variance
+    Reduction for Training Large Models". 2024.
+    https://arxiv.org/abs/2411.10438
 
     AdamW-шаг по вариационно-скорректированному градиенту c_t с клиппингом
     по норме. Здесь градиент точный (стохастики нет), поэтому вариационная

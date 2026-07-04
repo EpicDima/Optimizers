@@ -3,9 +3,11 @@ from .Optimizer import Optimizer, np
 
 class CautiousAdamW(Optimizer):
     """
-    Оптимизатор Cautious AdamW (C-AdamW)
-    из статьи "Cautious Optimizers: Improving Training with One Line
-    of Code" (arXiv:2411.16085)
+    Оптимизатор Cautious AdamW (C-AdamW).
+
+    Первоисточник: Liang et al. "Cautious Optimizers: Improving Training
+    with One Line of Code". 2024.
+    https://arxiv.org/abs/2411.16085
     """
 
     v: np.ndarray
