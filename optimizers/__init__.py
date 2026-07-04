@@ -23,4 +23,5 @@ from .QuickProp import QuickProp
 from .RAdam import RAdam
 from .RMSprop import RMSprop
 from .Rprop import Rprop
+from .ScheduleFreeAdamW import ScheduleFreeAdamW
 from .SGD import SGD
