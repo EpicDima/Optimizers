@@ -100,6 +100,9 @@ class Graphics:
         self.cmap = "inferno"
         self.not_disappearing = 0
 
+        self.interval = 30
+        self.frames_per_tick = 1
+
         self.end_animation_func = None
         self.step_function = None
 
@@ -133,10 +136,12 @@ class Graphics:
             self.animation = FuncAnimation(
                 canvas.fig,
                 self.draw_animation_plot,
-                frames=len(xs[0]),
+                # генератор-функция: FuncAnimation создаёт свежую
+                # последовательность кадров на каждый запуск
+                frames=lambda: self.animation_frames(len(xs[0])),
                 fargs=(lines, legend, names, xs, ys),
                 repeat=False,
-                interval=30,
+                interval=self.interval,
                 # блиттинг перерисовывает только линии поверх кешированного фона,
                 # но 3D-осями не поддерживается
                 blit=not self.threedimensional,
@@ -198,6 +203,16 @@ class Graphics:
         ax.set_ylim(self.function.from_y, self.function.to_y)
         if self.threedimensional:
             ax.set_zlim(self.function.y.min(), self.function.y.max())
+
+    def animation_frames(self, count):
+        # число пропускаемых шагов читается на каждом тике, поэтому скорость
+        # можно менять на лету; последний кадр выдаётся всегда, чтобы
+        # сработало завершение анимации
+        frame = 0
+        while frame < count - 1:
+            yield frame
+            frame += self.frames_per_tick
+        yield count - 1
 
     def create_animation_lines(self, ax, names):
         lines = []
