@@ -1,4 +1,9 @@
+from typing import TYPE_CHECKING
+
 import numpy as np  # noqa: F401  # реэкспортируется в дочерние оптимизаторы
+
+if TYPE_CHECKING:
+    from Function import Function
 
 
 class Optimizer:
@@ -11,7 +16,7 @@ class Optimizer:
 
     """
 
-    def __init__(self, initial_x, function, params):
+    def __init__(self, initial_x: np.ndarray, function: Function, params: dict[str, float]) -> None:
         """
         Конструктор класса Optimizer
 
@@ -31,7 +36,7 @@ class Optimizer:
 
         self.reset()
 
-    def next_point(self):
+    def next_point(self) -> tuple[np.ndarray, float]:
         """
         Метод next_point, в котором рассчитывается новое положение точки.
         Каждый дочерний оптимизатор обязан реализовать этот метод
@@ -39,7 +44,7 @@ class Optimizer:
 
         raise NotImplementedError
 
-    def move_next(self, next_x):
+    def move_next(self, next_x: np.ndarray) -> tuple[np.ndarray, float]:
         """
         Метод move_next, возвращает значение точки и значение функции в этой точке
         """
@@ -47,7 +52,7 @@ class Optimizer:
         self.x = next_x.flatten()
         return self.x, self.function(self.x)
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Метод reset просто сбрасывает текущее значение точки к начальному
         """

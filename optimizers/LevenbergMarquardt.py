@@ -2,11 +2,13 @@ from .Optimizer import Optimizer, np
 
 
 class LevenbergMarquardt(Optimizer):
-    def __init__(self, initial_x, function, lr=1.0, damping=0.001):
+    m: float
+
+    def __init__(self, initial_x: np.ndarray, function, lr: float = 1.0, damping: float = 0.001) -> None:
         params = dict(lr=lr, damping=damping)
         super().__init__(initial_x, function, params)
 
-    def next_point(self):
+    def next_point(self) -> tuple[np.ndarray, float]:
         gradient = self.function.grad(self.x)
         hesse = self.function.hesse(self.x)
 
@@ -26,6 +28,6 @@ class LevenbergMarquardt(Optimizer):
         self.m *= 2
         return self.move_next(self.x)
 
-    def reset(self):
+    def reset(self) -> None:
         super().reset()
         self.m = self.params["damping"]

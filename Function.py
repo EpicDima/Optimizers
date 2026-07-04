@@ -1,5 +1,7 @@
 import ast
 import re
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -11,7 +13,7 @@ _ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod, ast.Fl
 _ALLOWED_UNARYOPS = (ast.UAdd, ast.USub)
 
 
-def _is_np_attribute(node):
+def _is_np_attribute(node: ast.AST) -> bool:
     return (
         isinstance(node, ast.Attribute)
         and isinstance(node.value, ast.Name)
@@ -20,7 +22,7 @@ def _is_np_attribute(node):
     )
 
 
-def _is_allowed_node(node):
+def _is_allowed_node(node: ast.AST) -> bool:
     if isinstance(node, ast.Constant):
         return isinstance(node.value, (int, float))
     if isinstance(node, ast.BinOp):
@@ -44,7 +46,7 @@ def _is_allowed_node(node):
 
 
 class Function:
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.from_x = -5
         self.to_x = 5
@@ -92,22 +94,22 @@ class Function:
         self.grad1 = lambda x, f: (f(x + self.eps1) - f(x - self.eps1)) / self.double_eps
         self.grad2 = lambda x, f: (f(x + self.eps2) - f(x - self.eps2)) / self.double_eps
 
-    def create_surface(self):
+    def create_surface(self) -> None:
         mesh_x = np.linspace(self.from_x, self.to_x, self.count)
         mesh_y = np.linspace(self.from_y, self.to_y, self.count)
         self.x = np.array(np.meshgrid(mesh_x, mesh_y))
         self.reset_fx()
 
-    def get_params(self):
+    def get_params(self) -> tuple[float, float, float, float, int]:
         return (self.from_x, self.to_x, self.from_y, self.to_y, self.count)
 
-    def set_params(self, values):
+    def set_params(self, values) -> None:
         self.from_x, self.to_x, self.from_y, self.to_y, self.count = values
 
-    def __call__(self, x):
+    def __call__(self, x: np.ndarray) -> Any:
         return self.fx(x)
 
-    def compile_fx(self, str_fx):
+    def compile_fx(self, str_fx: str) -> Callable[[np.ndarray], Any]:
         """Компилирует выражение вида "x[0]**2 + np.sin(x[1])" в функцию от точки x.
 
         Выражение проверяется по белому списку узлов AST, исполняется без builtins,
@@ -119,15 +121,15 @@ class Function:
         code = compile(tree, "<function>", "eval")
         return lambda x: eval(code, {"__builtins__": {}, "np": np}, {"x": x})
 
-    def reset_fx(self):
+    def reset_fx(self) -> None:
         self.fx = self.compile_fx(self.str_fx)
         self.y = self.fx(self.x)
 
-    def grad(self, x):
+    def grad(self, x: np.ndarray) -> np.ndarray:
         x = x.flatten()
         return np.array([self.grad1(x, self.fx), self.grad2(x, self.fx)])
 
-    def hesse(self, x):
+    def hesse(self, x: np.ndarray) -> np.ndarray:
         x = x.flatten()
         f = self.fx
         h = self.hesse_eps
@@ -138,7 +140,7 @@ class Function:
         fxy = (f(x + e1 + e2) - f(x + e1 - e2) - f(x - e1 + e2) + f(x - e1 - e2)) / (4 * h**2)
         return np.array([[fxx, fxy], [fxy, fyy]])
 
-    def convert(self, s):
+    def convert(self, s: str) -> str:
         chars = []
         for i in s:
             if i in self.for_replace:
@@ -160,7 +162,7 @@ class Function:
         s1 += s0[-1]
         return s1.replace("^", "**")
 
-    def check_function(self, s):
+    def check_function(self, s: str) -> int:
         if self.raw_str_fx == s:
             return 1
         try:

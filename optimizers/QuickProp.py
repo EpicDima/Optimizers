@@ -2,11 +2,14 @@ from .Optimizer import Optimizer, np
 
 
 class QuickProp(Optimizer):
-    def __init__(self, initial_x, function, lr=0.01, alpha_max=1.75):
+    previous_update: np.ndarray
+    previous_gradient: np.ndarray
+
+    def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01, alpha_max: float = 1.75) -> None:
         params = dict(lr=lr, alpha_max=alpha_max)
         super().__init__(initial_x, function, params)
 
-    def next_point(self):
+    def next_point(self) -> tuple[np.ndarray, float]:
         gradient = self.function.grad(self.x)
 
         denominator = self.previous_gradient - gradient
@@ -24,7 +27,7 @@ class QuickProp(Optimizer):
 
         return self.move_next(next_x)
 
-    def reset(self):
+    def reset(self) -> None:
         super().reset()
         self.previous_update = np.zeros([2])
         self.previous_gradient = np.zeros([2])
