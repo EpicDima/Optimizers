@@ -132,6 +132,15 @@ class Application(QMainWindow, Ui_MainWindow):
         function_row.addWidget(self.label_4)
         left.addLayout(function_row)
 
+        for button in (
+            self.remove_button,
+            self.add_button,
+            self.function_check_button,
+            self.animation_trigger_button,
+            self.start_button,
+        ):
+            button.setMinimumSize(120, 32)
+
         right = QVBoxLayout()
         self.optimizers_listview.setMinimumWidth(291)
         right.addWidget(self.optimizers_listview, stretch=1)
