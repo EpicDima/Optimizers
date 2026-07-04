@@ -10,6 +10,7 @@ from .ASGD import ASGD
 from .CautiousAdamW import CautiousAdamW
 from .LBFGS import LBFGS
 from .LevenbergMarquardt import LevenbergMarquardt
+from .Lion import Lion
 from .Momentum import Momentum
 from .NAdam import NAdam
 from .Nesterov import Nesterov
