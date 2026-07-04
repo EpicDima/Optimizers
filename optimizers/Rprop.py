@@ -21,10 +21,9 @@ class Rprop(Optimizer):
         gradient = self.function.grad(self.x)
 
         mul = gradient * self.last_gradient
-        self.step_size = (mul > 0) * self.step_size * self.params["inc_factor"] + (
-            mul < 0
-        ) * self.step_size * self.params["dec_factor"]
-        self.step_size = np.clip(self.step_size, self.params["step_min"], self.params["step_max"])
+        factor = np.where(mul > 0, self.params["inc_factor"], np.where(mul < 0, self.params["dec_factor"], 1.0))
+        self.step_size = np.clip(self.step_size * factor, self.params["step_min"], self.params["step_max"])
+        gradient = np.where(mul < 0, 0.0, gradient)
 
         self.last_gradient = gradient
         next_x = self.x - np.sign(gradient) * self.step_size
@@ -32,5 +31,5 @@ class Rprop(Optimizer):
 
     def reset(self) -> None:
         super().reset()
-        self.last_gradient = np.ones([2])
+        self.last_gradient = np.zeros([2])
         self.step_size = np.ones([2])
