@@ -83,6 +83,8 @@ class Function:
         self.create_surface()
 
         self.eps = 1e-05
+        # для вторых производных нужен шаг покрупнее, иначе шум float64 забивает результат
+        self.hesse_eps = 1e-04
         self.double_eps = 2 * self.eps
         self.eps1 = np.array([self.eps, 0])
         self.eps2 = np.array([0, self.eps])
@@ -124,6 +126,17 @@ class Function:
     def grad(self, x):
         x = x.flatten()
         return np.array([self.grad1(x, self.fx), self.grad2(x, self.fx)])
+
+    def hesse(self, x):
+        x = x.flatten()
+        f = self.fx
+        h = self.hesse_eps
+        e1 = np.array([h, 0.0])
+        e2 = np.array([0.0, h])
+        fxx = (f(x + e1) - 2 * f(x) + f(x - e1)) / h**2
+        fyy = (f(x + e2) - 2 * f(x) + f(x - e2)) / h**2
+        fxy = (f(x + e1 + e2) - f(x + e1 - e2) - f(x - e1 + e2) + f(x - e1 - e2)) / (4 * h**2)
+        return np.array([[fxx, fxy], [fxy, fyy]])
 
     def convert(self, s):
         chars = []
