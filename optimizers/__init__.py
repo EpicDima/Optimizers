@@ -25,4 +25,5 @@ from .RMSprop import RMSprop
 from .Rprop import Rprop
 from .ScheduleFreeAdamW import ScheduleFreeAdamW
 from .SGD import SGD
+from .Shampoo import Shampoo
 from .Sophia import Sophia
