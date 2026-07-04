@@ -140,7 +140,7 @@ class Application(QMainWindow, Ui_MainWindow):
         controls.addWidget(self.speed_label, 1, 4)
         # ширина резервируется под самый длинный текст, иначе колонка
         # дёргается при смене множителя скорости
-        self.speed_label.setMinimumWidth(self.speed_label.fontMetrics().horizontalAdvance("Speed ×0.25"))
+        self.speed_label.setMinimumWidth(self.speed_label.fontMetrics().horizontalAdvance("Speed ×0.125"))
         controls.setColumnStretch(5, 1)
         left.addLayout(controls)
 
