@@ -1,5 +1,4 @@
 from matplotlib.animation import FuncAnimation
-from mpl_toolkits.mplot3d import Axes3D
 
 
 class Graphics:
@@ -8,7 +7,7 @@ class Graphics:
         self.anime = False
         self.threedimensional = False
 
-        self.colormaps = ["Accent", "Blues", "BrBG", "BuGn", "BuPu", "CMRmap", "Dark2", "GnBu", "Greens", "Greys", "OrRd", "Oranges", "PRGn", "Paired", "Pastel1", "Pastel2", "PiYG", "PuBu", "PuBuGn", "PuOr", "PuRd", "Purples", "RdBu", "RdGy", "RdPu", "RdYlBu", "RdYlGn", "Reds", "Set1", "Set2", "Set3", "Spectral", "Wistia", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "afmhot", "autumn", "binary", "bone", "brg", "bwr", "cividis", "cool", "coolwarm", "copper", "cubehelix", "flag", "gist_earth", "gist_gray", "gist_heat", "gist_ncar", "gist_stern", "gist_yarg", "gistainbow", "gistainbow", "gnuplot", "gnuplot2", "gray", "hot", "hsv", "inferno", "jet", "magma", "nipy_spectral", "ocean", "pink", "plasma", "prism", "rainbow", "seismic", "spring", "summer", "tab10", "tab20", "tab20b", "tab20c", "terrain", "twilight", "twilight_shifted", "viridis", "winter"]
+        self.colormaps = ["Accent", "Blues", "BrBG", "BuGn", "BuPu", "CMRmap", "Dark2", "GnBu", "Greens", "Greys", "OrRd", "Oranges", "PRGn", "Paired", "Pastel1", "Pastel2", "PiYG", "PuBu", "PuBuGn", "PuOr", "PuRd", "Purples", "RdBu", "RdGy", "RdPu", "RdYlBu", "RdYlGn", "Reds", "Set1", "Set2", "Set3", "Spectral", "Wistia", "YlGn", "YlGnBu", "YlOrBr", "YlOrRd", "afmhot", "autumn", "binary", "bone", "brg", "bwr", "cividis", "cool", "coolwarm", "copper", "cubehelix", "flag", "gist_earth", "gist_gray", "gist_heat", "gist_ncar", "gist_stern", "gist_yarg", "gist_rainbow", "gnuplot", "gnuplot2", "gray", "hot", "hsv", "inferno", "jet", "magma", "nipy_spectral", "ocean", "pink", "plasma", "prism", "rainbow", "seismic", "spring", "summer", "tab10", "tab20", "tab20b", "tab20c", "terrain", "twilight", "twilight_shifted", "viridis", "winter"]
         self.colors = ["red", "limegreen", "blue", "orange", "cyan"]
 
         self.contour_type = True
@@ -68,7 +67,8 @@ class Graphics:
 
     def draw_animation_plot(self, frame_idx, ax, xs, ys, names):
         self.step_function(frame_idx)
-        ax.lines.clear()
+        for line in list(ax.lines):
+            line.remove()
 
         if self.not_disappearing == 0:
             start = 0
