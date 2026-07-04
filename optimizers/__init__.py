@@ -13,6 +13,7 @@ from .CautiousAdamW import CautiousAdamW
 from .LBFGS import LBFGS
 from .LevenbergMarquardt import LevenbergMarquardt
 from .Lion import Lion
+from .MARS import MARS
 from .Momentum import Momentum
 from .NAdam import NAdam
 from .Nesterov import Nesterov
