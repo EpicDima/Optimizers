@@ -5,6 +5,7 @@ from .Adagrad import Adagrad
 from .Adam import Adam
 from .Adamax import Adamax
 from .AdamW import AdamW
+from .ADOPT import ADOPT
 from .ASGD import ASGD
 from .LBFGS import LBFGS
 from .LevenbergMarquardt import LevenbergMarquardt
