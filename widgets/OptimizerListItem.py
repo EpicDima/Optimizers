@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QListWidgetItem
+from PySide6.QtWidgets import QListWidgetItem
 
 
 class OptimizerListItem(QListWidgetItem):

@@ -1,8 +1,7 @@
 from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 
-from PyQt5.QtWidgets import QSizePolicy
+from PySide6.QtWidgets import QSizePolicy
 
 
 class MatplotlibCanvas(FigureCanvasQTAgg):
@@ -10,7 +9,7 @@ class MatplotlibCanvas(FigureCanvasQTAgg):
         self.fig = Figure(figsize=[4.2, 4.1], tight_layout=True)
         self.create_subplot()
         super().__init__(self.fig)
-        FigureCanvasQTAgg.setSizePolicy(self, QSizePolicy.Maximum, QSizePolicy.Maximum)
+        FigureCanvasQTAgg.setSizePolicy(self, QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         FigureCanvasQTAgg.updateGeometry(self)
 
 

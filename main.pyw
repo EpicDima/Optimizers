@@ -1,8 +1,8 @@
 import sys
 
 import numpy as np
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 
 import optimizers
 from dialogs import (
@@ -19,7 +19,7 @@ class Application(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         self.setFixedSize(self.frameGeometry().width(), self.frameGeometry().height())
 
         self.plot_widget = MatplotlibWidget(self.plot_widget)
@@ -69,7 +69,7 @@ class Application(QMainWindow, Ui_MainWindow):
     
     def show_about(self):
         msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Information)
+        msg_box.setIcon(QMessageBox.Icon.Information)
         msg_box.setWindowTitle("О программе")
         msg_box.setText("Optimizers - программа для показа и тестирования алгоритмов нахождения минимума функции градиентными методами в трёхмерном пространстве.\n\n Сделал программу Дима :) Ссылка: vk.com/dddima10")
         msg_box.exec()
@@ -111,9 +111,9 @@ class Application(QMainWindow, Ui_MainWindow):
 
     def save_optimizer(self, code):
         filedialog = QFileDialog()
-        filedialog.setAcceptMode(QFileDialog.AcceptSave)
-        filedialog.setFileMode(QFileDialog.AnyFile)
-        if filedialog.exec_() == QFileDialog.Accepted:
+        filedialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        filedialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        if filedialog.exec() == QFileDialog.DialogCode.Accepted:
             filename = filedialog.selectedFiles()[0]
             with open(filename, "w") as file:
                 file.write(code)
@@ -121,9 +121,9 @@ class Application(QMainWindow, Ui_MainWindow):
     
     def add_new(self):
         filedialog = QFileDialog()
-        filedialog.setAcceptMode(QFileDialog.AcceptOpen)
-        filedialog.setFileMode(QFileDialog.ExistingFile)
-        if filedialog.exec_() == QFileDialog.Accepted:
+        filedialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+        filedialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        if filedialog.exec() == QFileDialog.DialogCode.Accepted:
             filename = filedialog.selectedFiles()[0]
             self.validate(open(filename, "r").read())
 
@@ -283,4 +283,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Application()
     window.show()
-    app.exec_()
+    app.exec()

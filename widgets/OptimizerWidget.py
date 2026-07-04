@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGridLayout, QLabel, QLineEdit
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGridLayout, QLabel, QLineEdit
 
 
 class OptimizerWidget(QWidget):
@@ -16,8 +16,8 @@ class OptimizerWidget(QWidget):
         self.combobox = QComboBox()
         self.grid = QGridLayout()
         
-        self.vbl.addWidget(self.combobox, Qt.AlignTop)
-        self.vbl.addLayout(self.grid, Qt.AlignTop)
+        self.vbl.addWidget(self.combobox, alignment=Qt.AlignmentFlag.AlignTop)
+        self.vbl.addLayout(self.grid)
         self.setLayout(self.vbl)
 
         self.combobox.activated.connect(self.change_optimizer)
@@ -43,7 +43,7 @@ class OptimizerWidget(QWidget):
             self.item.setSizeHint(QSize(0, self.frameGeometry().height()))
 
     
-    def change_optimizer(self):
+    def change_optimizer(self, index=None):
         for key in self.text_boxes_params:
             self.text_boxes_params[key][0].setParent(None)
             self.text_boxes_params[key][1].setParent(None)
@@ -59,8 +59,8 @@ class OptimizerWidget(QWidget):
             edit = QLineEdit(self)
             edit.setText(str(self.optimizer.params[key]))
 
-            self.grid.addWidget(label, line, 0, Qt.AlignTop)
-            self.grid.addWidget(edit, line, 1, Qt.AlignTop)
+            self.grid.addWidget(label, line, 0, Qt.AlignmentFlag.AlignTop)
+            self.grid.addWidget(edit, line, 1, Qt.AlignmentFlag.AlignTop)
 
             self.text_boxes_params[key] = [label, edit]
 
