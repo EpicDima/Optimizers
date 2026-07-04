@@ -189,7 +189,6 @@ class Application(QMainWindow, Ui_MainWindow):
         self.check_function()
         self.graphics.threedimensional = self.three_dims_checkbox.isChecked()
 
-        self.plot_widget.canvas.ax.clear()
         self.plot_widget.canvas.create_subplot(self.graphics.threedimensional)
         self.graphics.draw_function_plot(self.plot_widget.canvas.ax)
         self.plot_widget.canvas.draw()
@@ -260,7 +259,6 @@ class Application(QMainWindow, Ui_MainWindow):
             self.animation_trigger_button.hide()
             self.step_label.hide()
 
-        self.plot_widget.canvas.ax.clear()
         self.plot_widget.canvas.create_subplot(self.graphics.threedimensional)
 
         self.graphics.draw_plot(self.plot_widget.canvas.ax, np.array(xs), ys, self.plot_widget.canvas, names)
