@@ -17,6 +17,11 @@ class Nesterov(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — масштаб шага",
+        "coef": "коэффициент момента: затухание накопленной скорости и вес «заглядывающей вперёд» добавки в шаге",
+    }
+
     v: np.ndarray
 
     def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01, coef: float = 0.9) -> None:

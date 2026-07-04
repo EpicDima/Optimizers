@@ -18,6 +18,11 @@ class Momentum(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — масштаб шага вдоль накопленной скорости",
+        "coef": "коэффициент затухания скорости: какая доля прошлой скорости сохраняется на каждом шаге",
+    }
+
     v: np.ndarray
 
     def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01, coef: float = 0.9) -> None:

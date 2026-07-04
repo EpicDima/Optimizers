@@ -14,6 +14,13 @@ class Rprop(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.Rprop.html
     """
 
+    param_descriptions = {
+        "dec_factor": "множитель уменьшения длины шага при смене знака градиента (минимум проскочен)",
+        "inc_factor": "множитель увеличения длины шага, пока знак градиента по координате не меняется",
+        "step_min": "нижняя граница длины шага по каждой координате",
+        "step_max": "верхняя граница длины шага по каждой координате",
+    }
+
     last_gradient: np.ndarray
     step_size: np.ndarray
 
