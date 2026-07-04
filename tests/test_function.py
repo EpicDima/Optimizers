@@ -36,6 +36,23 @@ class TestCheckFunction:
         assert function.check_function("x^2 +* y") == 0
         assert function.raw_str_fx == old
 
+    @pytest.mark.parametrize(
+        "malicious",
+        [
+            '__import__("os").getcwd()',
+            "().__class__.__mro__",
+            "open('/etc/hosts').read()",
+            "x + save(1)",
+            "load('data.npy')",
+            "lambda: 1",
+            "[i for i in (1, 2)]",
+        ],
+    )
+    def test_arbitrary_code_is_rejected(self, function, malicious):
+        old = function.raw_str_fx
+        assert function.check_function(malicious) == 0
+        assert function.raw_str_fx == old
+
 
 class TestEvaluation:
     def test_sphere_value(self, function):

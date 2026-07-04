@@ -1,6 +1,46 @@
+import ast
 import re
 
 import numpy as np
+
+# Имена из numpy, разрешённые в формулах: универсальные функции (sin, cos, exp, sqrt, abs...)
+# и математические константы
+_ALLOWED_NP_NAMES = {name for name, obj in np.__dict__.items() if isinstance(obj, np.ufunc)} | {"pi", "e", "inf"}
+
+_ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod, ast.FloorDiv)
+_ALLOWED_UNARYOPS = (ast.UAdd, ast.USub)
+
+
+def _is_np_attribute(node):
+    return (
+        isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "np"
+        and node.attr in _ALLOWED_NP_NAMES
+    )
+
+
+def _is_allowed_node(node):
+    if isinstance(node, ast.Constant):
+        return isinstance(node.value, (int, float))
+    if isinstance(node, ast.BinOp):
+        return isinstance(node.op, _ALLOWED_BINOPS) and _is_allowed_node(node.left) and _is_allowed_node(node.right)
+    if isinstance(node, ast.UnaryOp):
+        return isinstance(node.op, _ALLOWED_UNARYOPS) and _is_allowed_node(node.operand)
+    if isinstance(node, ast.Call):
+        return _is_np_attribute(node.func) and not node.keywords and all(_is_allowed_node(arg) for arg in node.args)
+    if isinstance(node, ast.Attribute):
+        return _is_np_attribute(node)
+    if isinstance(node, ast.Subscript):
+        return (
+            isinstance(node.value, ast.Name)
+            and node.value.id == "x"
+            and isinstance(node.slice, ast.Constant)
+            and node.slice.value in (0, 1)
+        )
+    if isinstance(node, ast.Name):
+        return node.id == "x"
+    return False
 
 
 class Function:
@@ -65,8 +105,20 @@ class Function:
     def __call__(self, x):
         return self.fx(x)
 
+    def compile_fx(self, str_fx):
+        """Компилирует выражение вида "x[0]**2 + np.sin(x[1])" в функцию от точки x.
+
+        Выражение проверяется по белому списку узлов AST, исполняется без builtins,
+        поэтому произвольный код через поле ввода функции выполнить нельзя.
+        """
+        tree = ast.parse(str_fx, mode="eval")
+        if not _is_allowed_node(tree.body):
+            raise ValueError(f"недопустимое выражение: {str_fx}")
+        code = compile(tree, "<function>", "eval")
+        return lambda x: eval(code, {"__builtins__": {}, "np": np}, {"x": x})
+
     def reset_fx(self):
-        self.fx = lambda x: eval(self.str_fx)
+        self.fx = self.compile_fx(self.str_fx)
         self.y = self.fx(self.x)
 
     def grad(self, x):
@@ -100,8 +152,7 @@ class Function:
             return 1
         try:
             s1 = self.convert(s)
-            x = np.array([0, 0])  # noqa: F841  # используется внутри eval
-            eval(s1)
+            self.compile_fx(s1)(np.array([0, 0]))
         except Exception:
             return 0
         self.raw_str_fx = s
