@@ -8,6 +8,7 @@ from .ASGD import ASGD
 from .LBFGS import LBFGS
 from .LevenbergMarquardt import LevenbergMarquardt
 from .Momentum import Momentum
+from .NAdam import NAdam
 from .Nesterov import Nesterov
 from .Newton import Newton
 from .QuickProp import QuickProp
