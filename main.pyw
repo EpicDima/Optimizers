@@ -327,7 +327,7 @@ class Application(QMainWindow, Ui_MainWindow):
             self.steps_textedit.text(), int, 100, "Неправильное количество шагов (steps)! Используется 100 по умолчанию"
         )
 
-        xs, ys = [], []
+        xs, ys, lrs = [], [], []
         names = []
 
         for widget in self.optimizer_widget_list:
@@ -335,13 +335,14 @@ class Application(QMainWindow, Ui_MainWindow):
             if self.reset_checkbox.isChecked():
                 widget.reset_optimizer()
 
-            points_x, points_y = widget.optimize(steps)
+            points_x, points_y, points_lr = widget.optimize(steps)
             xs.append(points_x)
             ys.append(points_y)
+            lrs.append(points_lr)
 
             names.append(widget.get_params_in_string_form())
 
-        self.plot(xs, ys, names)
+        self.plot(xs, ys, names, lrs)
 
     def get_initial_coordinate(self, optimizer):
         initial_x = self.safe_input(
@@ -390,7 +391,7 @@ class Application(QMainWindow, Ui_MainWindow):
     def change_step(self, step):
         self.step_label.setText(f"Step: {step}")
 
-    def plot(self, xs, ys, names):
+    def plot(self, xs, ys, names, lrs):
         self.stop_animation()
         self.graphics.threedimensional = self.three_dims_checkbox.isChecked()
         self.graphics.anime = self.animation_checkbox.isChecked()
@@ -405,7 +406,7 @@ class Application(QMainWindow, Ui_MainWindow):
 
         self.plot_widget.canvas.create_subplot(self.graphics.threedimensional)
 
-        self.graphics.draw_plot(self.plot_widget.canvas.ax, np.array(xs), ys, self.plot_widget.canvas, names)
+        self.graphics.draw_plot(self.plot_widget.canvas.ax, np.array(xs), ys, self.plot_widget.canvas, names, lrs)
         self.plot_widget.canvas.draw()
 
     def add_optimizer(self):

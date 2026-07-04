@@ -173,14 +173,19 @@ class OptimizerWidget(QWidget):
         points_x = [self.optimizer.x]
         points_y = [self.optimizer.function(self.optimizer.x)]
         # расписание подменяет lr перед каждым шагом; base_lr из поля ввода
-        # восстанавливается после прогона, чтобы поле не «уплывало»
+        # восстанавливается после прогона, чтобы поле не «уплывало».
+        # points_lr выровнен с точками: points_lr[k] — lr шага, приведшего
+        # в точку k (нулевая точка стартовая, для неё lr первого шага)
         base_lr = self.optimizer.params.get("lr")
+        points_lr = None if base_lr is None else [self.scheduler.lr(0, steps, base_lr)]
         for i in range(steps):
             if base_lr is not None:
-                self.optimizer.params["lr"] = self.scheduler.lr(i, steps, base_lr)
+                current_lr = self.scheduler.lr(i, steps, base_lr)
+                self.optimizer.params["lr"] = current_lr
+                points_lr.append(current_lr)
             x, y = self.optimizer.next_point()
             points_x.append(x)
             points_y.append(y)
         if base_lr is not None:
             self.optimizer.params["lr"] = base_lr
-        return points_x, points_y
+        return points_x, points_y, points_lr

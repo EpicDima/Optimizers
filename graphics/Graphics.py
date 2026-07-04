@@ -129,7 +129,7 @@ class Graphics:
         else:
             ax.plot(x, y, zorder=4, **marker_style)
 
-    def draw_plot(self, ax, xs, ys, canvas, names):
+    def draw_plot(self, ax, xs, ys, canvas, names, lrs):
         if self.anime:
             self.draw_function_plot(ax)
             self.draw_start_markers(ax, xs, ys)
@@ -142,7 +142,7 @@ class Graphics:
                 # генератор-функция: FuncAnimation создаёт свежую
                 # последовательность кадров на каждый запуск
                 frames=lambda: self.animation_frames(len(xs[0])),
-                fargs=(lines, legend, names, xs, ys),
+                fargs=(lines, legend, names, xs, ys, lrs),
                 repeat=False,
                 interval=self.interval,
                 # блиттинг перерисовывает только линии поверх кешированного фона,
@@ -210,8 +210,11 @@ class Graphics:
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
 
-    def value_label(self, name, value):
-        return f"{name} = {value:.4g}"
+    def value_label(self, name, value, lr=None):
+        label = f"{name} = {value:.4g}"
+        if lr is not None:
+            label += f", lr: {lr:.3g}"
+        return label
 
     def fix_limits(self, ax):
         # разлетевшийся оптимизатор не должен растягивать оси автомасштабом
@@ -241,7 +244,7 @@ class Graphics:
             lines.append(line)
         return lines
 
-    def draw_animation_plot(self, frame_idx, lines, legend, names, xs, ys):
+    def draw_animation_plot(self, frame_idx, lines, legend, names, xs, ys, lrs):
         self.step_function(frame_idx)
 
         if self.not_disappearing == 0:
@@ -259,10 +262,11 @@ class Graphics:
             else:
                 line.set_data(x[start : frame_idx + 1, 0], x[start : frame_idx + 1, 1])
 
-        # текущее значение функции показывается в легенде; чтобы блиттинг
-        # перерисовывал легенду, она возвращается вместе с линиями
+        # текущие значение функции и скорость обучения показываются в легенде;
+        # чтобы блиттинг перерисовывал легенду, она возвращается вместе с линиями
         for idx, text in enumerate(legend.get_texts()):
-            text.set_text(self.value_label(names[idx], ys[idx][frame_idx]))
+            lr = None if lrs[idx] is None else lrs[idx][frame_idx]
+            text.set_text(self.value_label(names[idx], ys[idx][frame_idx], lr))
 
         if frame_idx == len(xs[0]) - 1:
             self.end_animation_func()
