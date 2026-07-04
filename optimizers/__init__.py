@@ -4,6 +4,7 @@ from .Adagrad import Adagrad
 from .Adam import Adam
 from .Adamax import Adamax
 from .AdamW import AdamW
+from .ASGD import ASGD
 from .LevenbergMarquardt import LevenbergMarquardt
 from .Momentum import Momentum
 from .Nesterov import Nesterov
