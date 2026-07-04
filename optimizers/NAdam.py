@@ -2,6 +2,15 @@ from .Optimizer import Optimizer, np
 
 
 class NAdam(Optimizer):
+    """
+    NAdam — Adam с моментом Нестерова и затуханием момента.
+
+    Первоисточник: Dozat T. "Incorporating Nesterov Momentum into Adam". ICLR 2016 Workshop.
+    https://openreview.net/forum?id=OM0jvwB8jIp57ZJjtNEZ
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.NAdam.html
+    """
+
     v: np.ndarray
     acc: np.ndarray
     mu_product: float

@@ -2,6 +2,17 @@ from .Optimizer import Optimizer, np
 
 
 class Adafactor(Optimizer):
+    """
+    Adafactor — адаптивный метод с сублинейной памятью; для параметра-вектора
+    используется нефакторизованная оценка второго момента.
+
+    Первоисточник: Shazeer N., Stern M. "Adafactor: Adaptive Learning Rates
+    with Sublinear Memory Cost". arXiv:1804.04235, 2018.
+    https://arxiv.org/abs/1804.04235
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.Adafactor.html
+    """
+
     step: float
     variance: np.ndarray
 
