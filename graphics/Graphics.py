@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib.animation import FuncAnimation
+from matplotlib.patheffects import withStroke
 
 
 class Graphics:
@@ -105,6 +106,10 @@ class Graphics:
         self.interval = 30
         self.frames_per_tick = 1
 
+        # тонкая тёмная обводка отделяет траекторию от близкого по цвету
+        # участка колормапы (например, оранжевую линию от оранжевой зоны)
+        self.line_effects = [withStroke(linewidth=2.8, foreground="black")]
+
         self.start_marker_style = dict(marker="o", markersize=8, color="white", markeredgecolor="black")
         self.start_marker = None
 
@@ -206,7 +211,11 @@ class Graphics:
         for idx, x in enumerate(xs):
             start = self.tail_start(len(x) - 1)
             (line,) = ax.plot(
-                x[start:, 0], x[start:, 1], color=self.colors[idx], label=self.value_label(names[idx], ys[idx][-1])
+                x[start:, 0],
+                x[start:, 1],
+                color=self.colors[idx],
+                path_effects=self.line_effects,
+                label=self.value_label(names[idx], ys[idx][-1]),
             )
             self.lines.append(line)
         ax.legend(fontsize=7.5)
@@ -223,6 +232,7 @@ class Graphics:
                 y[start:],
                 zorder=100,
                 color=self.colors[idx],
+                path_effects=self.line_effects,
                 label=self.value_label(names[idx], y[-1]),
             )
             self.lines.append(line)
@@ -264,9 +274,11 @@ class Graphics:
         lines = []
         for idx, name in enumerate(names):
             if self.threedimensional:
-                (line,) = ax.plot([], [], [], zorder=100, color=self.colors[idx], label=name)
+                (line,) = ax.plot(
+                    [], [], [], zorder=100, color=self.colors[idx], path_effects=self.line_effects, label=name
+                )
             else:
-                (line,) = ax.plot([], [], color=self.colors[idx], label=name)
+                (line,) = ax.plot([], [], color=self.colors[idx], path_effects=self.line_effects, label=name)
             lines.append(line)
         return lines
 
