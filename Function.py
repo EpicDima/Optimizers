@@ -69,95 +69,164 @@ class Function:
         # у каждой предустановки своя область, где виден её рельеф,
         # и стартовая точка, с которой поведение оптимизаторов интереснее всего
         self.standard_functions = {
+            # Первоисточник (канонизирована как тест F1): De Jong. "An analysis of the behavior of a class
+            # of genetic adaptive systems". PhD thesis, University of Michigan, 1975. doi:10.7302/10966
             "Функция сферы": StandardFunction("x^2 + y^2", (-5, 5, -5, 5), (-4, 4)),
+            # Первоисточник: Branin. "Widely convergent method for finding multiple solutions of simultaneous
+            # nonlinear equations". IBM J. Res. Dev. 16(5), 1972 (прил. C, ур. C15). doi:10.1147/rd.165.0504
             "Функция трёхгорбого верблюда": StandardFunction(
                 "2 * x^2 - 1.05 * x^4 + x^6/6 + x*y + y^2", (-2, 2, -2, 2), (-1.6, 1.8)
             ),
+            # Первоисточник: Ackley. "A Connectionist Machine for Genetic Hillclimbing".
+            # Kluwer Academic Publishers, Boston, 1987. doi:10.1007/978-1-4613-1997-9
             "Функция Экли": StandardFunction(
                 "-20 * exp(-0.2 * sqrt(0.5 * (x^2 + y^2))) - exp(0.5 * (cos(2 * pi * x) + cos(2 * pi * y))) + e + 20",
                 (-5, 5, -5, 5),
                 (4, -4),
             ),
+            # Первоисточник: Rosenbrock. "An automatic method for finding the greatest or least value
+            # of a function". The Computer Journal 3(3), 1960. doi:10.1093/comjnl/3.3.175
             "Функция Розенброка": StandardFunction("(1 - x)^2 + 100 * (y - x^2)^2", (-2, 2, -1, 3), (-1.2, 1)),
+            # Первоисточник (общепринятая атрибуция, сам техотчёт онлайн недоступен): Beale. "On an iterative
+            # method of finding a local minimum of a function of more than one variable". Tech. Rep. 25,
+            # Statistical Techniques Research Group, Princeton University, 1958
             "Функция Била": StandardFunction(
                 "(1.5 - x + x * y)^2 + (2.25 - x + x * y^2)^2 + (2.625 - x + x * y^3)^2", (-4.5, 4.5, -4.5, 4.5), (1, 1)
             ),
+            # Первоисточник: Goldstein, Price. "On descent from local minima". Mathematics of
+            # Computation 25(115), 1971. doi:10.1090/S0025-5718-1971-0312365-X
             "Функция Гольдштейна-Прайса": StandardFunction(
                 "(1 + (x + y + 1)^2 * (19 - 14 * x + 3 * x^2 - 14 * y + 6 * x * y + 3*y^2)) * (30 + (2 * x - 3 * y)^2 * (18 - 32 * x + 12 * x^2 + 48 * y - 36 * x * y + 27 * y^2))",
                 (-2, 2, -2, 2),
                 (1.5, 1.5),
             ),
+            # Первоисточник достоверно не установлен: традиционная связь с Booth (Quart. J. Mech. Appl.
+            # Math. 2(4), 1949, doi:10.1093/qjmam/2.4.460) текстом не подтверждена; самое раннее
+            # проверенное появление — тест-сеты 1990-х (Van Iwaarden 1996, Silagadze 2004)
             "Функция Бута": StandardFunction("(x + 2 * y - 7)^2 + (2 * x + y - 5)^2", (-10, 10, -10, 10), (-8, -8)),
+            # Первоисточник: Bukin. "New Minimization Strategy for Non-Smooth Functions". Препринт ИЯФ 97-79,
+            # Новосибирск, 1997 (функция f6). https://www.inp.nsk.su/images/preprint/1997_079.pdf
             "Функция Букина": StandardFunction(
                 "100 * sqrt(abs(y - 0.01 * x^2)) + 0.01 * abs(x + 10)", (-15, -5, -3, 3), (-7, 2.5)
             ),
+            # Первоисточник достоверно не установлен: традиционная ссылка на Matyas. "Random optimization"
+            # (1965) текстом не подтверждена; самое раннее проверенное — тест-сет Jansson, Knuppel
+            # (TR 94.1, TU Hamburg-Harburg, 1994)
             "Функция Матьяса": StandardFunction("0.26 * (x^2 + y^2) - 0.48 * x * y", (-10, 10, -10, 10), (-9, 9)),
+            # Первоисточник (наша формула — задача Levy N.13 при n=2): Levy, Montalvo. "The Tunneling
+            # Algorithm for the Global Minimization of Functions". SIAM J. Sci. Stat. Comput. 6(1), 1985.
+            # doi:10.1137/0906002
             "Функция Леви": StandardFunction(
                 "sin(3 * pi * x)^2 + (x - 1)^2 * (1 + sin(3 * pi * y)^2) + (y - 1)^2 * (1 + sin(2 * pi * y)^2)",
                 (-10, 10, -10, 10),
                 (-8, -8),
             ),
+            # Первоисточник: Himmelblau. "Applied Nonlinear Programming". McGraw-Hill, 1972
             "Функция Химмельблау": StandardFunction("(x^2 + y - 11)^2 + (x + y^2 - 7)^2", (-5, 5, -5, 5), (0, 0)),
+            # Первоисточник (двумерный оригинал): Растригин Л.А. "Системы экстремального управления".
+            # М.: Наука, 1974 (обобщение на n измерений — Rudolph, 1990)
             "Функция Растригина": StandardFunction(
                 "20 + (x^2 - 10 * cos(2 * pi * x)) + (y^2 - 10 * cos(2 * pi * y))",
                 (-5.12, 5.12, -5.12, 5.12),
                 (4.5, 4.5),
             ),
+            # Первоисточник: Easom. "A survey of global optimization techniques". M.Eng. thesis,
+            # University of Louisville, 1990
             "Функция Изома": StandardFunction(
                 "-cos(x) * cos(y) * exp(-((x - pi)^2 + (y - pi)^2))", (0, 6, 0, 6), (2.5, 4)
             ),
+            # Первоисточник: Mishra. "Some new test functions for global optimization and performance of
+            # repulsive particle swarm method". MPRA Paper 2718 / SSRN 926132, 2006.
+            # https://mpra.ub.uni-muenchen.de/2718/
             "Функция Cross-in-tray": StandardFunction(
                 "-0.0001 * (abs(sin(x) * sin(y) * exp(abs(100 - (sqrt(x^2 + y^2) / pi)))) + 1)^0.1",
                 (-10, 10, -10, 10),
                 (6, 3),
             ),
+            # Первоисточник sin*cos-варианта достоверно не установлен: оригинал у Mishra (2006, MPRA 2718)
+            # с cos(x)*cos(y); наша форма впервые в Википедии (2012) и у Jamil, Yang (2013, "Holder Table 2")
             "Функция Хольдера": StandardFunction(
                 "-abs(sin(x) * cos(y) * exp(abs(1 - (sqrt(x^2 + y^2) / pi))))", (-10, 10, -10, 10), (1, 1)
             ),
+            # Первоисточник достоверно не установлен: обычно приписывают McCormick (Math. Programming 10,
+            # 1976, doi:10.1007/BF01580665), но наличие функции там не подтверждено; самое раннее
+            # проверенное — сборники Adorio (2005) и Mishra (2006)
             "Функция МакКормика": StandardFunction(
                 "sin(x + y) + (x - y)^2 - 1.5 * x + 2.5 * y + 1", (-1.5, 4, -3, 4), (3, 3)
             ),
+            # Первоисточник: Styblinski, Tang. "Experiments in nonconvex optimization: stochastic approximation
+            # with function smoothing and simulated annealing". Neural Networks 3(4), 1990.
+            # doi:10.1016/0893-6080(90)90029-K
             "Функция Стыбинского-Танга": StandardFunction(
                 "(x^4 - 16 * x^2 + 5 * x + y^4 - 16 * y^2 + 5 * y) / 2", (-5, 5, -5, 5), (1, 1)
             ),
+            # Вариант "Schaffer N.2": впервые как "modified Schaffer function #2" у Mishra (2006, MPRA 2718);
+            # прототип (F6): Schaffer, Caruana, Eshelman, Das. Proc. 3rd ICGA, 1989
             "Функция Шаффера": StandardFunction(
                 "0.5 + (sin(x^2 - y^2)^2 - 0.5) / (1 + 0.001 * (x^2 + y^2))^2", (-5, 5, -5, 5), (-4, 2)
             ),
+            # Вариант "Schaffer N.4": впервые как "modified Schaffer function #4" у Mishra (2006, MPRA 2718);
+            # прототип (F6): Schaffer et al. Proc. 3rd ICGA, 1989
             "Функция Шаффера N4": StandardFunction(
                 "0.5 + (cos(sin(abs(x^2 - y^2)))^2 - 0.5) / (1 + 0.001 * (x^2 + y^2))^2", (-5, 5, -5, 5), (-4, 2)
             ),
+            # Первоисточник: Griewank. "Generalized descent for global optimization". Journal of
+            # Optimization Theory and Applications 34(1), 1981. doi:10.1007/BF00933356
             "Функция Гривенка": StandardFunction(
                 "1 + (x^2 + y^2) / 4000 - cos(x) * cos(y / sqrt(2))", (-8, 8, -8, 8), (7, 7)
             ),
+            # Первоисточник достоверно не установлен; самое раннее найденное — обзор Molga, Smutnicki.
+            # "Test functions for optimization needs", 2005
             "Функция Drop-Wave": StandardFunction(
                 "-(1 + cos(12 * sqrt(x^2 + y^2))) / (2 + 0.5 * (x^2 + y^2))", (-5.12, 5.12, -5.12, 5.12), (-4, -4)
             ),
+            # 1D-прототип: Shubert. "A sequential method seeking the global maximum of a function".
+            # SIAM J. Numer. Anal. 9(3), 1972. doi:10.1137/0709036 (в оригинале сумма j*sin((j+1)x+j));
+            # наша 2D-форма (произведение cos-сумм) — позднейшая, из работ Levy и соавт. (1982-1985)
             "Функция Шуберта": StandardFunction(
                 "(cos(2*x + 1) + 2*cos(3*x + 2) + 3*cos(4*x + 3) + 4*cos(5*x + 4) + 5*cos(6*x + 5)) * (cos(2*y + 1) + 2*cos(3*y + 2) + 3*cos(4*y + 3) + 4*cos(5*y + 4) + 5*cos(6*y + 5))",
                 (-5.12, 5.12, -5.12, 5.12),
                 (0, 0),
             ),
+            # Классическая поверхность (гиперболический параболоид); первоисточника как тестовой функции нет
             "Седловая функция": StandardFunction("x^2 - y^2", (-5, 5, -5, 5), (4, 0.01)),
+            # Классическая поверхность ("monkey saddle"); термин популяризован в кн.: Hilbert, Cohn-Vossen.
+            # "Anschauliche Geometrie", Springer, 1932 (англ. "Geometry and the Imagination", 1952)
             "Обезьянье седло": StandardFunction("x^3 - 3*x*y^2", (-2, 2, -2, 2), (1.2, 0.01)),
+            # Первоисточник (тест-набор Dixon-Szego): Dixon, Szego (eds.). "Towards Global Optimisation 2".
+            # North-Holland, 1978 (атрибуция по вторичным источникам; текст книги недоступен)
             "Функция шестигорбого верблюда": StandardFunction(
                 "4*x^2 - 2.1*x^4 + x^6/3 + x*y - 4*y^2 + 4*y^4", (-2, 2, -1.5, 1.5), (-1.7, 1.2)
             ),
+            # Первоисточник достоверно не установлен ("Zakharov" не прослеживается); самое раннее найденное
+            # употребление — Siarry et al. ACM TOMS 23(2), 1997. doi:10.1145/264029.264043
             "Функция Захарова": StandardFunction(
                 "x^2 + y^2 + (0.5*x + y)^2 + (0.5*x + y)^4", (-2, 2, -2, 2), (-1.5, 1.8)
             ),
+            # Первоисточник: Schwefel. "Numerische Optimierung von Computer-Modellen mittels der
+            # Evolutionsstrategie". Birkhauser, 1977 (англ. "Numerical Optimization of Computer Models",
+            # Wiley, 1981); слагаемое 418.9829 * n — поздняя нормировка
             "Функция Швефеля": StandardFunction(
                 "418.9829 * 2 - x * sin(sqrt(abs(x))) - y * sin(sqrt(abs(y)))", (-500, 500, -500, 500), (-100, -100)
             ),
+            # Первоисточник: Whitley, Rana, Dzubera, Mathias. "Evaluating evolutionary algorithms".
+            # Artificial Intelligence 85, 1996 (функция F101; имя "Eggholder" закрепилось позже).
+            # doi:10.1016/0004-3702(95)00124-7
             "Функция Eggholder": StandardFunction(
                 "-(y + 47) * sin(sqrt(abs(x / 2 + y + 47))) - x * sin(sqrt(abs(x - y - 47)))",
                 (-512, 512, -512, 512),
                 (0, 0),
             ),
+            # Первоисточник: Shekel. "Test functions for multimodal search techniques". Proc. 5th Princeton
+            # Conf. on Information Science and Systems, 1971 (оригинал 4-мерный; здесь 2D-вариант с 5 ямами)
             "Функция Шекеля": StandardFunction(
                 "-1/(0.1 + (x - 4)^2 + (y - 4)^2) - 1/(0.2 + (x - 1)^2 + (y - 1)^2) - 1/(0.2 + (x - 8)^2 + (y - 8)^2) - 1/(0.4 + (x - 6)^2 + (y - 6)^2) - 1/(0.4 + (x - 3)^2 + (y - 7)^2)",
                 (0, 10, 0, 10),
                 (2.5, 2.5),
             ),
+            # Первоисточник: Mishra. "Some new test functions for global optimization and performance of
+            # repulsive particle swarm method". MPRA 2718 / SSRN 926132, 2006 (Bird function; наша область —
+            # от позднейшего constrained-варианта)
             "Функция Мишры-Бёрда": StandardFunction(
                 "sin(y) * exp((1 - cos(x))^2) + cos(x) * exp((1 - sin(y))^2) + (x - y)^2",
                 (-10, 0, -6.5, 0),
