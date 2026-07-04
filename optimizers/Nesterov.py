@@ -9,10 +9,9 @@ class Nesterov(Optimizer):
         super().__init__(initial_x, function, params)
 
     def next_point(self) -> tuple[np.ndarray, float]:
-        self.v = self.params["coef"] * self.v + self.params["lr"] * self.function.grad(
-            self.x - self.params["coef"] * self.v
-        )
-        next_x = self.x - self.v
+        gradient = self.function.grad(self.x)
+        self.v = self.params["coef"] * self.v + gradient
+        next_x = self.x - self.params["lr"] * (gradient + self.params["coef"] * self.v)
         return self.move_next(next_x)
 
     def reset(self) -> None:
