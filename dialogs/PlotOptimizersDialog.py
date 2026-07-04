@@ -16,8 +16,6 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
         self.remove_button.clicked.connect(self.remove_optimizer)
         self.change_button.clicked.connect(self.change_optimizer)
 
-        self.not_disappearing_edit.setText(str(self.graphics.not_disappearing))
-
         self.colors = []
         for color in self.graphics.colors:
             self.add_optimizer(color)
@@ -50,13 +48,5 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
         self.optim_list.item(index).setBackground(QColor(self.colors[index]))
 
     def accept(self):
-        try:
-            value = int(self.not_disappearing_edit.text())
-            if value < 0:
-                raise ValueError
-        except ValueError:
-            self.show_msg_box("Неправильное значение шагов!")
-            return
-        self.graphics.not_disappearing = value
         self.graphics.colors = self.colors
         self.close()
