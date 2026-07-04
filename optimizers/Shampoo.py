@@ -16,6 +16,11 @@ class Shampoo(Optimizer):
     и подстраивается под ориентацию оврага функции.
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — масштаб шага",
+        "eps": "добавка eps*I к накопителю перед обращением — численная защита собственных значений",
+    }
+
     h: np.ndarray
 
     def __init__(self, initial_x: np.ndarray, function, lr: float = 0.5, eps: float = 1e-06) -> None:
