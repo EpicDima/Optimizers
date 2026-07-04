@@ -2,6 +2,16 @@ from .Optimizer import Optimizer, np
 
 
 class Adadelta(Optimizer):
+    """
+    Adadelta — адаптивный метод на экспоненциальных средних квадратов градиентов и квадратов обновлений.
+
+    Первоисточник: Zeiler M.D. "ADADELTA: An Adaptive Learning Rate Method". arXiv preprint arXiv:1212.5701, 2012.
+    https://arxiv.org/abs/1212.5701
+    Реализация следует алгоритму из документации PyTorch (в отличие от статьи Зейлера,
+    обновление дополнительно умножается на скорость обучения lr):
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.Adadelta.html
+    """
+
     acc1: np.ndarray
     acc2: np.ndarray
 

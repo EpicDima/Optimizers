@@ -2,6 +2,16 @@ from .Optimizer import Optimizer, np
 
 
 class RMSprop(Optimizer):
+    """
+    RMSprop — деление градиента на корень из скользящего среднего квадратов градиентов.
+
+    Первоисточник (метод не публиковался как статья): Tieleman T., Hinton G. Lecture 6.5 — rmsprop.
+    Курс COURSERA "Neural Networks for Machine Learning", University of Toronto, 2012 (слайды лекции 6e).
+    https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.RMSprop.html
+    """
+
     acc: np.ndarray
 
     def __init__(
