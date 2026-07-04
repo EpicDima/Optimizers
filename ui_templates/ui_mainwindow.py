@@ -211,7 +211,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Initial Y", None))
         self.steps_textedit.setText(QCoreApplication.translate("MainWindow", u"100", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Steps", None))
-        self.tail_textedit.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.tail_textedit.setText(QCoreApplication.translate("MainWindow", u"50", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Tail", None))
         self.speed_label.setText(QCoreApplication.translate("MainWindow", u"Speed \u00d71", None))
         self.reset_checkbox.setText(QCoreApplication.translate("MainWindow", u"Reset", None))

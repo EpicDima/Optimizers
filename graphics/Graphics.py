@@ -98,7 +98,9 @@ class Graphics:
         self.contour_type = True
         self.contour_number = 30
         self.cmap = "inferno"
-        self.not_disappearing = 0
+        # длина хвоста траектории по умолчанию; должна совпадать с текстом
+        # tail_textedit в ui_templates/optimizers_pyqt_ui.ui
+        self.not_disappearing = 50
 
         self.interval = 30
         self.frames_per_tick = 1
