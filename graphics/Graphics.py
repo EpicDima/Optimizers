@@ -128,13 +128,13 @@ class Graphics:
             self.draw_function_plot(ax)
             self.draw_start_markers(ax, xs, ys)
             lines = self.create_animation_lines(ax, names)
-            ax.legend(fontsize=7.5)
+            legend = ax.legend(fontsize=7.5)
             self.fix_limits(ax)
             self.animation = FuncAnimation(
                 canvas.fig,
                 self.draw_animation_plot,
                 frames=len(xs[0]),
-                fargs=(lines, xs, ys),
+                fargs=(lines, legend, names, xs, ys),
                 repeat=False,
                 interval=30,
                 # блиттинг перерисовывает только линии поверх кешированного фона,
@@ -176,7 +176,7 @@ class Graphics:
         self.draw_function_plot(ax)
         self.draw_start_markers(ax, xs, ys)
         for idx, x in enumerate(xs):
-            ax.plot(x[:, 0], x[:, 1], color=self.colors[idx], label=names[idx])
+            ax.plot(x[:, 0], x[:, 1], color=self.colors[idx], label=self.value_label(names[idx], ys[idx][-1]))
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
 
@@ -184,9 +184,12 @@ class Graphics:
         self.draw_function_plot(ax)
         self.draw_start_markers(ax, xs, ys)
         for idx, (x, y) in enumerate(zip(xs, ys)):
-            ax.plot(x[:, 0], x[:, 1], y, zorder=100, color=self.colors[idx], label=names[idx])
+            ax.plot(x[:, 0], x[:, 1], y, zorder=100, color=self.colors[idx], label=self.value_label(names[idx], y[-1]))
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
+
+    def value_label(self, name, value):
+        return f"{name} = {value:.4g}"
 
     def fix_limits(self, ax):
         # разлетевшийся оптимизатор не должен растягивать оси автомасштабом
@@ -206,7 +209,7 @@ class Graphics:
             lines.append(line)
         return lines
 
-    def draw_animation_plot(self, frame_idx, lines, xs, ys):
+    def draw_animation_plot(self, frame_idx, lines, legend, names, xs, ys):
         self.step_function(frame_idx)
 
         if self.not_disappearing == 0:
@@ -224,6 +227,11 @@ class Graphics:
             else:
                 line.set_data(x[start : frame_idx + 1, 0], x[start : frame_idx + 1, 1])
 
+        # текущее значение функции показывается в легенде; чтобы блиттинг
+        # перерисовывал легенду, она возвращается вместе с линиями
+        for idx, text in enumerate(legend.get_texts()):
+            text.set_text(self.value_label(names[idx], ys[idx][frame_idx]))
+
         if frame_idx == len(xs[0]) - 1:
             self.end_animation_func()
-        return lines
+        return [*lines, legend]
