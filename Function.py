@@ -280,6 +280,98 @@ class Function:
     def reset_fx(self) -> None:
         self.fx = self.compile_fx(self.str_fx)
         self.y = self.fx(self.x)
+        self._minima: np.ndarray | None = None
+
+    @property
+    def minima(self) -> np.ndarray:
+        """Все глобальные минимумы функции в текущей области, по точке в строке."""
+        if self._minima is None:
+            self._minima = self.find_minima()
+        return self._minima
+
+    def find_minima(self) -> np.ndarray:
+        candidates = self.grid_minima_candidates()
+        if len(candidates) == 0:
+            return np.empty((0, 2))
+        # вырожденный случай (плато: значительная часть узлов — «минимумы»);
+        # уточнять их все бессмысленно, остаётся один узел argmin, как раньше
+        if len(candidates) > 1000:
+            idx = np.unravel_index(np.argmin(self.y), self.y.shape)
+            return np.array([[self.x[0][idx], self.x[1][idx]]])
+        points = [self.refine_minimum(p) for p in candidates]
+        values = np.array([float(self.fx(p)) for p in points])
+        best = values.min()
+        # глобальными считаются все минимумы, совпадающие с лучшим найденным
+        # с точностью до численной погрешности уточнения
+        tolerance = 1e-6 * max(abs(best), 1.0)
+        return self.deduplicate([p for p, v in zip(points, values) if v <= best + tolerance])
+
+    def grid_minima_candidates(self) -> np.ndarray:
+        # узлы сетки поверхности, не превосходящие всех восьми соседей
+        # (граница дополняется бесконечностью, чтобы учесть краевые минимумы)
+        padded = np.pad(self.y.astype(float), 1, constant_values=np.inf)
+        n, m = self.y.shape
+        is_min = np.ones((n, m), dtype=bool)
+        for di in (0, 1, 2):
+            for dj in (0, 1, 2):
+                if di == 1 and dj == 1:
+                    continue
+                is_min &= self.y <= padded[di : di + n, dj : dj + m]
+        rows, cols = np.nonzero(is_min)
+        return np.stack([self.x[0][rows, cols], self.x[1][rows, cols]], axis=1)
+
+    def refine_minimum(self, point: np.ndarray) -> np.ndarray:
+        # уточнение узла сетки до настоящего минимума: шаг Ньютона, пока
+        # гессиан положительно определён, иначе градиентный спуск; бэктрекинг
+        # с проекцией в область не даёт ни выйти за границы, ни подняться
+        low = np.array([self.from_x, self.from_y], dtype=float)
+        high = np.array([self.to_x, self.to_y], dtype=float)
+        span = max(self.to_x - self.from_x, self.to_y - self.from_y)
+        point = point.astype(float)
+        value = float(self.fx(point))
+        for _ in range(100):
+            gradient = self.grad(point)
+            hessian = self.hesse(point)
+            determinant = hessian[0, 0] * hessian[1, 1] - hessian[0, 1] * hessian[1, 0]
+            if hessian[0, 0] > 0 and determinant > 0:
+                step = -np.linalg.solve(hessian, gradient)
+            else:
+                step = -gradient
+            norm = float(np.linalg.norm(step))
+            if not np.isfinite(norm) or norm == 0:
+                break
+            if norm > span:
+                step *= span / norm
+            # бэктрекинг: найти первый улучшающий масштаб шага, а затем
+            # продолжать половинить, пока становится ещё лучше — иначе на
+            # границе области спуск зигзагом топчется около минимума
+            scale = 1.0
+            new_point, new_value = point, value
+            for _ in range(40):
+                trial_point = np.clip(point + scale * step, low, high)
+                trial_value = float(self.fx(trial_point))
+                if trial_value < new_value:
+                    new_point, new_value = trial_point, trial_value
+                elif new_value < value:
+                    break
+                scale *= 0.5
+            if new_value >= value:
+                break
+            moved = float(np.linalg.norm(new_point - point))
+            point, value = new_point, new_value
+            if moved < 1e-10 * span:
+                break
+        return point
+
+    def deduplicate(self, points: list[np.ndarray]) -> np.ndarray:
+        # соседние узлы одного бассейна уточняются в одну и ту же точку —
+        # совпавшие сливаются
+        span = max(self.to_x - self.from_x, self.to_y - self.from_y)
+        unique: list[np.ndarray] = []
+        for point in points:
+            if all(float(np.linalg.norm(point - other)) > 1e-4 * span for other in unique):
+                unique.append(point)
+        return np.array(unique)
 
     def grad(self, x: np.ndarray) -> np.ndarray:
         x = x.flatten()
