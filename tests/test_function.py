@@ -62,6 +62,15 @@ class TestEvaluation:
         grad = function.grad(np.array([1.0, 2.0]))
         assert grad == pytest.approx(np.array([2.0, 4.0]), abs=1e-4)
 
+    def test_hessian_of_sphere(self, function):
+        hesse = function.hesse(np.array([1.0, 2.0]))
+        assert hesse == pytest.approx(np.array([[2.0, 0.0], [0.0, 2.0]]), abs=1e-3)
+
+    def test_hessian_mixed_derivative(self, function):
+        function.check_function("x * y")
+        hesse = function.hesse(np.array([1.0, 2.0]))
+        assert hesse == pytest.approx(np.array([[0.0, 1.0], [1.0, 0.0]]), abs=1e-3)
+
     def test_surface_shape(self, function):
         assert function.y.shape == (function.count, function.count)
 

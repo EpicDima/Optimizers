@@ -2,8 +2,10 @@ from .Adadelta import Adadelta
 from .Adagrad import Adagrad
 from .Adam import Adam
 from .Adamax import Adamax
+from .LevenbergMarquardt import LevenbergMarquardt
 from .Momentum import Momentum
 from .Nesterov import Nesterov
+from .Newton import Newton
 from .QuickProp import QuickProp
 from .RMSprop import RMSprop
 from .Rprop import Rprop
