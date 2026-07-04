@@ -1,4 +1,6 @@
+import importlib.util
 import sys
+from pathlib import Path
 
 import numpy as np
 from PySide6.QtCore import Qt
@@ -8,11 +10,11 @@ import optimizers
 from dialogs import PlotColormapDialog, PlotOptimizersDialog, PlotRangeDialog, PlotTypeDialog
 from Function import Function
 from graphics import Graphics, MatplotlibWidget
-from optimizers.Optimizer import Optimizer  # noqa: F401  # нужен exec-коду пользовательских оптимизаторов
+from optimizers.Optimizer import Optimizer
 from ui_templates.ui_mainwindow import Ui_MainWindow
 from widgets import OptimizerListItem, OptimizerWidget
 
-# pyuic5 optimizers_pyqt_ui.ui -o design.py
+# pyside6-uic ui_templates/optimizers_pyqt_ui.ui -o ui_templates/ui_mainwindow.py
 
 
 class Application(QMainWindow, Ui_MainWindow):
@@ -118,11 +120,11 @@ class Application(QMainWindow, Ui_MainWindow):
         self.w.show()
 
     def save_example_optimizer(self):
-        code = open("optimizers//Momentum.py").read()
-        self.save_optimizer(code[:5] + code[6:])
+        code = open("optimizers/Momentum.py").read()
+        self.save_optimizer(code.replace("from .Optimizer import", "from optimizers.Optimizer import", 1))
 
     def save_base_optimizer(self):
-        self.save_optimizer(open("optimizers//Optimizer.py").read())
+        self.save_optimizer(open("optimizers/Optimizer.py").read())
 
     def save_optimizer(self, code):
         filedialog = QFileDialog()
@@ -138,36 +140,41 @@ class Application(QMainWindow, Ui_MainWindow):
         filedialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
         filedialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if filedialog.exec() == QFileDialog.DialogCode.Accepted:
-            filename = filedialog.selectedFiles()[0]
-            self.validate(open(filename).read())
+            self.load_optimizer(filedialog.selectedFiles()[0])
 
-    def validate(self, code):
+    def load_optimizer(self, filename):
         self.statusbar.showMessage("")
-        if code.count("class") != 1:
-            self.statusbar.showMessage("Выбранный файл содержит некорректный код!")
-            return
-
-        begin_idx = code.find("class")
-        code = code[begin_idx:]
-        begin_idx = 6
-        end_idx = code.find("(")
-        name = code[begin_idx:end_idx].strip()
 
         try:
-            exec(code)
+            spec = importlib.util.spec_from_file_location(f"user_optimizers.{Path(filename).stem}", filename)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
         except Exception:
             self.statusbar.showMessage("Выбранный файл содержит некорректный код!")
             return
 
-        try:
-            list(optimizers.__dict__.keys()).index(name)
-        except Exception:
-            pass
-        else:
+        classes = [
+            obj
+            for obj in vars(module).values()
+            if isinstance(obj, type) and issubclass(obj, Optimizer) and obj is not Optimizer
+        ]
+        if len(classes) != 1:
+            self.statusbar.showMessage("В файле должен быть ровно один класс-наследник Optimizer!")
+            return
+        optimizer_class = classes[0]
+        name = optimizer_class.__name__
+
+        if hasattr(optimizers, name):
             self.statusbar.showMessage("Оптимизатор с таким именем уже существует!")
             return
 
-        optimizers.__dict__[name] = eval(name)
+        try:
+            optimizer_class(np.array([0.0, 0.0]), self.function)
+        except Exception:
+            self.statusbar.showMessage("Не удалось создать оптимизатор с параметрами по умолчанию!")
+            return
+
+        setattr(optimizers, name, optimizer_class)
 
         self.list_of_optimizers.append(name)
         self.list_of_optimizers.sort()
