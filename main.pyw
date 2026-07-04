@@ -71,7 +71,7 @@ class Application(QMainWindow, Ui_MainWindow):
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Icon.Information)
         msg_box.setWindowTitle("О программе")
-        msg_box.setText("Optimizers - программа для показа и тестирования алгоритмов нахождения минимума функции градиентными методами в трёхмерном пространстве.\n\n Сделал программу Дима :) Ссылка: vk.com/dddima10")
+        msg_box.setText("Optimizers - программа для показа и тестирования алгоритмов нахождения минимума функции градиентными методами в трёхмерном пространстве.")
         msg_box.exec()
 
 
