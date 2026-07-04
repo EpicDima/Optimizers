@@ -25,3 +25,4 @@ from .RMSprop import RMSprop
 from .Rprop import Rprop
 from .ScheduleFreeAdamW import ScheduleFreeAdamW
 from .SGD import SGD
+from .Sophia import Sophia
