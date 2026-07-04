@@ -190,10 +190,10 @@ class Function:
                 (0, 0),
             ),
             # Классическая поверхность (гиперболический параболоид); первоисточника как тестовой функции нет
-            "Седловая функция": StandardFunction("x^2 - y^2", (-5, 5, -5, 5), (4, 0.01)),
+            "Функция седловая": StandardFunction("x^2 - y^2", (-5, 5, -5, 5), (4, 0.01)),
             # Классическая поверхность ("monkey saddle"); термин популяризован в кн.: Hilbert, Cohn-Vossen.
             # "Anschauliche Geometrie", Springer, 1932 (англ. "Geometry and the Imagination", 1952)
-            "Обезьянье седло": StandardFunction("x^3 - 3*x*y^2", (-2, 2, -2, 2), (1.2, 0.01)),
+            "Функция обезьянье седло": StandardFunction("x^3 - 3*x*y^2", (-2, 2, -2, 2), (1.2, 0.01)),
             # Первоисточник (тест-набор Dixon-Szego): Dixon, Szego (eds.). "Towards Global Optimisation 2".
             # North-Holland, 1978 (атрибуция по вторичным источникам; текст книги недоступен)
             # старт на гребне водораздела: отсюда SGD, Momentum и другие
