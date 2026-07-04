@@ -13,7 +13,7 @@ class RMSprop(Optimizer):
     def next_point(self) -> tuple[np.ndarray, float]:
         gradient = self.function.grad(self.x)
         self.acc = self.params["coef"] * self.acc + (1 - self.params["coef"]) * gradient**2
-        adaptive_lr = self.params["lr"] / np.sqrt(self.acc + self.params["eps"])
+        adaptive_lr = self.params["lr"] / (np.sqrt(self.acc) + self.params["eps"])
         next_x = self.x - adaptive_lr * gradient
         return self.move_next(next_x)
 
