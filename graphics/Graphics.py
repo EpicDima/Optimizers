@@ -96,7 +96,7 @@ class Graphics:
         self.colors = ["red", "limegreen", "blue", "orange", "cyan"]
 
         self.contour_type = True
-        self.contour_number = 15
+        self.contour_number = 30
         self.cmap = "inferno"
         self.not_disappearing = 0
 
