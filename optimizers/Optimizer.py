@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np  # noqa: F401  # реэкспортируется в дочерние оптимизаторы
 
 
 class Optimizer:

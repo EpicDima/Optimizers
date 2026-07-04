@@ -1,5 +1,7 @@
-import numpy as np
 import re
+
+import numpy as np
+
 
 class Function:
     def __init__(self):
@@ -104,9 +106,9 @@ class Function:
             return 1
         try:
             s1 = self.convert(s)
-            t = lambda x: eval(s1)
-            t(np.array([0, 0]))
-        except:
+            x = np.array([0, 0])  # noqa: F841  # используется внутри eval
+            eval(s1)
+        except Exception:
             return 0
         self.raw_str_fx = s
         self.str_fx = s1
