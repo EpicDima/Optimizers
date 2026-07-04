@@ -121,17 +121,15 @@ class Graphics:
         self.draw_minimum_marker(ax)
 
     def draw_minimum_marker(self, ax):
-        # минимум ищется по расчётной сетке поверхности, поэтому это
-        # приближение с точностью до шага сетки; у функций с несколькими
-        # глобальными минимумами отмечается один из них
-        idx = np.unravel_index(np.argmin(self.function.y), self.function.y.shape)
-        x = [self.function.x[0][idx]]
-        y = [self.function.x[1][idx]]
+        # отмечаются все глобальные минимумы: кандидаты с сетки поверхности
+        # уточняются численно в Function.find_minima (у Химмельблау звёзд
+        # четыре, у шестигорбого верблюда — две)
         marker_style = dict(marker="*", markersize=13, color="yellow", markeredgecolor="black")
-        if self.threedimensional:
-            ax.plot(x, y, [self.function.y[idx]], zorder=101, **marker_style)
-        else:
-            ax.plot(x, y, zorder=4, **marker_style)
+        for point in self.function.minima:
+            if self.threedimensional:
+                ax.plot([point[0]], [point[1]], [self.function(point)], zorder=101, **marker_style)
+            else:
+                ax.plot([point[0]], [point[1]], zorder=4, **marker_style)
 
     def draw_plot(self, ax, xs, ys, canvas, names, lrs):
         self.lines = []
