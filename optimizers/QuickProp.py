@@ -11,7 +11,7 @@ class QuickProp(Optimizer):
         gradient = self.function.grad(self.x)
 
         denominator = self.previous_gradient - gradient
-        temp = np.divide(gradient, denominator, where = (denominator != 0))
+        temp = np.divide(gradient, denominator, out=np.zeros_like(gradient), where=(denominator != 0))
 
         alpha = np.clip(temp, -self.params["alpha_max"], self.params["alpha_max"])
 
