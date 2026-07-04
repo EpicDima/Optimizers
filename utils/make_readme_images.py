@@ -106,6 +106,8 @@ def apply_scene(window, scene):
     window.initial_y_textedit.setText(str(scene.start[1]))
     window.steps_textedit.setText(str(scene.steps))
     window.tail_textedit.setText(str(scene.tail))
+    # анимация включена по умолчанию, а скриншоту нужны готовые траектории
+    window.animation_checkbox.setChecked(False)
     window.three_dims_checkbox.setChecked(scene.threedimensional)
     window.graphics.contour_type = not scene.surface
     window.start()

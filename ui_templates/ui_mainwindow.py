@@ -71,6 +71,7 @@ class Ui_MainWindow(object):
         self.animation_checkbox.setObjectName(u"animation_checkbox")
         self.animation_checkbox.setGeometry(QRect(10, 510, 80, 25))
         self.animation_checkbox.setFont(font1)
+        self.animation_checkbox.setChecked(True)
         self.initial_x_textedit = QLineEdit(self.centralwidget)
         self.initial_x_textedit.setObjectName(u"initial_x_textedit")
         self.initial_x_textedit.setGeometry(QRect(140, 480, 70, 25))
