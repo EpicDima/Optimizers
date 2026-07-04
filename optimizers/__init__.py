@@ -1,4 +1,5 @@
 from .Adadelta import Adadelta
+from .Adafactor import Adafactor
 from .Adagrad import Adagrad
 from .Adam import Adam
 from .Adamax import Adamax
