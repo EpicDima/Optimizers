@@ -2,6 +2,16 @@ from .Optimizer import Optimizer, np
 
 
 class AdamW(Optimizer):
+    """
+    AdamW — Adam с отвязанной (decoupled) регуляризацией весов: weight decay применяется к точке напрямую.
+
+    Первоисточник: Loshchilov I., Hutter F. "Decoupled Weight Decay Regularization".
+    arXiv preprint arXiv:1711.05101, 2017.
+    https://arxiv.org/abs/1711.05101
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.AdamW.html
+    """
+
     v: np.ndarray
     acc: np.ndarray
     t: int

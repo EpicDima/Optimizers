@@ -2,6 +2,16 @@ from .Optimizer import Optimizer, np
 
 
 class Adam(Optimizer):
+    """
+    Adam — адаптивный метод с оценками первого и второго моментов градиента и коррекцией смещения.
+
+    Первоисточник: Kingma D.P., Ba J. "Adam: A Method for Stochastic Optimization".
+    arXiv preprint arXiv:1412.6980, 2014.
+    https://arxiv.org/abs/1412.6980
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.Adam.html
+    """
+
     v: np.ndarray
     acc: np.ndarray
     t: int
