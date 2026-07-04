@@ -1,3 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+
+# Build artifacts
 *.exe
 *.7z
-*.pyc
+build/
+dist/
+
+# IDE
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
