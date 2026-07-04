@@ -9,8 +9,8 @@ class Adamax(Optimizer):
     def next_point(self):
         gradient = self.function.grad(self.x)
         self.v = self.params["beta1"] * self.v + (1 - self.params["beta1"]) * gradient
-        self.acc = np.clip(self.params["beta2"] * self.acc, np.fabs(gradient), self.params["beta2"] * self.acc)
-        adaptive_lr = self.params["lr"] / np.sqrt(self.acc + self.params["eps"])
+        self.acc = np.maximum(self.params["beta2"] * self.acc, np.fabs(gradient))
+        adaptive_lr = self.params["lr"] / (self.acc + self.params["eps"])
         next_x = self.x - adaptive_lr * self.v
         return self.move_next(next_x)
 
