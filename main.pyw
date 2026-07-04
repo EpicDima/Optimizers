@@ -78,6 +78,9 @@ class Application(QMainWindow, Ui_MainWindow):
         self.speed_slider.valueChanged.connect(self.change_speed)
         self.change_speed(self.speed_slider.value())
 
+        self.initial_x_textedit.textChanged.connect(self.preview_start_point)
+        self.initial_y_textedit.textChanged.connect(self.preview_start_point)
+
         self.graphics.end_animation_func = self.animation_trigger_button.hide
         self.graphics.step_function = self.change_step
 
@@ -284,6 +287,23 @@ class Application(QMainWindow, Ui_MainWindow):
 
         self.plot_widget.canvas.create_subplot(self.graphics.threedimensional)
         self.graphics.draw_function_plot(self.plot_widget.canvas.ax)
+        self.plot_widget.canvas.draw()
+        self.preview_start_point()
+
+    def preview_start_point(self):
+        # кружок стартовой точки двигается по графику сразу при правке полей;
+        # пока в поле недописанное число, маркер остаётся на прежнем месте
+        x = self.safe_input(self.initial_x_textedit.text(), float, None)
+        y = self.safe_input(self.initial_y_textedit.text(), float, None)
+        if x is None or y is None:
+            return
+        self.graphics.move_start_marker(self.plot_widget.canvas.ax, x, y)
+        # у идущей блит-анимации фон закеширован ещё без сдвинутого маркера,
+        # и следующий кадр затёр бы маркер восстановленным фоном — сброс кеша
+        # заставляет перезахватить фон после полной перерисовки
+        cache = getattr(self.graphics.animation, "_blit_cache", None)
+        if cache is not None:
+            cache.clear()
         self.plot_widget.canvas.draw()
 
     def check_function(self):
