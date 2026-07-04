@@ -179,7 +179,7 @@ class Graphics:
             ax.plot(
                 x[start : frame_idx + 1, 0],
                 x[start : frame_idx + 1, 1],
-                y[start:frame_idx],
+                y[start : frame_idx + 1],
                 zorder=100,
                 color=self.colors[idx],
                 label=names[idx],
