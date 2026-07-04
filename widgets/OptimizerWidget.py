@@ -26,8 +26,11 @@ class OptimizerWidget(QWidget):
         self.visibility_checkbox.setToolTip("Показывать траекторию на графике")
         self.visibility_checkbox.toggled.connect(self.app.apply_optimizers_visibility)
 
+        scheduler_tooltip = "Расписание скорости обучения (lr) по шагам"
+        self.scheduler_label = QLabel("Scheduler")
+        self.scheduler_label.setToolTip(scheduler_tooltip)
         self.scheduler_combobox = QComboBox()
-        self.scheduler_combobox.setToolTip("Расписание скорости обучения (lr) по шагам")
+        self.scheduler_combobox.setToolTip(scheduler_tooltip)
         self.scheduler_grid = QGridLayout()
 
         combobox_row = QHBoxLayout()
@@ -36,7 +39,11 @@ class OptimizerWidget(QWidget):
         combobox_row.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.vbl.addLayout(combobox_row)
         self.vbl.addLayout(self.grid)
-        self.vbl.addWidget(self.scheduler_combobox, alignment=Qt.AlignmentFlag.AlignTop)
+        scheduler_row = QHBoxLayout()
+        scheduler_row.addWidget(self.scheduler_label)
+        scheduler_row.addWidget(self.scheduler_combobox, stretch=1)
+        scheduler_row.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.vbl.addLayout(scheduler_row)
         self.vbl.addLayout(self.scheduler_grid)
         self.setLayout(self.vbl)
 
@@ -104,7 +111,9 @@ class OptimizerWidget(QWidget):
             self.text_boxes_params[key] = [label, edit]
 
         # расписание имеет смысл только для оптимизаторов с параметром lr
-        self.scheduler_combobox.setEnabled("lr" in self.optimizer.params)
+        has_lr = "lr" in self.optimizer.params
+        self.scheduler_label.setEnabled(has_lr)
+        self.scheduler_combobox.setEnabled(has_lr)
 
         self.update_size()
 
