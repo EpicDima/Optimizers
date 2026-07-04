@@ -4,11 +4,11 @@ import numpy as np  # noqa: F401  # реэкспортируется в доче
 class Optimizer:
     """
     Класс Optimizer - Оптимизатор
-    
+
     Является базовым классом для всех оптимизаторов.
     Каждый оптимизатор обязан наследоваться от этого класса,
     а также реализовать метод next_point.
-    
+
     """
 
     def __init__(self, initial_x, function, params):
@@ -28,9 +28,8 @@ class Optimizer:
         self.initial_x = initial_x
         self.function = function
         self.params = params
-        
-        self.reset()
 
+        self.reset()
 
     def next_point(self):
         """
@@ -40,7 +39,6 @@ class Optimizer:
 
         raise NotImplementedError
 
-
     def move_next(self, next_x):
         """
         Метод move_next, возвращает значение точки и значение функции в этой точке
@@ -48,7 +46,6 @@ class Optimizer:
 
         self.x = next_x.flatten()
         return self.x, self.function(self.x)
-
 
     def reset(self):
         """

@@ -6,16 +6,15 @@ from .BaseDialog import BaseDialog
 class PlotRangeDialog(BaseDialog, Ui_Dialog):
     def __init__(self, parent, function, plot_function):
         super().__init__(parent)
-        
+
         self.function = function
         self.plot_function = plot_function
 
         self.xy_checkbox.stateChanged.connect(self.checkbox_change)
-        
+
         if self.function.from_x != self.function.from_y or self.function.to_x != self.function.to_y:
             self.xy_checkbox.setChecked(True)
         self.checkbox_change()
-
 
     def checkbox_change(self):
         if self.xy_checkbox.isChecked():
@@ -23,7 +22,6 @@ class PlotRangeDialog(BaseDialog, Ui_Dialog):
         else:
             self.hide_y_part()
         self.set_values()
-
 
     def hide_y_part(self):
         self.from_y_edit.hide()
@@ -33,7 +31,6 @@ class PlotRangeDialog(BaseDialog, Ui_Dialog):
         self.from_x_edit.move(170, 30)
         self.to_x_edit.move(170, 60)
 
-
     def show_y_part(self):
         self.from_x_edit.move(60, 30)
         self.to_x_edit.move(60, 60)
@@ -41,7 +38,6 @@ class PlotRangeDialog(BaseDialog, Ui_Dialog):
         self.y_label.show()
         self.from_y_edit.show()
         self.to_y_edit.show()
-
 
     def set_values(self):
         values = self.function.get_params()
@@ -51,7 +47,6 @@ class PlotRangeDialog(BaseDialog, Ui_Dialog):
         self.to_y_edit.setText(str(values[3]))
         self.count_edit.setText(str(values[4]))
 
-    
     def get_values(self):
         values = []
         values.append(float(self.from_x_edit.text()))
@@ -60,7 +55,6 @@ class PlotRangeDialog(BaseDialog, Ui_Dialog):
         values.append(float(self.to_y_edit.text()) if self.xy_checkbox.isChecked() else values[1])
         values.append(int(self.count_edit.text()))
         return values
-
 
     def accept(self):
         try:

@@ -6,14 +6,12 @@ class Adagrad(Optimizer):
         params = dict(lr=lr, eps=eps)
         super().__init__(initial_x, function, params)
 
-
     def next_point(self):
         gradient = self.function.grad(self.x)
-        self.acc += gradient ** 2
+        self.acc += gradient**2
         adaptive_lr = self.params["lr"] / np.sqrt(self.acc + self.params["eps"])
         next_x = self.x - adaptive_lr * gradient
         return self.move_next(next_x)
-
 
     def reset(self):
         super().reset()

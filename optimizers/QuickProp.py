@@ -6,7 +6,6 @@ class QuickProp(Optimizer):
         params = dict(lr=lr, alpha_max=alpha_max)
         super().__init__(initial_x, function, params)
 
-
     def next_point(self):
         gradient = self.function.grad(self.x)
 
@@ -24,7 +23,6 @@ class QuickProp(Optimizer):
         next_x = self.x - update
 
         return self.move_next(next_x)
-
 
     def reset(self):
         super().reset()

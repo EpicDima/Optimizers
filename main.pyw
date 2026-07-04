@@ -14,11 +14,16 @@ from widgets import OptimizerListItem, OptimizerWidget
 
 # pyuic5 optimizers_pyqt_ui.ui -o design.py
 
+
 class Application(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.setWindowFlags(Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
+        self.setWindowFlags(
+            Qt.WindowType.CustomizeWindowHint
+            | Qt.WindowType.WindowMinimizeButtonHint
+            | Qt.WindowType.WindowCloseButtonHint
+        )
         self.setFixedSize(self.frameGeometry().width(), self.frameGeometry().height())
 
         self.plot_widget = MatplotlibWidget(self.plot_widget)
@@ -27,9 +32,23 @@ class Application(QMainWindow, Ui_MainWindow):
         self.add_button.clicked.connect(self.add_optimizer)
         self.remove_button.clicked.connect(self.remove_optimizer)
 
-        self.list_of_optimizers = list(set(dir(optimizers)) - {"Optimizer", "__builtins__", "__cached__", "__doc__", "__file__", "__loader__", "__name__", "__package__", "__path__", "__spec__"})
+        self.list_of_optimizers = list(
+            set(dir(optimizers))
+            - {
+                "Optimizer",
+                "__builtins__",
+                "__cached__",
+                "__doc__",
+                "__file__",
+                "__loader__",
+                "__name__",
+                "__package__",
+                "__path__",
+                "__spec__",
+            }
+        )
         self.list_of_optimizers.sort()
-        
+
         self.function = Function()
         self.graphics = Graphics(self.function)
 
@@ -63,50 +82,47 @@ class Application(QMainWindow, Ui_MainWindow):
         self.about.triggered.connect(self.show_about)
 
         for name in self.function.standard_functions:
-            (lambda name: self.functions_menu.addAction(name).triggered.connect(lambda: self.set_standard_function(name)))(name)
+            (
+                lambda name: self.functions_menu.addAction(name).triggered.connect(
+                    lambda: self.set_standard_function(name)
+                )
+            )(name)
 
-    
     def show_about(self):
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Icon.Information)
         msg_box.setWindowTitle("О программе")
-        msg_box.setText("Optimizers - программа для показа и тестирования алгоритмов нахождения минимума функции градиентными методами в трёхмерном пространстве.")
+        msg_box.setText(
+            "Optimizers - программа для показа и тестирования алгоритмов нахождения минимума функции градиентными методами в трёхмерном пространстве."
+        )
         msg_box.exec()
-
 
     def set_standard_function(self, function_name):
         self.function_textedit.setText(self.function.standard_functions[function_name])
         self.plot_function()
 
-
     def plot_range_dialog(self):
         self.w = PlotRangeDialog(self, self.function, self.plot_function)
         self.w.show()
 
-    
     def plot_type_dialog(self):
         self.w = PlotTypeDialog(self, self.graphics, self.plot_function)
         self.w.show()
-
 
     def plot_cmap_dialog(self):
         self.w = PlotColormapDialog(self, self.graphics, self.plot_function)
         self.w.show()
 
-    
     def plot_optims_dialog(self):
         self.w = PlotOptimizersDialog(self, self.graphics)
         self.w.show()
 
-    
     def save_example_optimizer(self):
         code = open("optimizers//Momentum.py").read()
         self.save_optimizer(code[:5] + code[6:])
 
-
     def save_base_optimizer(self):
         self.save_optimizer(open("optimizers//Optimizer.py").read())
-
 
     def save_optimizer(self, code):
         filedialog = QFileDialog()
@@ -117,7 +133,6 @@ class Application(QMainWindow, Ui_MainWindow):
             with open(filename, "w") as file:
                 file.write(code)
 
-    
     def add_new(self):
         filedialog = QFileDialog()
         filedialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
@@ -126,13 +141,12 @@ class Application(QMainWindow, Ui_MainWindow):
             filename = filedialog.selectedFiles()[0]
             self.validate(open(filename).read())
 
-    
     def validate(self, code):
         self.statusbar.showMessage("")
         if code.count("class") != 1:
             self.statusbar.showMessage("Выбранный файл содержит некорректный код!")
             return
-        
+
         begin_idx = code.find("class")
         code = code[begin_idx:]
         begin_idx = 6
@@ -163,7 +177,6 @@ class Application(QMainWindow, Ui_MainWindow):
 
         self.statusbar.showMessage("Новый оптимизатор успешно добавлен!")
 
-
     def plot_function(self):
         self.step_label.hide()
         self.check_function()
@@ -173,7 +186,6 @@ class Application(QMainWindow, Ui_MainWindow):
         self.plot_widget.canvas.create_subplot(self.graphics.threedimensional)
         self.graphics.draw_function_plot(self.plot_widget.canvas.ax)
         self.plot_widget.canvas.draw()
-        
 
     def check_function(self):
         self.statusbar.showMessage("")
@@ -184,11 +196,12 @@ class Application(QMainWindow, Ui_MainWindow):
             for widget in self.optimizer_widget_list:
                 widget.reset_optimizer()
 
-
     def start(self):
         self.check_function()
 
-        steps = self.safe_input(self.steps_textedit.text(), int, 100, "Неправильное количество шагов (steps)! Используется 100 по умолчанию")
+        steps = self.safe_input(
+            self.steps_textedit.text(), int, 100, "Неправильное количество шагов (steps)! Используется 100 по умолчанию"
+        )
 
         xs, ys = [], []
         names = []
@@ -206,12 +219,14 @@ class Application(QMainWindow, Ui_MainWindow):
 
         self.plot(xs, ys, names)
 
-
     def get_initial_coordinate(self, optimizer):
-        initial_x = self.safe_input(self.initial_x_textedit.text(), float, optimizer.initial_x[0], "Неправильное начальное значение X!")
-        initial_y = self.safe_input(self.initial_y_textedit.text(), float, optimizer.initial_x[1], "Неправильное начальное значение Y!")
+        initial_x = self.safe_input(
+            self.initial_x_textedit.text(), float, optimizer.initial_x[0], "Неправильное начальное значение X!"
+        )
+        initial_y = self.safe_input(
+            self.initial_y_textedit.text(), float, optimizer.initial_x[1], "Неправильное начальное значение Y!"
+        )
         return np.array([initial_x, initial_y])
-
 
     def change_animation_state(self):
         if self.graphics.animation is not None:
@@ -222,10 +237,8 @@ class Application(QMainWindow, Ui_MainWindow):
                 self.graphics.animation.event_source.start()
                 self.animation_trigger_button.setText("Pause")
 
-
     def change_step(self, step):
         self.step_label.setText(f"Step: {step}")
-
 
     def plot(self, xs, ys, names):
         self.graphics.threedimensional = self.three_dims_checkbox.isChecked()
@@ -245,7 +258,6 @@ class Application(QMainWindow, Ui_MainWindow):
 
         self.graphics.draw_plot(self.plot_widget.canvas.ax, np.array(xs), ys, self.plot_widget.canvas, names)
         self.plot_widget.canvas.draw()
-        
 
     def add_optimizer(self):
         self.statusbar.showMessage("")
@@ -258,7 +270,6 @@ class Application(QMainWindow, Ui_MainWindow):
         self.optimizers_listview.setItemWidget(item, widget)
         self.optimizer_widget_list.append(widget)
 
-
     def remove_optimizer(self):
         self.statusbar.showMessage("")
         if len(self.optimizer_widget_list) <= 1:
@@ -266,7 +277,6 @@ class Application(QMainWindow, Ui_MainWindow):
             return
         self.optimizers_listview.takeItem(len(self.optimizer_widget_list) - 1)
         self.optimizer_widget_list.pop()
-        
 
     def safe_input(self, text_value, type, default, error_text=None):
         try:
