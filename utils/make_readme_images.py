@@ -45,6 +45,8 @@ class Scene:
     surface: bool
     # 0 — вся траектория, иначе показываются только последние tail шагов
     tail: int = 0
+    # снимать в тёмной теме (offscreen сам за системной темой не следит)
+    dark: bool = False
 
 
 SCENES = [
@@ -60,6 +62,7 @@ SCENES = [
         steps=300,
         threedimensional=False,
         surface=False,
+        dark=True,
     ),
     Scene(
         filename="example2.png",
@@ -75,6 +78,23 @@ SCENES = [
         surface=True,
     ),
 ]
+
+
+def make_dark_palette():
+    # палитра в духе тёмной темы macOS; смену палитры подхватывают и
+    # виджеты Qt, и график (MatplotlibCanvas ловит ApplicationPaletteChange)
+    from PySide6.QtGui import QColor, QPalette
+
+    palette = QPalette()
+    dark = QColor(50, 50, 50)
+    white = QColor(255, 255, 255)
+    palette.setColor(QPalette.ColorRole.Window, dark)
+    palette.setColor(QPalette.ColorRole.WindowText, white)
+    palette.setColor(QPalette.ColorRole.Base, QColor(42, 42, 42))
+    palette.setColor(QPalette.ColorRole.Text, white)
+    palette.setColor(QPalette.ColorRole.Button, dark)
+    palette.setColor(QPalette.ColorRole.ButtonText, white)
+    return palette
 
 
 def load_application_class():
@@ -133,7 +153,11 @@ def main():
     window.resize(*WINDOW_SIZE)
     window.show()
 
+    light_palette = app.palette()
+    dark_palette = make_dark_palette()
+
     for scene in SCENES:
+        app.setPalette(dark_palette if scene.dark else light_palette)
         apply_scene(window, scene)
         QApplication.processEvents()
         path = ROOT / "images" / scene.filename
