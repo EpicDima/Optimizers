@@ -77,8 +77,19 @@ class TestEvaluation:
 
 class TestStandardFunctions:
     def test_all_standard_functions_are_valid(self, function):
-        for name, expr in function.standard_functions.items():
-            code = function.check_function(expr)
+        for name, preset in function.standard_functions.items():
+            code = function.check_function(preset.formula)
             assert code in (1, 2), f"функция {name!r} не прошла проверку"
             value = function(np.array([0.5, -0.5]))
             assert np.isfinite(value), f"функция {name!r} вернула {value}"
+
+    def test_standard_function_presets_are_consistent(self, function):
+        for name, preset in function.standard_functions.items():
+            from_x, to_x, from_y, to_y = preset.range
+            assert from_x < to_x and from_y < to_y, f"функция {name!r}: некорректная область"
+            start_x, start_y = preset.start
+            assert from_x <= start_x <= to_x, f"функция {name!r}: старт вне области по x"
+            assert from_y <= start_y <= to_y, f"функция {name!r}: старт вне области по y"
+            function.check_function(preset.formula)
+            value = function(np.array([float(start_x), float(start_y)]))
+            assert np.isfinite(value), f"функция {name!r}: в старте значение {value}"
