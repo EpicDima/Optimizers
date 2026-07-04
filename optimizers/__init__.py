@@ -5,6 +5,7 @@ from .Adagrad import Adagrad
 from .Adam import Adam
 from .Adamax import Adamax
 from .AdamW import AdamW
+from .Adan import Adan
 from .ADOPT import ADOPT
 from .ASGD import ASGD
 from .CautiousAdamW import CautiousAdamW
