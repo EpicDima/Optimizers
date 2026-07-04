@@ -1,3 +1,4 @@
+import numpy as np
 from matplotlib.animation import FuncAnimation
 
 
@@ -107,6 +108,20 @@ class Graphics:
             self.draw_3d_function_plot(ax)
         else:
             self.draw_2d_function_plot(ax)
+        self.draw_minimum_marker(ax)
+
+    def draw_minimum_marker(self, ax):
+        # минимум ищется по расчётной сетке поверхности, поэтому это
+        # приближение с точностью до шага сетки; у функций с несколькими
+        # глобальными минимумами отмечается один из них
+        idx = np.unravel_index(np.argmin(self.function.y), self.function.y.shape)
+        x = [self.function.x[0][idx]]
+        y = [self.function.x[1][idx]]
+        marker_style = dict(marker="*", markersize=13, color="yellow", markeredgecolor="black")
+        if self.threedimensional:
+            ax.plot(x, y, [self.function.y[idx]], zorder=101, **marker_style)
+        else:
+            ax.plot(x, y, zorder=4, **marker_style)
 
     def draw_plot(self, ax, xs, ys, canvas, names):
         if self.anime:
@@ -147,14 +162,14 @@ class Graphics:
             ax.plot_surface(self.function.x[0], self.function.x[1], self.function.y, cmap=self.cmap)
 
     def draw_2d_plot(self, ax, xs, ys, names):
-        self.draw_2d_function_plot(ax)
+        self.draw_function_plot(ax)
         for idx, x in enumerate(xs):
             ax.plot(x[:, 0], x[:, 1], color=self.colors[idx], label=names[idx])
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
 
     def draw_3d_plot(self, ax, xs, ys, names):
-        self.draw_3d_function_plot(ax)
+        self.draw_function_plot(ax)
         for idx, (x, y) in enumerate(zip(xs, ys)):
             ax.plot(x[:, 0], x[:, 1], y, zorder=100, color=self.colors[idx], label=names[idx])
         ax.legend(fontsize=7.5)
