@@ -9,7 +9,9 @@ class Momentum(Optimizer):
 
     """
 
-    def __init__(self, initial_x, function, lr=0.01, coef=0.9):
+    v: np.ndarray
+
+    def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01, coef: float = 0.9) -> None:
         """
         Конструктор класса Momentum
 
@@ -26,7 +28,7 @@ class Momentum(Optimizer):
         # вызов конструктора базового класса
         super().__init__(initial_x, function, params)
 
-    def next_point(self):
+    def next_point(self) -> tuple[np.ndarray, float]:
         """
         Реализованный метод next_point, в котором рассчитывается новое положение точки
         """
@@ -35,7 +37,7 @@ class Momentum(Optimizer):
         next_x = self.x - self.params["lr"] * self.v
         return self.move_next(next_x)  # обязательная конструкция с методом move_next
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Метод reset просто сбрасывает текущее значение точки к начальному
         """
