@@ -1,7 +1,7 @@
 import ast
 import re
 from collections.abc import Callable
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 
@@ -11,6 +11,14 @@ _ALLOWED_NP_NAMES = {name for name, obj in np.__dict__.items() if isinstance(obj
 
 _ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod, ast.FloorDiv)
 _ALLOWED_UNARYOPS = (ast.UAdd, ast.USub)
+
+
+class StandardFunction(NamedTuple):
+    """Предустановка: формула, область (from_x, to_x, from_y, to_y) и стартовая точка."""
+
+    formula: str
+    range: tuple[float, float, float, float]
+    start: tuple[float, float]
 
 
 def _is_np_attribute(node: ast.AST) -> bool:
@@ -58,40 +66,96 @@ class Function:
         self.for_replace = "+-*/()"
         self.re_replace = "".join(["\\" + i + "|" for i in self.for_replace[:-1]]) + "\\" + self.for_replace[-1]
 
+        # у каждой предустановки своя область, где виден её рельеф,
+        # и стартовая точка, с которой поведение оптимизаторов интереснее всего
         self.standard_functions = {
-            "Функция сферы": "x^2 + y^2",
-            "Функция трёхгорбого верблюда": "2 * x^2 - 1.05 * x^4 + x^6/6 + x*y + y^2",
-            "Функция Экли": "-20 * exp(-0.2 * sqrt(0.5 * (x^2 + y^2))) - exp(0.5 * (cos(2 * pi * x) + cos(2 * pi * y))) + e + 20",
-            "Функция Розенброка": "(1 - x)^2 + 100 * (y - x^2)^2",
-            "Функция Била": "(1.5 - x + x * y)^2 + (2.25 - x + x * y^2)^2 + (2.625 - x + x * y^3)^2",
-            "Функция Гольдштейна-Прайса": "(1 + (x + y + 1)^2 * (19 - 14 * x + 3 * x^2 - 14 * y + 6 * x * y + 3*y^2)) * (30 + (2 * x - 3 * y)^2 * (18 - 32 * x + 12 * x^2 + 48 * y - 36 * x * y + 27 * y^2))",
-            "Функция Бута": "(x + 2 * y - 7)^2 + (2 * x + y - 5)^2",
-            "Функция Букина": "100 * sqrt(abs(y - 0.01 * x^2)) + 0.01 * abs(x + 10)",
-            "Функция Матьяса": "0.26 * (x^2 + y^2) - 0.48 * x * y",
-            "Функция Леви": "sin(3 * pi * x)^2 + (x - 1)^2 * (1 + sin(3 * pi * y)^2) + (y - 1)^2 * (1 + sin(2 * pi * y)^2)",
-            "Функция Химмельблау": "(x^2 + y - 11)^2 + (x + y^2 - 7)^2",
-            "Функция Растригина": "20 + (x^2 - 10 * cos(2 * pi * x)) + (y^2 - 10 * cos(2 * pi * y))",
-            "Функция Изома": "-cos(x) * cos(y) * exp(-((x - pi)^2 + (y - pi)^2))",
-            "Функция Cross-in-tray": "-0.0001 * (abs(sin(x) * sin(y) * exp(abs(100 - (sqrt(x^2 + y^2) / pi)))) + 1)^0.1",
-            "Функция Хольдера": "-abs(sin(x) * cos(y) * exp(abs(1 - (sqrt(x^2 + y^2) / pi))))",
-            "Функция МакКормика": "sin(x + y) + (x - y)^2 - 1.5 * x + 2.5 * y + 1",
-            "Функция Стыбинского-Танга": "(x^4 - 16 * x^2 + 5 * x + y^4 - 16 * y^2 + 5 * y) / 2",
-            "Функция Шаффера": "0.5 + (sin(x^2 - y^2)^2 - 0.5) / (1 + 0.001 * (x^2 + y^2))^2",
-            "Функция Шаффера N4": "0.5 + (cos(sin(abs(x^2 - y^2)))^2 - 0.5) / (1 + 0.001 * (x^2 + y^2))^2",
-            "Функция Гривенка": "1 + (x^2 + y^2) / 4000 - cos(x) * cos(y / sqrt(2))",
-            "Функция Drop-Wave": "-(1 + cos(12 * sqrt(x^2 + y^2))) / (2 + 0.5 * (x^2 + y^2))",
-            "Функция Шуберта": "(cos(2*x + 1) + 2*cos(3*x + 2) + 3*cos(4*x + 3) + 4*cos(5*x + 4) + 5*cos(6*x + 5)) * (cos(2*y + 1) + 2*cos(3*y + 2) + 3*cos(4*y + 3) + 4*cos(5*y + 4) + 5*cos(6*y + 5))",
-            "Седловая функция": "x^2 - y^2",
-            "Обезьянье седло": "x^3 - 3*x*y^2",
-            # шестигорбому верблюду и Захарову лучше диапазон около ±2,
-            # Швефелю ±500, Eggholder ±512 — меняется в настройках диапазона
-            "Функция шестигорбого верблюда": "4*x^2 - 2.1*x^4 + x^6/3 + x*y - 4*y^2 + 4*y^4",
-            "Функция Захарова": "x^2 + y^2 + (0.5*x + y)^2 + (0.5*x + y)^4",
-            "Функция Швефеля": "418.9829 * 2 - x * sin(sqrt(abs(x))) - y * sin(sqrt(abs(y)))",
-            "Функция Eggholder": "-(y + 47) * sin(sqrt(abs(x / 2 + y + 47))) - x * sin(sqrt(abs(x - y - 47)))",
+            "Функция сферы": StandardFunction("x^2 + y^2", (-5, 5, -5, 5), (-4, 4)),
+            "Функция трёхгорбого верблюда": StandardFunction(
+                "2 * x^2 - 1.05 * x^4 + x^6/6 + x*y + y^2", (-2, 2, -2, 2), (-1.6, 1.8)
+            ),
+            "Функция Экли": StandardFunction(
+                "-20 * exp(-0.2 * sqrt(0.5 * (x^2 + y^2))) - exp(0.5 * (cos(2 * pi * x) + cos(2 * pi * y))) + e + 20",
+                (-5, 5, -5, 5),
+                (4, -4),
+            ),
+            "Функция Розенброка": StandardFunction("(1 - x)^2 + 100 * (y - x^2)^2", (-2, 2, -1, 3), (-1.2, 1)),
+            "Функция Била": StandardFunction(
+                "(1.5 - x + x * y)^2 + (2.25 - x + x * y^2)^2 + (2.625 - x + x * y^3)^2", (-4.5, 4.5, -4.5, 4.5), (1, 1)
+            ),
+            "Функция Гольдштейна-Прайса": StandardFunction(
+                "(1 + (x + y + 1)^2 * (19 - 14 * x + 3 * x^2 - 14 * y + 6 * x * y + 3*y^2)) * (30 + (2 * x - 3 * y)^2 * (18 - 32 * x + 12 * x^2 + 48 * y - 36 * x * y + 27 * y^2))",
+                (-2, 2, -2, 2),
+                (1.5, 1.5),
+            ),
+            "Функция Бута": StandardFunction("(x + 2 * y - 7)^2 + (2 * x + y - 5)^2", (-10, 10, -10, 10), (-8, -8)),
+            "Функция Букина": StandardFunction(
+                "100 * sqrt(abs(y - 0.01 * x^2)) + 0.01 * abs(x + 10)", (-15, -5, -3, 3), (-7, 2.5)
+            ),
+            "Функция Матьяса": StandardFunction("0.26 * (x^2 + y^2) - 0.48 * x * y", (-10, 10, -10, 10), (-9, 9)),
+            "Функция Леви": StandardFunction(
+                "sin(3 * pi * x)^2 + (x - 1)^2 * (1 + sin(3 * pi * y)^2) + (y - 1)^2 * (1 + sin(2 * pi * y)^2)",
+                (-10, 10, -10, 10),
+                (-8, -8),
+            ),
+            "Функция Химмельблау": StandardFunction("(x^2 + y - 11)^2 + (x + y^2 - 7)^2", (-5, 5, -5, 5), (0, 0)),
+            "Функция Растригина": StandardFunction(
+                "20 + (x^2 - 10 * cos(2 * pi * x)) + (y^2 - 10 * cos(2 * pi * y))",
+                (-5.12, 5.12, -5.12, 5.12),
+                (4.5, 4.5),
+            ),
+            "Функция Изома": StandardFunction(
+                "-cos(x) * cos(y) * exp(-((x - pi)^2 + (y - pi)^2))", (0, 6, 0, 6), (2.5, 4)
+            ),
+            "Функция Cross-in-tray": StandardFunction(
+                "-0.0001 * (abs(sin(x) * sin(y) * exp(abs(100 - (sqrt(x^2 + y^2) / pi)))) + 1)^0.1",
+                (-10, 10, -10, 10),
+                (6, 3),
+            ),
+            "Функция Хольдера": StandardFunction(
+                "-abs(sin(x) * cos(y) * exp(abs(1 - (sqrt(x^2 + y^2) / pi))))", (-10, 10, -10, 10), (1, 1)
+            ),
+            "Функция МакКормика": StandardFunction(
+                "sin(x + y) + (x - y)^2 - 1.5 * x + 2.5 * y + 1", (-1.5, 4, -3, 4), (3, 3)
+            ),
+            "Функция Стыбинского-Танга": StandardFunction(
+                "(x^4 - 16 * x^2 + 5 * x + y^4 - 16 * y^2 + 5 * y) / 2", (-5, 5, -5, 5), (1, 1)
+            ),
+            "Функция Шаффера": StandardFunction(
+                "0.5 + (sin(x^2 - y^2)^2 - 0.5) / (1 + 0.001 * (x^2 + y^2))^2", (-5, 5, -5, 5), (-4, 2)
+            ),
+            "Функция Шаффера N4": StandardFunction(
+                "0.5 + (cos(sin(abs(x^2 - y^2)))^2 - 0.5) / (1 + 0.001 * (x^2 + y^2))^2", (-5, 5, -5, 5), (-4, 2)
+            ),
+            "Функция Гривенка": StandardFunction(
+                "1 + (x^2 + y^2) / 4000 - cos(x) * cos(y / sqrt(2))", (-8, 8, -8, 8), (7, 7)
+            ),
+            "Функция Drop-Wave": StandardFunction(
+                "-(1 + cos(12 * sqrt(x^2 + y^2))) / (2 + 0.5 * (x^2 + y^2))", (-5.12, 5.12, -5.12, 5.12), (-4, -4)
+            ),
+            "Функция Шуберта": StandardFunction(
+                "(cos(2*x + 1) + 2*cos(3*x + 2) + 3*cos(4*x + 3) + 4*cos(5*x + 4) + 5*cos(6*x + 5)) * (cos(2*y + 1) + 2*cos(3*y + 2) + 3*cos(4*y + 3) + 4*cos(5*y + 4) + 5*cos(6*y + 5))",
+                (-5.12, 5.12, -5.12, 5.12),
+                (0, 0),
+            ),
+            "Седловая функция": StandardFunction("x^2 - y^2", (-5, 5, -5, 5), (4, 0.01)),
+            "Обезьянье седло": StandardFunction("x^3 - 3*x*y^2", (-2, 2, -2, 2), (1.2, 0.01)),
+            "Функция шестигорбого верблюда": StandardFunction(
+                "4*x^2 - 2.1*x^4 + x^6/3 + x*y - 4*y^2 + 4*y^4", (-2, 2, -1.5, 1.5), (-1.7, 1.2)
+            ),
+            "Функция Захарова": StandardFunction(
+                "x^2 + y^2 + (0.5*x + y)^2 + (0.5*x + y)^4", (-2, 2, -2, 2), (-1.5, 1.8)
+            ),
+            "Функция Швефеля": StandardFunction(
+                "418.9829 * 2 - x * sin(sqrt(abs(x))) - y * sin(sqrt(abs(y)))", (-500, 500, -500, 500), (-100, -100)
+            ),
+            "Функция Eggholder": StandardFunction(
+                "-(y + 47) * sin(sqrt(abs(x / 2 + y + 47))) - x * sin(sqrt(abs(x - y - 47)))",
+                (-512, 512, -512, 512),
+                (0, 0),
+            ),
         }
 
-        self.raw_str_fx = self.standard_functions["Функция сферы"]
+        self.raw_str_fx = self.standard_functions["Функция сферы"].formula
         self.str_fx = self.convert(self.raw_str_fx)
 
         self.create_surface()

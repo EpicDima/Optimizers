@@ -194,7 +194,12 @@ class Application(QMainWindow, Ui_MainWindow):
         msg_box.exec()
 
     def set_standard_function(self, function_name):
-        self.function_textedit.setText(self.function.standard_functions[function_name])
+        preset = self.function.standard_functions[function_name]
+        self.function.set_params((*preset.range, self.function.count))
+        self.function.create_surface()
+        self.initial_x_textedit.setText(str(preset.start[0]))
+        self.initial_y_textedit.setText(str(preset.start[1]))
+        self.function_textedit.setText(preset.formula)
         self.plot_function()
 
     def plot_range_dialog(self):
