@@ -111,13 +111,20 @@ class Graphics:
     def draw_plot(self, ax, xs, ys, canvas, names):
         if self.anime:
             self.draw_function_plot(ax)
+            lines = self.create_animation_lines(ax, names)
+            ax.legend(fontsize=7.5)
+            self.fix_limits(ax)
             self.animation = FuncAnimation(
                 canvas.fig,
                 self.draw_animation_plot,
                 frames=len(xs[0]),
-                fargs=(ax, xs, ys, names),
+                fargs=(lines, xs, ys),
                 repeat=False,
                 interval=30,
+                # блиттинг перерисовывает только линии поверх кешированного фона,
+                # но 3D-осями не поддерживается
+                blit=not self.threedimensional,
+                cache_frame_data=False,
             )
         else:
             if self.threedimensional:
@@ -161,10 +168,18 @@ class Graphics:
         if self.threedimensional:
             ax.set_zlim(self.function.y.min(), self.function.y.max())
 
-    def draw_animation_plot(self, frame_idx, ax, xs, ys, names):
+    def create_animation_lines(self, ax, names):
+        lines = []
+        for idx, name in enumerate(names):
+            if self.threedimensional:
+                (line,) = ax.plot([], [], [], zorder=100, color=self.colors[idx], label=name)
+            else:
+                (line,) = ax.plot([], [], color=self.colors[idx], label=name)
+            lines.append(line)
+        return lines
+
+    def draw_animation_plot(self, frame_idx, lines, xs, ys):
         self.step_function(frame_idx)
-        for line in list(ax.lines):
-            line.remove()
 
         if self.not_disappearing == 0:
             start = 0
@@ -172,26 +187,15 @@ class Graphics:
             start = frame_idx - self.not_disappearing
             start = start if start >= 0 else 0
 
-        if self.threedimensional:
-            self.draw_3d_anim_plot(frame_idx, ax, xs, ys, names, start)
-        else:
-            self.draw_2d_anim_plot(frame_idx, ax, xs, names, start)
-        if ax.get_legend() is None:
-            ax.legend(fontsize=7.5)
+        for idx, line in enumerate(lines):
+            x = xs[idx]
+            if self.threedimensional:
+                line.set_data_3d(
+                    x[start : frame_idx + 1, 0], x[start : frame_idx + 1, 1], ys[idx][start : frame_idx + 1]
+                )
+            else:
+                line.set_data(x[start : frame_idx + 1, 0], x[start : frame_idx + 1, 1])
+
         if frame_idx == len(xs[0]) - 1:
             self.end_animation_func()
-
-    def draw_2d_anim_plot(self, frame_idx, ax, xs, names, start):
-        for idx, x in enumerate(xs):
-            ax.plot(x[start : frame_idx + 1, 0], x[start : frame_idx + 1, 1], color=self.colors[idx], label=names[idx])
-
-    def draw_3d_anim_plot(self, frame_idx, ax, xs, ys, names, start):
-        for idx, (x, y) in enumerate(zip(xs, ys)):
-            ax.plot(
-                x[start : frame_idx + 1, 0],
-                x[start : frame_idx + 1, 1],
-                y[start : frame_idx + 1],
-                zorder=100,
-                color=self.colors[idx],
-                label=names[idx],
-            )
+        return lines
