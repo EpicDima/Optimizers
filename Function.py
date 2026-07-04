@@ -143,10 +143,11 @@ class Function:
                 (-10, 10, -10, 10),
                 (6, 3),
             ),
-            # Первоисточник sin*cos-варианта достоверно не установлен: оригинал у Mishra (2006, MPRA 2718)
-            # с cos(x)*cos(y); наша форма впервые в Википедии (2012) и у Jamil, Yang (2013, "Holder Table 2")
+            # Первоисточник: Mishra. "Some new test functions for global optimization and performance of
+            # repulsive particle swarm method". MPRA 2718 / SSRN 926132, 2006 (Holder table; оригинальный
+            # cos*cos-вариант, глобальные минимумы -26.92 в (+-9.646, +-9.646))
             "Функция Хольдера": StandardFunction(
-                "-abs(sin(x) * cos(y) * exp(abs(1 - (sqrt(x^2 + y^2) / pi))))", (-10, 10, -10, 10), (1, 1)
+                "-abs(cos(x) * cos(y) * exp(abs(1 - (sqrt(x^2 + y^2) / pi))))", (-10, 10, -10, 10), (5, 5)
             ),
             # Первоисточник достоверно не установлен: обычно приписывают McCormick (Math. Programming 10,
             # 1976, doi:10.1007/BF01580665), но наличие функции там не подтверждено; самое раннее
