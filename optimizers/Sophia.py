@@ -3,9 +3,11 @@ from .Optimizer import Optimizer, np
 
 class Sophia(Optimizer):
     """
-    Оптимизатор Sophia (Second-order Clipped Stochastic Optimization)
-    из статьи "Sophia: A Scalable Stochastic Second-order Optimizer
-    for Language Model Pre-training" (arXiv:2305.14342)
+    Оптимизатор Sophia (Second-order Clipped Stochastic Optimization).
+
+    Первоисточник: Liu et al. "Sophia: A Scalable Stochastic Second-order
+    Optimizer for Language Model Pre-training". 2023.
+    https://arxiv.org/abs/2305.14342
 
     Вариант SophiaH, но вместо стохастической оценки Хатчинсона
     используется диагональ точного численного гессиана function.hesse,

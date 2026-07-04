@@ -3,8 +3,10 @@ from .Optimizer import Optimizer, np
 
 class ScheduleFreeAdamW(Optimizer):
     """
-    Оптимизатор Schedule-Free AdamW
-    из статьи "The Road Less Scheduled" (arXiv:2405.15682)
+    Оптимизатор Schedule-Free AdamW.
+
+    Первоисточник: Defazio et al. "The Road Less Scheduled". 2024.
+    https://arxiv.org/abs/2405.15682
     """
 
     z: np.ndarray

@@ -3,9 +3,11 @@ from .Optimizer import Optimizer, np
 
 class AdaBelief(Optimizer):
     """
-    Оптимизатор AdaBelief
-    из статьи "AdaBelief Optimizer: Adapting Stepsizes by the Belief
-    in Observed Gradients" (arXiv:2010.07468)
+    Оптимизатор AdaBelief.
+
+    Первоисточник: Zhuang et al. "AdaBelief Optimizer: Adapting Stepsizes
+    by the Belief in Observed Gradients". 2020.
+    https://arxiv.org/abs/2010.07468
     """
 
     v: np.ndarray

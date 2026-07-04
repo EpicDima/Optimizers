@@ -3,8 +3,10 @@ from .Optimizer import Optimizer, np
 
 class Lion(Optimizer):
     """
-    Оптимизатор Lion (EvoLved Sign Momentum)
-    из статьи "Symbolic Discovery of Optimization Algorithms" (arXiv:2302.06675)
+    Оптимизатор Lion (EvoLved Sign Momentum).
+
+    Первоисточник: Chen et al. "Symbolic Discovery of Optimization Algorithms". 2023.
+    https://arxiv.org/abs/2302.06675
     """
 
     v: np.ndarray

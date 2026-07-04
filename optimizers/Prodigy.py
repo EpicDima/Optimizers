@@ -3,8 +3,13 @@ from .Optimizer import Optimizer, np
 
 class Prodigy(Optimizer):
     """
-    Оптимизатор Prodigy (learning-rate-free D-адаптация поверх Adam)
-    из статьи "Prodigy: An Expeditiously Adaptive Parameter-Free Learner" (arXiv:2306.06101)
+    Оптимизатор Prodigy (learning-rate-free D-адаптация поверх Adam).
+
+    Первоисточник: Mishchenko, Defazio. "Prodigy: An Expeditiously
+    Adaptive Parameter-Free Learner". 2023.
+    https://arxiv.org/abs/2306.06101
+    Реализация/конвенции: референсная реализация авторов konstmish/prodigy
+    https://github.com/konstmish/prodigy
     """
 
     m: np.ndarray
