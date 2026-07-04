@@ -18,6 +18,7 @@ from .Momentum import Momentum
 from .NAdam import NAdam
 from .Nesterov import Nesterov
 from .Newton import Newton
+from .Prodigy import Prodigy
 from .QuickProp import QuickProp
 from .RAdam import RAdam
 from .RMSprop import RMSprop
