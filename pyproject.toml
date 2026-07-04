@@ -20,7 +20,7 @@ dev = [
 ]
 
 [tool.mypy]
-files = ["optimizers", "Function.py"]
+files = ["optimizers", "schedulers", "Function.py"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
