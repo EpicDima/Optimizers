@@ -15,6 +15,10 @@ class SGD(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — масштаб шага против градиента",
+    }
+
     def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01) -> None:
         params = dict(lr=lr)
         super().__init__(initial_x, function, params)

@@ -12,6 +12,11 @@ class Adagrad(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.Adagrad.html
     """
 
+    param_descriptions = {
+        "lr": "базовая скорость обучения, делится на корень из суммы квадратов всех прошлых градиентов",
+        "eps": "малая добавка в знаменатель для численной устойчивости, настраивать обычно не нужно",
+    }
+
     def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01, eps: float = 1e-08) -> None:
         params = dict(lr=lr, eps=eps)
         super().__init__(initial_x, function, params)

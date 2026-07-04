@@ -12,6 +12,13 @@ class Adam(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.Adam.html
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — масштаб шага",
+        "beta1": "коэффициент EMA первого момента (сглаживание направления градиента)",
+        "beta2": "коэффициент EMA второго момента (сглаживание квадрата градиента)",
+        "eps": "малая добавка в знаменатель для численной устойчивости, настраивать обычно не нужно",
+    }
+
     v: np.ndarray
     acc: np.ndarray
     t: int

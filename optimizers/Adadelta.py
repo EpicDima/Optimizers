@@ -12,6 +12,12 @@ class Adadelta(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.Adadelta.html
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — дополнительный масштаб обновления (есть в PyTorch, в статье Зейлера отсутствует)",
+        "rho": "коэффициент затухания накопителей квадратов градиентов и квадратов обновлений",
+        "eps": "малая добавка под корнями: численная защита и стартовый масштаб шага, пока накопители пусты",
+    }
+
     acc1: np.ndarray
     acc2: np.ndarray
 

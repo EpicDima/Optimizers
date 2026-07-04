@@ -12,6 +12,13 @@ class Adamax(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.Adamax.html
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения — масштаб шага",
+        "beta1": "коэффициент EMA первого момента (сглаживание направления градиента)",
+        "beta2": "коэффициент затухания бесконечной нормы: как быстро забывается прошлый максимум |градиента|",
+        "eps": "малая добавка к модулю градиента перед взятием максимума — защита от деления на ноль",
+    }
+
     v: np.ndarray
     acc: np.ndarray
     t: int

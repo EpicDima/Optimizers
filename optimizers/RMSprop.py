@@ -12,6 +12,12 @@ class RMSprop(Optimizer):
     https://docs.pytorch.org/docs/stable/generated/torch.optim.RMSprop.html
     """
 
+    param_descriptions = {
+        "lr": "базовая скорость обучения, делится на корень из скользящего среднего квадратов градиентов",
+        "coef": "коэффициент затухания скользящего среднего квадратов градиентов",
+        "eps": "малая добавка в знаменатель для численной устойчивости, настраивать обычно не нужно",
+    }
+
     acc: np.ndarray
 
     def __init__(
