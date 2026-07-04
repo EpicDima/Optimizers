@@ -1,76 +1,78 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'plot_optims_ui.ui'
-#
-# Created by: PyQt5 UI code generator 5.11.3
-#
-# WARNING! All changes made in this file will be lost!
+################################################################################
+## Form generated from reading UI file 'plot_optims_ui.ui'
+##
+## Created by: Qt User Interface Compiler version 6.11.1
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QDialog, QLabel, QLineEdit,
+    QListView, QListWidget, QListWidgetItem, QPushButton,
+    QSizePolicy, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
+        if not Dialog.objectName():
+            Dialog.setObjectName(u"Dialog")
         Dialog.resize(360, 300)
-        self.ok_button = QtWidgets.QPushButton(Dialog)
-        self.ok_button.setGeometry(QtCore.QRect(270, 260, 80, 25))
-        font = QtGui.QFont()
+        self.ok_button = QPushButton(Dialog)
+        self.ok_button.setObjectName(u"ok_button")
+        self.ok_button.setGeometry(QRect(270, 260, 80, 25))
+        font = QFont()
         font.setPointSize(9)
         self.ok_button.setFont(font)
-        self.ok_button.setObjectName("ok_button")
-        self.cancel_button = QtWidgets.QPushButton(Dialog)
-        self.cancel_button.setGeometry(QtCore.QRect(180, 260, 80, 25))
-        font = QtGui.QFont()
-        font.setPointSize(9)
+        self.cancel_button = QPushButton(Dialog)
+        self.cancel_button.setObjectName(u"cancel_button")
+        self.cancel_button.setGeometry(QRect(180, 260, 80, 25))
         self.cancel_button.setFont(font)
-        self.cancel_button.setObjectName("cancel_button")
-        self.optim_list = QtWidgets.QListWidget(Dialog)
-        self.optim_list.setGeometry(QtCore.QRect(10, 10, 150, 270))
-        self.optim_list.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.optim_list.setFlow(QtWidgets.QListView.TopToBottom)
-        self.optim_list.setObjectName("optim_list")
-        self.add_button = QtWidgets.QPushButton(Dialog)
-        self.add_button.setGeometry(QtCore.QRect(180, 10, 80, 25))
-        font = QtGui.QFont()
-        font.setPointSize(9)
+        self.optim_list = QListWidget(Dialog)
+        self.optim_list.setObjectName(u"optim_list")
+        self.optim_list.setGeometry(QRect(10, 10, 150, 270))
+        self.optim_list.setLayoutDirection(Qt.LeftToRight)
+        self.optim_list.setFlow(QListView.TopToBottom)
+        self.add_button = QPushButton(Dialog)
+        self.add_button.setObjectName(u"add_button")
+        self.add_button.setGeometry(QRect(180, 10, 80, 25))
         self.add_button.setFont(font)
-        self.add_button.setObjectName("add_button")
-        self.remove_button = QtWidgets.QPushButton(Dialog)
-        self.remove_button.setGeometry(QtCore.QRect(180, 50, 80, 25))
-        font = QtGui.QFont()
-        font.setPointSize(9)
+        self.remove_button = QPushButton(Dialog)
+        self.remove_button.setObjectName(u"remove_button")
+        self.remove_button.setGeometry(QRect(180, 50, 80, 25))
         self.remove_button.setFont(font)
-        self.remove_button.setObjectName("remove_button")
-        self.change_button = QtWidgets.QPushButton(Dialog)
-        self.change_button.setGeometry(QtCore.QRect(180, 90, 80, 25))
-        font = QtGui.QFont()
-        font.setPointSize(9)
+        self.change_button = QPushButton(Dialog)
+        self.change_button.setObjectName(u"change_button")
+        self.change_button.setGeometry(QRect(180, 90, 80, 25))
         self.change_button.setFont(font)
-        self.change_button.setObjectName("change_button")
-        self.not_disappearing_edit = QtWidgets.QLineEdit(Dialog)
-        self.not_disappearing_edit.setGeometry(QtCore.QRect(180, 200, 80, 25))
-        font = QtGui.QFont()
-        font.setPointSize(9)
+        self.not_disappearing_edit = QLineEdit(Dialog)
+        self.not_disappearing_edit.setObjectName(u"not_disappearing_edit")
+        self.not_disappearing_edit.setGeometry(QRect(180, 200, 80, 25))
         self.not_disappearing_edit.setFont(font)
-        self.not_disappearing_edit.setObjectName("not_disappearing_edit")
-        self.label = QtWidgets.QLabel(Dialog)
-        self.label.setGeometry(QtCore.QRect(180, 130, 161, 60))
-        font = QtGui.QFont()
-        font.setPointSize(9)
+        self.label = QLabel(Dialog)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(180, 130, 170, 60))
         self.label.setFont(font)
         self.label.setWordWrap(True)
-        self.label.setObjectName("label")
 
         self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+        QMetaObject.connectSlotsByName(Dialog)
+    # setupUi
 
     def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Цвета оптимизаторов"))
-        self.ok_button.setText(_translate("Dialog", "OK"))
-        self.cancel_button.setText(_translate("Dialog", "Отмена"))
-        self.add_button.setText(_translate("Dialog", "Добавить"))
-        self.remove_button.setText(_translate("Dialog", "Убрать"))
-        self.change_button.setText(_translate("Dialog", "Изменить"))
-        self.label.setText(_translate("Dialog", "Количество шагов без исчезновения в анимации (0 - без исчезновения):"))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"\u0426\u0432\u0435\u0442\u0430 \u043e\u043f\u0442\u0438\u043c\u0438\u0437\u0430\u0442\u043e\u0440\u043e\u0432", None))
+        self.ok_button.setText(QCoreApplication.translate("Dialog", u"OK", None))
+        self.cancel_button.setText(QCoreApplication.translate("Dialog", u"\u041e\u0442\u043c\u0435\u043d\u0430", None))
+        self.add_button.setText(QCoreApplication.translate("Dialog", u"\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c", None))
+        self.remove_button.setText(QCoreApplication.translate("Dialog", u"\u0423\u0431\u0440\u0430\u0442\u044c", None))
+        self.change_button.setText(QCoreApplication.translate("Dialog", u"\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"\u041a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e \u0448\u0430\u0433\u043e\u0432 \u0431\u0435\u0437 \u0438\u0441\u0447\u0435\u0437\u043d\u043e\u0432\u0435\u043d\u0438\u044f \u0432 \u0430\u043d\u0438\u043c\u0430\u0446\u0438\u0438 (0 - \u0432\u0441\u0435\u0433\u0434\u0430 \u0431\u0435\u0437 \u0438\u0441\u0447\u0435\u0437\u043d\u043e\u0432\u0435\u043d\u0438\u044f):", None))
+    # retranslateUi
 
