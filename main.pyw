@@ -428,6 +428,19 @@ class Application(QMainWindow, Ui_MainWindow):
         self.plot_widget.canvas.create_subplot(self.graphics.threedimensional)
 
         self.graphics.draw_plot(self.plot_widget.canvas.ax, np.array(xs), ys, self.plot_widget.canvas, names, lrs)
+        self.apply_optimizers_visibility()
+
+    def apply_optimizers_visibility(self):
+        # скрытие/показ переключается на линиях последнего построения без
+        # пересчёта; при несовпадении списков (виджет добавили или убрали
+        # после построения) лишние элементы просто пропускаются
+        for widget, line in zip(self.optimizer_widget_list, self.graphics.lines):
+            line.set_visible(widget.visibility_checkbox.isChecked())
+        # как и в preview_start_point: фон блит-анимации закеширован, после
+        # полной перерисовки его нужно перезахватить
+        cache = getattr(self.graphics.animation, "_blit_cache", None)
+        if cache is not None:
+            cache.clear()
         self.plot_widget.canvas.draw()
 
     def add_optimizer(self):
