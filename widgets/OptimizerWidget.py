@@ -149,19 +149,25 @@ class OptimizerWidget(QWidget):
             )
 
     def get_params_in_string_form(self):
-        s = self.optimizer.__class__.__name__ + " " + str(self.optimizer.params)
+        s = self.wrap_params_line(self.optimizer.__class__.__name__ + " " + str(self.optimizer.params))
         if "lr" in self.optimizer.params and not isinstance(self.scheduler, schedulers.Constant):
-            s += " + " + self.scheduler.__class__.__name__ + " " + str(self.scheduler.params)
-        s = s.replace("'", "")
-        for i in range(42, 42 * 5, 40):
-            if len(s) > i:
-                for j in range(i - 2, 0, -1):
-                    if s[j] == ",":
-                        s = s[: j + 1] + "\n" + s[j + 2 :]
-                        break
-            else:
-                break
+            s += "\n" + self.wrap_params_line(
+                "+ " + self.scheduler.__class__.__name__ + " " + str(self.scheduler.params)
+            )
         return s
+
+    @staticmethod
+    def wrap_params_line(s, width=42):
+        # жадный перенос по запятым, чтобы легенда не вылезала за край графика
+        parts = s.replace("'", "").split(", ")
+        lines = [parts[0]]
+        for part in parts[1:]:
+            if len(lines[-1]) + len(part) + 2 <= width:
+                lines[-1] += ", " + part
+            else:
+                lines[-1] += ","
+                lines.append(part)
+        return "\n".join(lines)
 
     def optimize(self, steps):
         points_x = [self.optimizer.x]
