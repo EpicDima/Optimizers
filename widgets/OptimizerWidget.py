@@ -1,5 +1,5 @@
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import QComboBox, QGridLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QCheckBox, QComboBox, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
 import schedulers
 from schedulers.Scheduler import Scheduler
@@ -19,11 +19,22 @@ class OptimizerWidget(QWidget):
         self.combobox = QComboBox()
         self.grid = QGridLayout()
 
+        # переключение видимости действует сразу на уже построенный график,
+        # без пересчёта — удобно различать наложившиеся траектории
+        self.visibility_checkbox = QCheckBox()
+        self.visibility_checkbox.setChecked(True)
+        self.visibility_checkbox.setToolTip("Показывать траекторию на графике")
+        self.visibility_checkbox.toggled.connect(self.app.apply_optimizers_visibility)
+
         self.scheduler_combobox = QComboBox()
         self.scheduler_combobox.setToolTip("Расписание скорости обучения (lr) по шагам")
         self.scheduler_grid = QGridLayout()
 
-        self.vbl.addWidget(self.combobox, alignment=Qt.AlignmentFlag.AlignTop)
+        combobox_row = QHBoxLayout()
+        combobox_row.addWidget(self.visibility_checkbox)
+        combobox_row.addWidget(self.combobox, stretch=1)
+        combobox_row.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.vbl.addLayout(combobox_row)
         self.vbl.addLayout(self.grid)
         self.vbl.addWidget(self.scheduler_combobox, alignment=Qt.AlignmentFlag.AlignTop)
         self.vbl.addLayout(self.scheduler_grid)

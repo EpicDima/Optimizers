@@ -106,6 +106,10 @@ class Graphics:
         self.start_marker_style = dict(marker="o", markersize=8, color="white", markeredgecolor="black")
         self.start_marker = None
 
+        # линии траекторий последнего построения — по одной на оптимизатор,
+        # в порядке списка виджетов; нужны для переключения видимости
+        self.lines = []
+
         self.end_animation_func = None
         self.step_function = None
 
@@ -130,10 +134,12 @@ class Graphics:
             ax.plot(x, y, zorder=4, **marker_style)
 
     def draw_plot(self, ax, xs, ys, canvas, names, lrs):
+        self.lines = []
         if self.anime:
             self.draw_function_plot(ax)
             self.draw_start_markers(ax, xs, ys)
             lines = self.create_animation_lines(ax, names)
+            self.lines = lines
             legend = ax.legend(fontsize=7.5)
             self.fix_limits(ax)
             self.animation = FuncAnimation(
@@ -199,7 +205,10 @@ class Graphics:
         self.draw_start_markers(ax, xs, ys)
         for idx, x in enumerate(xs):
             start = self.tail_start(len(x) - 1)
-            ax.plot(x[start:, 0], x[start:, 1], color=self.colors[idx], label=self.value_label(names[idx], ys[idx][-1]))
+            (line,) = ax.plot(
+                x[start:, 0], x[start:, 1], color=self.colors[idx], label=self.value_label(names[idx], ys[idx][-1])
+            )
+            self.lines.append(line)
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
 
@@ -208,7 +217,7 @@ class Graphics:
         self.draw_start_markers(ax, xs, ys)
         for idx, (x, y) in enumerate(zip(xs, ys)):
             start = self.tail_start(len(x) - 1)
-            ax.plot(
+            (line,) = ax.plot(
                 x[start:, 0],
                 x[start:, 1],
                 y[start:],
@@ -216,6 +225,7 @@ class Graphics:
                 color=self.colors[idx],
                 label=self.value_label(names[idx], y[-1]),
             )
+            self.lines.append(line)
         ax.legend(fontsize=7.5)
         self.fix_limits(ax)
 
