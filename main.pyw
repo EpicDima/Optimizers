@@ -156,6 +156,12 @@ class Application(QMainWindow, Ui_MainWindow):
         function_check_row.addWidget(self.function_check_button)
         right.addLayout(function_check_row)
 
+        # место под скрытую кнопку паузы резервируется всегда, иначе при её
+        # появлении правый блок меняет геометрию
+        size_policy = self.animation_trigger_button.sizePolicy()
+        size_policy.setRetainSizeWhenHidden(True)
+        self.animation_trigger_button.setSizePolicy(size_policy)
+
         start_row = QHBoxLayout()
         start_row.addWidget(self.animation_trigger_button)
         start_row.addStretch()
