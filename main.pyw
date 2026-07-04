@@ -85,10 +85,16 @@ class Application(QMainWindow, Ui_MainWindow):
         self.graphics.step_function = self.change_step
 
         self.optimizer_widget_list = []
+        # стартовая пара с контрастным поведением на функции Химмельблау:
+        # Adam аккуратно сходится в ближний минимум (3, 2), а Momentum
+        # по инерции перелетает седло и петлёй закручивается в (3.58, -1.85)
         self.add_optimizer()
+        self.add_optimizer()
+        self.setup_default_optimizer(0, "Adam", {"lr": 0.3})
+        self.setup_default_optimizer(1, "Momentum", {"lr": 0.005})
 
         self.function_check_button.clicked.connect(self.plot_function)
-        self.plot_function()
+        self.set_standard_function("Функция Химмельблау")
 
         self.new_optimizer.triggered.connect(self.add_new)
         self.base_optimizer.triggered.connect(self.save_base_optimizer)
@@ -419,6 +425,13 @@ class Application(QMainWindow, Ui_MainWindow):
         self.optimizers_listview.addItem(item)
         self.optimizers_listview.setItemWidget(item, widget)
         self.optimizer_widget_list.append(widget)
+
+    def setup_default_optimizer(self, index, name, params):
+        widget = self.optimizer_widget_list[index]
+        widget.combobox.setCurrentText(name)
+        widget.change_optimizer()
+        for key, value in params.items():
+            widget.text_boxes_params[key][1].setText(str(value))
 
     def remove_optimizer(self):
         self.statusbar.showMessage("")
