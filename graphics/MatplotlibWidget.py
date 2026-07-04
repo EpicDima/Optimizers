@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from .MatplotlibCanvas import MatplotlibCanvas
 

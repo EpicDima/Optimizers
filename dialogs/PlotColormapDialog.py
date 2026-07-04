@@ -1,5 +1,6 @@
-from .BaseDialog import BaseDialog
 from ui_templates.ui_plotcmap import Ui_Dialog
+
+from .BaseDialog import BaseDialog
 
 
 class PlotColormapDialog(BaseDialog, Ui_Dialog):

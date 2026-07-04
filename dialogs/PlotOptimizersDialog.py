@@ -1,8 +1,9 @@
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QColorDialog
 
-from .BaseDialog import BaseDialog
 from ui_templates.ui_plotoptims import Ui_Dialog
+
+from .BaseDialog import BaseDialog
 
 
 class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
@@ -26,7 +27,7 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
         if len(self.colors) >= 15:
             self.show_msg_box("Достигнуто максимально возможное количество оптимизаторов!")
             return
-        self.optim_list.addItem("Оптимизатор #{}".format(len(self.colors) + 1))
+        self.optim_list.addItem(f"Оптимизатор #{len(self.colors) + 1}")
         self.colors.append(color)
         self.optim_list.item(len(self.colors) - 1).setBackground(QColor(self.colors[-1]))
         

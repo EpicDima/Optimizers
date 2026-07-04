@@ -1,5 +1,6 @@
-from .BaseDialog import BaseDialog
 from ui_templates.ui_plotrange import Ui_Dialog
+
+from .BaseDialog import BaseDialog
 
 
 class PlotRangeDialog(BaseDialog, Ui_Dialog):

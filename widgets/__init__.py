@@ -1,2 +1,2 @@
-from .OptimizerWidget import OptimizerWidget
 from .OptimizerListItem import OptimizerListItem
+from .OptimizerWidget import OptimizerWidget

@@ -16,7 +16,7 @@ class QuickProp(Optimizer):
         alpha = np.clip(temp, -self.params["alpha_max"], self.params["alpha_max"])
 
         zeros = self.previous_update == 0
-        update = (zeros == False) * alpha * self.previous_update + zeros * self.params["lr"] * gradient
+        update = ~zeros * alpha * self.previous_update + zeros * self.params["lr"] * gradient
 
         self.previous_gradient = gradient
         self.previous_update = update

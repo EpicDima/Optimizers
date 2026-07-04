@@ -2,14 +2,13 @@ import sys
 
 import numpy as np
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
 
 import optimizers
-from dialogs import (
-    PlotColormapDialog, PlotOptimizersDialog, PlotRangeDialog, PlotTypeDialog)
+from dialogs import PlotColormapDialog, PlotOptimizersDialog, PlotRangeDialog, PlotTypeDialog
 from Function import Function
 from graphics import Graphics, MatplotlibWidget
-from optimizers.Optimizer import Optimizer
+from optimizers.Optimizer import Optimizer  # noqa: F401  # нужен exec-коду пользовательских оптимизаторов
 from ui_templates.ui_mainwindow import Ui_MainWindow
 from widgets import OptimizerListItem, OptimizerWidget
 
@@ -101,12 +100,12 @@ class Application(QMainWindow, Ui_MainWindow):
 
     
     def save_example_optimizer(self):
-        code = open("optimizers//Momentum.py", "r").read()
+        code = open("optimizers//Momentum.py").read()
         self.save_optimizer(code[:5] + code[6:])
 
 
     def save_base_optimizer(self):
-        self.save_optimizer(open("optimizers//Optimizer.py", "r").read())
+        self.save_optimizer(open("optimizers//Optimizer.py").read())
 
 
     def save_optimizer(self, code):
@@ -125,7 +124,7 @@ class Application(QMainWindow, Ui_MainWindow):
         filedialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if filedialog.exec() == QFileDialog.DialogCode.Accepted:
             filename = filedialog.selectedFiles()[0]
-            self.validate(open(filename, "r").read())
+            self.validate(open(filename).read())
 
     
     def validate(self, code):
@@ -142,13 +141,13 @@ class Application(QMainWindow, Ui_MainWindow):
 
         try:
             exec(code)
-        except:
+        except Exception:
             self.statusbar.showMessage("Выбранный файл содержит некорректный код!")
             return
 
         try:
             list(optimizers.__dict__.keys()).index(name)
-        except:
+        except Exception:
             pass
         else:
             self.statusbar.showMessage("Оптимизатор с таким именем уже существует!")
@@ -225,7 +224,7 @@ class Application(QMainWindow, Ui_MainWindow):
 
 
     def change_step(self, step):
-        self.step_label.setText("Step: {}".format(step))
+        self.step_label.setText(f"Step: {step}")
 
 
     def plot(self, xs, ys, names):
@@ -251,7 +250,7 @@ class Application(QMainWindow, Ui_MainWindow):
     def add_optimizer(self):
         self.statusbar.showMessage("")
         if len(self.optimizer_widget_list) >= len(self.graphics.colors):
-            self.statusbar.showMessage("Максимальное количество оптимизаторов {} достигнуто!".format(len(self.graphics.colors)))
+            self.statusbar.showMessage(f"Максимальное количество оптимизаторов {len(self.graphics.colors)} достигнуто!")
             return
         widget = OptimizerWidget(self, optimizers, self.list_of_optimizers)
         item = OptimizerListItem(widget, self.optimizers_listview)

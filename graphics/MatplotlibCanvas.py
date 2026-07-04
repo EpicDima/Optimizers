@@ -1,6 +1,5 @@
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-
+from matplotlib.figure import Figure
 from PySide6.QtWidgets import QSizePolicy
 
 

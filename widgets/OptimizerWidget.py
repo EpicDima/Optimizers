@@ -1,5 +1,5 @@
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QComboBox, QGridLayout, QLabel, QLineEdit
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtWidgets import QComboBox, QGridLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
 
 class OptimizerWidget(QWidget):
@@ -75,7 +75,7 @@ class OptimizerWidget(QWidget):
 
     def get_params(self):
         for key in self.optimizer.params:
-            self.optimizer.params[key] = self.app.safe_input(self.text_boxes_params[key][1].text(), float, self.optimizer.params[key], "Неправильное значение параметра {}".format(key))
+            self.optimizer.params[key] = self.app.safe_input(self.text_boxes_params[key][1].text(), float, self.optimizer.params[key], f"Неправильное значение параметра {key}")
         
 
     def get_params_in_string_form(self):
