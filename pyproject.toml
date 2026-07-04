@@ -6,4 +6,8 @@ readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "EpicDima" }]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "matplotlib>=3.10",
+    "numpy>=2",
+    "pyside6>=6.8",
+]
