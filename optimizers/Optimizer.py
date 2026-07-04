@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np  # noqa: F401  # реэкспортируется в дочерние оптимизаторы
 
@@ -14,7 +14,12 @@ class Optimizer:
     Каждый оптимизатор обязан наследоваться от этого класса,
     а также реализовать метод next_point.
 
+    Дочерний оптимизатор описывает смысл своих параметров в словаре
+    param_descriptions (ключи совпадают с params) — GUI показывает
+    эти описания как подсказки к полям ввода.
     """
+
+    param_descriptions: ClassVar[dict[str, str]] = {}
 
     def __init__(self, initial_x: np.ndarray, function: Function, params: dict[str, float]) -> None:
         """

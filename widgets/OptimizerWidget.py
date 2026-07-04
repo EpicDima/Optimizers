@@ -54,6 +54,11 @@ class OptimizerWidget(QWidget):
             edit = QLineEdit(self)
             edit.setText(str(self.optimizer.params[key]))
 
+            description = self.optimizer.param_descriptions.get(key)
+            if description:
+                label.setToolTip(description)
+                edit.setToolTip(description)
+
             self.grid.addWidget(label, line, 0, Qt.AlignmentFlag.AlignTop)
             self.grid.addWidget(edit, line, 1, Qt.AlignmentFlag.AlignTop)
 
