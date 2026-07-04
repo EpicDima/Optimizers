@@ -7,6 +7,7 @@ from .Adamax import Adamax
 from .AdamW import AdamW
 from .ADOPT import ADOPT
 from .ASGD import ASGD
+from .CautiousAdamW import CautiousAdamW
 from .LBFGS import LBFGS
 from .LevenbergMarquardt import LevenbergMarquardt
 from .Momentum import Momentum
