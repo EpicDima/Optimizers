@@ -1,6 +1,9 @@
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import QComboBox, QGridLayout, QLabel, QLineEdit, QVBoxLayout, QWidget
 
+import schedulers
+from schedulers.Scheduler import Scheduler
+
 
 class OptimizerWidget(QWidget):
     def __init__(self, app, optimizers, optimizers_list, parent=None):
@@ -16,20 +19,45 @@ class OptimizerWidget(QWidget):
         self.combobox = QComboBox()
         self.grid = QGridLayout()
 
+        self.scheduler_combobox = QComboBox()
+        self.scheduler_combobox.setToolTip("Расписание скорости обучения (lr) по шагам")
+        self.scheduler_grid = QGridLayout()
+
         self.vbl.addWidget(self.combobox, alignment=Qt.AlignmentFlag.AlignTop)
         self.vbl.addLayout(self.grid)
+        self.vbl.addWidget(self.scheduler_combobox, alignment=Qt.AlignmentFlag.AlignTop)
+        self.vbl.addLayout(self.scheduler_grid)
         self.setLayout(self.vbl)
 
         self.combobox.activated.connect(self.change_optimizer)
         self.refresh_optimizers()
         self.text_boxes_params = {}
 
+        self.scheduler_combobox.activated.connect(self.change_scheduler)
+        self.refresh_schedulers()
+        self.text_boxes_scheduler_params = {}
+
         self.item = None
+        self.change_scheduler()
         self.change_optimizer()
 
     def refresh_optimizers(self):
         self.combobox.clear()
         self.combobox.addItems(self.optimizers_list)
+
+    def refresh_schedulers(self):
+        schedulers_list = ["Constant"] + sorted(
+            (
+                name
+                for name in dir(schedulers)
+                if name not in ("Scheduler", "Constant")
+                and isinstance(getattr(schedulers, name), type)
+                and issubclass(getattr(schedulers, name), Scheduler)
+            ),
+            key=str.lower,
+        )
+        self.scheduler_combobox.clear()
+        self.scheduler_combobox.addItems(schedulers_list)
 
     def set_item(self, item):
         self.item = item
@@ -64,7 +92,40 @@ class OptimizerWidget(QWidget):
 
             self.text_boxes_params[key] = [label, edit]
 
-        self.resize(self.frameGeometry().width(), 80 + line * 25)
+        # расписание имеет смысл только для оптимизаторов с параметром lr
+        self.scheduler_combobox.setEnabled("lr" in self.optimizer.params)
+
+        self.update_size()
+
+    def change_scheduler(self, index=None):
+        for key in self.text_boxes_scheduler_params:
+            self.text_boxes_scheduler_params[key][0].setParent(None)
+            self.text_boxes_scheduler_params[key][1].setParent(None)
+
+        self.scheduler = getattr(schedulers, self.scheduler_combobox.currentText())()
+        self.text_boxes_scheduler_params = {}
+        for line, key in enumerate(self.scheduler.params):
+            label = QLabel(self)
+            label.setText(key)
+
+            edit = QLineEdit(self)
+            edit.setText(str(self.scheduler.params[key]))
+
+            description = self.scheduler.param_descriptions.get(key)
+            if description:
+                label.setToolTip(description)
+                edit.setToolTip(description)
+
+            self.scheduler_grid.addWidget(label, line, 0, Qt.AlignmentFlag.AlignTop)
+            self.scheduler_grid.addWidget(edit, line, 1, Qt.AlignmentFlag.AlignTop)
+
+            self.text_boxes_scheduler_params[key] = [label, edit]
+
+        self.update_size()
+
+    def update_size(self):
+        rows = len(self.text_boxes_params) + len(self.text_boxes_scheduler_params)
+        self.resize(self.frameGeometry().width(), 85 + rows * 25)
         self.set_item_size()
 
     def reset_optimizer(self):
@@ -79,9 +140,18 @@ class OptimizerWidget(QWidget):
                 self.optimizer.params[key],
                 f"Неправильное значение параметра {key}",
             )
+        for key in self.scheduler.params:
+            self.scheduler.params[key] = self.app.safe_input(
+                self.text_boxes_scheduler_params[key][1].text(),
+                float,
+                self.scheduler.params[key],
+                f"Неправильное значение параметра {key} расписания",
+            )
 
     def get_params_in_string_form(self):
         s = self.optimizer.__class__.__name__ + " " + str(self.optimizer.params)
+        if "lr" in self.optimizer.params and not isinstance(self.scheduler, schedulers.Constant):
+            s += " + " + self.scheduler.__class__.__name__ + " " + str(self.scheduler.params)
         s = s.replace("'", "")
         for i in range(42, 42 * 5, 40):
             if len(s) > i:
@@ -96,8 +166,15 @@ class OptimizerWidget(QWidget):
     def optimize(self, steps):
         points_x = [self.optimizer.x]
         points_y = [self.optimizer.function(self.optimizer.x)]
+        # расписание подменяет lr перед каждым шагом; base_lr из поля ввода
+        # восстанавливается после прогона, чтобы поле не «уплывало»
+        base_lr = self.optimizer.params.get("lr")
         for i in range(steps):
+            if base_lr is not None:
+                self.optimizer.params["lr"] = self.scheduler.lr(i, steps, base_lr)
             x, y = self.optimizer.next_point()
             points_x.append(x)
             points_y.append(y)
+        if base_lr is not None:
+            self.optimizer.params["lr"] = base_lr
         return points_x, points_y
