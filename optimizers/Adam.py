@@ -4,6 +4,7 @@ from .Optimizer import Optimizer, np
 class Adam(Optimizer):
     v: np.ndarray
     acc: np.ndarray
+    t: int
 
     def __init__(
         self,
@@ -18,14 +19,18 @@ class Adam(Optimizer):
         super().__init__(initial_x, function, params)
 
     def next_point(self) -> tuple[np.ndarray, float]:
+        self.t += 1
         gradient = self.function.grad(self.x)
         self.v = self.params["beta1"] * self.v + (1 - self.params["beta1"]) * gradient
         self.acc = self.params["beta2"] * self.acc + (1 - self.params["beta2"]) * gradient**2
-        adaptive_lr = self.params["lr"] / np.sqrt(self.acc + self.params["eps"])
-        next_x = self.x - adaptive_lr * self.v
+        bias_correction1 = 1 - self.params["beta1"] ** self.t
+        bias_correction2 = 1 - self.params["beta2"] ** self.t
+        denom = np.sqrt(self.acc) / np.sqrt(bias_correction2) + self.params["eps"]
+        next_x = self.x - self.params["lr"] / bias_correction1 * self.v / denom
         return self.move_next(next_x)
 
     def reset(self) -> None:
         super().reset()
         self.v = np.zeros([2])
         self.acc = np.zeros([2])
+        self.t = 0
