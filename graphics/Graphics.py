@@ -93,7 +93,7 @@ class Graphics:
             "viridis",
             "winter",
         ]
-        self.colors = ["red", "limegreen", "blue", "orange", "cyan"]
+        self.colors = ["red", "limegreen", "deepskyblue", "orange", "cyan"]
 
         self.contour_type = True
         self.contour_number = 30
