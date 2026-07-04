@@ -6,6 +6,7 @@ class Graphics:
         self.function = function
         self.anime = False
         self.threedimensional = False
+        self.animation = None
 
         self.colormaps = [
             "Accent",

@@ -185,6 +185,8 @@ class Application(QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Новый оптимизатор успешно добавлен!")
 
     def plot_function(self):
+        self.stop_animation()
+        self.animation_trigger_button.hide()
         self.step_label.hide()
         self.check_function()
         self.graphics.threedimensional = self.three_dims_checkbox.isChecked()
@@ -234,6 +236,18 @@ class Application(QMainWindow, Ui_MainWindow):
         )
         return np.array([initial_x, initial_y])
 
+    def stop_animation(self):
+        # незавершённая анимация продолжает рисовать по таймеру на том же
+        # холсте и накладывается на новый график; у доигравшей до конца
+        # event_source уже обнулён самим matplotlib.
+        # Остановки одного таймера недостаточно: у забличенной анимации
+        # остаётся подписка на resize холста, которая перезапустила бы таймер
+        # при изменении размера окна — _stop() отключает и её
+        if self.graphics.animation is not None:
+            if self.graphics.animation.event_source is not None:
+                self.graphics.animation._stop()
+            self.graphics.animation = None
+
     def change_animation_state(self):
         if self.graphics.animation is not None:
             if self.animation_trigger_button.text() == "Pause":
@@ -247,9 +261,9 @@ class Application(QMainWindow, Ui_MainWindow):
         self.step_label.setText(f"Step: {step}")
 
     def plot(self, xs, ys, names):
+        self.stop_animation()
         self.graphics.threedimensional = self.three_dims_checkbox.isChecked()
         self.graphics.anime = self.animation_checkbox.isChecked()
-        self.graphics.animation = None
 
         if self.graphics.anime:
             self.animation_trigger_button.setText("Pause")
