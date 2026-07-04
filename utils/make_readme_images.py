@@ -11,7 +11,7 @@
 import importlib.util
 import os
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
@@ -21,15 +21,23 @@ ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("QT_SCALE_FACTOR", "2")
 
-WINDOW_SIZE = (997, 846)
+WINDOW_SIZE = (1250, 940)
+
+
+@dataclass
+class OptimizerSpec:
+    name: str
+    # значения параметров поверх умолчаний оптимизатора
+    params: dict[str, str] = field(default_factory=dict)
+    scheduler: str = "Constant"
+    scheduler_params: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
 class Scene:
     filename: str
     preset: str
-    # [(имя оптимизатора, {параметр: значение поверх умолчаний})]
-    optimizers: list[tuple[str, dict[str, str]]]
+    optimizers: list[OptimizerSpec]
     start: tuple[float, float]
     steps: int
     threedimensional: bool
@@ -43,7 +51,11 @@ SCENES = [
     Scene(
         filename="example1.png",
         preset="Функция Розенброка",
-        optimizers=[("Lion", {}), ("MARS", {}), ("Sophia", {})],
+        optimizers=[
+            OptimizerSpec("Lion"),
+            OptimizerSpec("MARS"),
+            OptimizerSpec("Sophia", scheduler="CosineWarmRestarts"),
+        ],
         start=(-1.2, 1),
         steps=300,
         threedimensional=False,
@@ -52,7 +64,11 @@ SCENES = [
     Scene(
         filename="example2.png",
         preset="Функция Стыбинского-Танга",
-        optimizers=[("Momentum", {"lr": "0.01"}), ("Prodigy", {}), ("Sophia", {})],
+        optimizers=[
+            OptimizerSpec("Momentum", {"lr": "0.01"}, scheduler="OneCycle"),
+            OptimizerSpec("Prodigy"),
+            OptimizerSpec("Sophia"),
+        ],
         start=(4.5, -4.5),
         steps=100,
         threedimensional=True,
@@ -76,11 +92,15 @@ def apply_scene(window, scene):
         window.add_optimizer()
     while len(window.optimizer_widget_list) > len(scene.optimizers):
         window.remove_optimizer()
-    for widget, (name, params) in zip(window.optimizer_widget_list, scene.optimizers):
-        widget.combobox.setCurrentText(name)
+    for widget, spec in zip(window.optimizer_widget_list, scene.optimizers):
+        widget.combobox.setCurrentText(spec.name)
         widget.change_optimizer()
-        for key, value in params.items():
+        for key, value in spec.params.items():
             widget.text_boxes_params[key][1].setText(value)
+        widget.scheduler_combobox.setCurrentText(spec.scheduler)
+        widget.change_scheduler()
+        for key, value in spec.scheduler_params.items():
+            widget.text_boxes_scheduler_params[key][1].setText(value)
 
     window.initial_x_textedit.setText(str(scene.start[0]))
     window.initial_y_textedit.setText(str(scene.start[1]))
