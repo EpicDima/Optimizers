@@ -126,6 +126,7 @@ class Graphics:
     def draw_plot(self, ax, xs, ys, canvas, names):
         if self.anime:
             self.draw_function_plot(ax)
+            self.draw_start_markers(ax, xs, ys)
             lines = self.create_animation_lines(ax, names)
             ax.legend(fontsize=7.5)
             self.fix_limits(ax)
@@ -161,8 +162,19 @@ class Graphics:
         else:
             ax.plot_surface(self.function.x[0], self.function.x[1], self.function.y, cmap=self.cmap)
 
+    def draw_start_markers(self, ax, xs, ys):
+        # стартовые точки могут различаться: без галочки сброса каждый
+        # оптимизатор продолжает со своей последней позиции
+        marker_style = dict(marker="o", markersize=8, color="white", markeredgecolor="black")
+        for x, y in zip(xs, ys):
+            if self.threedimensional:
+                ax.plot([x[0][0]], [x[0][1]], [y[0]], zorder=101, **marker_style)
+            else:
+                ax.plot([x[0][0]], [x[0][1]], zorder=4, **marker_style)
+
     def draw_2d_plot(self, ax, xs, ys, names):
         self.draw_function_plot(ax)
+        self.draw_start_markers(ax, xs, ys)
         for idx, x in enumerate(xs):
             ax.plot(x[:, 0], x[:, 1], color=self.colors[idx], label=names[idx])
         ax.legend(fontsize=7.5)
@@ -170,6 +182,7 @@ class Graphics:
 
     def draw_3d_plot(self, ax, xs, ys, names):
         self.draw_function_plot(ax)
+        self.draw_start_markers(ax, xs, ys)
         for idx, (x, y) in enumerate(zip(xs, ys)):
             ax.plot(x[:, 0], x[:, 1], y, zorder=100, color=self.colors[idx], label=names[idx])
         ax.legend(fontsize=7.5)
