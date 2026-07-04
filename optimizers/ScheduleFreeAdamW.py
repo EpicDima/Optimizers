@@ -42,7 +42,8 @@ class ScheduleFreeAdamW(Optimizer):
 
     def reset(self) -> None:
         super().reset()
-        self.z = self.initial_x.astype(float)
-        self.x_avg = self.initial_x.astype(float)
+        # np.asarray: GUI создаёт оптимизатор со стартовой точкой-списком, у которого нет astype
+        self.z = np.asarray(self.initial_x, dtype=float)
+        self.x_avg = np.asarray(self.initial_x, dtype=float)
         self.v = np.zeros([2])
         self.t = 0
