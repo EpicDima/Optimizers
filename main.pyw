@@ -75,6 +75,9 @@ class Application(QMainWindow, Ui_MainWindow):
         self.animation_trigger_button.hide()
         self.step_label.hide()
 
+        self.speed_slider.valueChanged.connect(self.change_speed)
+        self.change_speed(self.speed_slider.value())
+
         self.graphics.end_animation_func = self.animation_trigger_button.hide
         self.graphics.step_function = self.change_step
 
@@ -124,6 +127,11 @@ class Application(QMainWindow, Ui_MainWindow):
         controls.addWidget(self.animation_checkbox, 1, 0)
         controls.addWidget(self.initial_y_textedit, 1, 1)
         controls.addWidget(self.label_2, 1, 2)
+        controls.addWidget(self.speed_slider, 1, 3)
+        controls.addWidget(self.speed_label, 1, 4)
+        # ширина резервируется под самый длинный текст, иначе колонка
+        # дёргается при смене множителя скорости
+        self.speed_label.setMinimumWidth(self.speed_label.fontMetrics().horizontalAdvance("Speed ×0.25"))
         controls.setColumnStretch(5, 1)
         left.addLayout(controls)
 
@@ -339,6 +347,20 @@ class Application(QMainWindow, Ui_MainWindow):
             else:
                 self.graphics.animation.event_source.start()
                 self.animation_trigger_button.setText("Pause")
+
+    def change_speed(self, value):
+        # замедление растягивает интервал таймера; ускорение сначала учащает
+        # таймер (до ~60 кадров/с), а дальше пропускает шаги между кадрами.
+        # Применяется на лету: интервал — через event_source, пропуск шагов
+        # генератор кадров читает сам на каждом тике
+        speed = 2.0**value
+        interval = max(15, round(30 / speed))
+        self.graphics.interval = interval
+        self.graphics.frames_per_tick = max(1, round(speed * interval / 30))
+        self.speed_label.setText(f"Speed ×{speed:g}")
+        animation = self.graphics.animation
+        if animation is not None and animation.event_source is not None:
+            animation.event_source.interval = interval
 
     def change_step(self, step):
         self.step_label.setText(f"Step: {step}")

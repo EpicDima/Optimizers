@@ -19,7 +19,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QLabel,
     QLineEdit, QListView, QListWidget, QListWidgetItem,
     QMainWindow, QMenu, QMenuBar, QPushButton,
-    QSizePolicy, QStatusBar, QTabWidget, QWidget)
+    QSizePolicy, QSlider, QStatusBar, QTabWidget,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -94,6 +95,18 @@ class Ui_MainWindow(object):
         self.label_3.setObjectName(u"label_3")
         self.label_3.setGeometry(QRect(380, 480, 60, 25))
         self.label_3.setFont(font1)
+        self.speed_slider = QSlider(self.centralwidget)
+        self.speed_slider.setObjectName(u"speed_slider")
+        self.speed_slider.setGeometry(QRect(300, 510, 70, 25))
+        self.speed_slider.setMinimum(-2)
+        self.speed_slider.setMaximum(5)
+        self.speed_slider.setPageStep(1)
+        self.speed_slider.setValue(0)
+        self.speed_slider.setOrientation(Qt.Orientation.Horizontal)
+        self.speed_label = QLabel(self.centralwidget)
+        self.speed_label.setObjectName(u"speed_label")
+        self.speed_label.setGeometry(QRect(380, 510, 90, 25))
+        self.speed_label.setFont(font1)
         self.reset_checkbox = QCheckBox(self.centralwidget)
         self.reset_checkbox.setObjectName(u"reset_checkbox")
         self.reset_checkbox.setEnabled(True)
@@ -190,6 +203,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Initial Y", None))
         self.steps_textedit.setText(QCoreApplication.translate("MainWindow", u"100", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Steps", None))
+        self.speed_label.setText(QCoreApplication.translate("MainWindow", u"Speed \u00d71", None))
         self.reset_checkbox.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.function_textedit.setText("")
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Function", None))
