@@ -5,6 +5,10 @@ from .Cyclical import Cyclical
 from .ExponentialDecay import ExponentialDecay
 from .InverseTimeDecay import InverseTimeDecay
 from .LinearDecay import LinearDecay
+from .Noam import Noam
 from .OneCycle import OneCycle
 from .PolynomialDecay import PolynomialDecay
+from .REX import REX
 from .StepDecay import StepDecay
+from .WarmupCosine import WarmupCosine
+from .WSD import WSD
