@@ -144,12 +144,22 @@ class Graphics:
         for idx, x in enumerate(xs):
             ax.plot(x[:, 0], x[:, 1], color=self.colors[idx], label=names[idx])
         ax.legend(fontsize=7.5)
+        self.fix_limits(ax)
 
     def draw_3d_plot(self, ax, xs, ys, names):
         self.draw_3d_function_plot(ax)
         for idx, (x, y) in enumerate(zip(xs, ys)):
             ax.plot(x[:, 0], x[:, 1], y, zorder=100, color=self.colors[idx], label=names[idx])
         ax.legend(fontsize=7.5)
+        self.fix_limits(ax)
+
+    def fix_limits(self, ax):
+        # разлетевшийся оптимизатор не должен растягивать оси автомасштабом
+        # до пустого белого графика — пределы фиксируются по области функции
+        ax.set_xlim(self.function.from_x, self.function.to_x)
+        ax.set_ylim(self.function.from_y, self.function.to_y)
+        if self.threedimensional:
+            ax.set_zlim(self.function.y.min(), self.function.y.max())
 
     def draw_animation_plot(self, frame_idx, ax, xs, ys, names):
         self.step_function(frame_idx)
