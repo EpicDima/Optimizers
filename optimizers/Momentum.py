@@ -22,20 +22,18 @@ class Momentum(Optimizer):
 
         # создание словаря параметров
         params = dict(lr=lr, coef=coef)
-        
+
         # вызов конструктора базового класса
         super().__init__(initial_x, function, params)
-
 
     def next_point(self):
         """
         Реализованный метод next_point, в котором рассчитывается новое положение точки
         """
-        
+
         self.v = self.params["coef"] * self.v + self.function.grad(self.x)
         next_x = self.x - self.params["lr"] * self.v
-        return self.move_next(next_x) # обязательная конструкция с методом move_next
-
+        return self.move_next(next_x)  # обязательная конструкция с методом move_next
 
     def reset(self):
         """

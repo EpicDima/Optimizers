@@ -20,15 +20,12 @@ class PlotTypeDialog(BaseDialog, Ui_Dialog):
         self.contour_radio.toggled.connect(self.enable_number_edit)
         self.mesh_radio.toggled.connect(self.disable_number_edit)
 
-
     def enable_number_edit(self):
         self.number_edit.setEnabled(True)
-
 
     def disable_number_edit(self):
         self.number_edit.setEnabled(False)
 
-    
     def accept(self):
         if self.contour_radio.isChecked():
             try:

@@ -6,7 +6,6 @@ class Adamax(Optimizer):
         params = dict(lr=lr, beta1=beta1, beta2=beta2, eps=eps)
         super().__init__(initial_x, function, params)
 
-
     def next_point(self):
         gradient = self.function.grad(self.x)
         self.v = self.params["beta1"] * self.v + (1 - self.params["beta1"]) * gradient
@@ -14,7 +13,6 @@ class Adamax(Optimizer):
         adaptive_lr = self.params["lr"] / np.sqrt(self.acc + self.params["eps"])
         next_x = self.x - adaptive_lr * self.v
         return self.move_next(next_x)
-
 
     def reset(self):
         super().reset()

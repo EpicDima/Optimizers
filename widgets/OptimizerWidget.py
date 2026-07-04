@@ -15,7 +15,7 @@ class OptimizerWidget(QWidget):
 
         self.combobox = QComboBox()
         self.grid = QGridLayout()
-        
+
         self.vbl.addWidget(self.combobox, alignment=Qt.AlignmentFlag.AlignTop)
         self.vbl.addLayout(self.grid)
         self.setLayout(self.vbl)
@@ -27,22 +27,18 @@ class OptimizerWidget(QWidget):
         self.item = None
         self.change_optimizer()
 
-
     def refresh_optimizers(self):
         self.combobox.clear()
         self.combobox.addItems(self.optimizers_list)
-
 
     def set_item(self, item):
         self.item = item
         self.set_item_size()
 
-
     def set_item_size(self):
         if self.item is not None:
             self.item.setSizeHint(QSize(0, self.frameGeometry().height()))
 
-    
     def change_optimizer(self, index=None):
         for key in self.text_boxes_params:
             self.text_boxes_params[key][0].setParent(None)
@@ -52,10 +48,9 @@ class OptimizerWidget(QWidget):
         self.reset_optimizer()
         self.text_boxes_params = {}
         for line, key in enumerate(self.optimizer.params):
-
             label = QLabel(self)
             label.setText(key)
-            
+
             edit = QLineEdit(self)
             edit.setText(str(self.optimizer.params[key]))
 
@@ -67,30 +62,31 @@ class OptimizerWidget(QWidget):
         self.resize(self.frameGeometry().width(), 80 + line * 25)
         self.set_item_size()
 
-
     def reset_optimizer(self):
         self.optimizer.initial_x = self.app.get_initial_coordinate(self.optimizer)
         self.optimizer.reset()
 
-
     def get_params(self):
         for key in self.optimizer.params:
-            self.optimizer.params[key] = self.app.safe_input(self.text_boxes_params[key][1].text(), float, self.optimizer.params[key], f"Неправильное значение параметра {key}")
-        
+            self.optimizer.params[key] = self.app.safe_input(
+                self.text_boxes_params[key][1].text(),
+                float,
+                self.optimizer.params[key],
+                f"Неправильное значение параметра {key}",
+            )
 
     def get_params_in_string_form(self):
         s = self.optimizer.__class__.__name__ + " " + str(self.optimizer.params)
-        s = s.replace("\'", "")
+        s = s.replace("'", "")
         for i in range(42, 42 * 5, 40):
             if len(s) > i:
                 for j in range(i - 2, 0, -1):
                     if s[j] == ",":
-                        s = s[:j+1] + "\n" + s[j+2:]
+                        s = s[: j + 1] + "\n" + s[j + 2 :]
                         break
             else:
                 break
         return s
-
 
     def optimize(self, steps):
         points_x = [self.optimizer.x]

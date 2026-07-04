@@ -21,8 +21,7 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
         self.colors = []
         for color in self.graphics.colors:
             self.add_optimizer(color)
-    
-    
+
     def add_optimizer(self, color):
         if len(self.colors) >= 15:
             self.show_msg_box("Достигнуто максимально возможное количество оптимизаторов!")
@@ -30,7 +29,6 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
         self.optim_list.addItem(f"Оптимизатор #{len(self.colors) + 1}")
         self.colors.append(color)
         self.optim_list.item(len(self.colors) - 1).setBackground(QColor(self.colors[-1]))
-        
 
     def remove_optimizer(self):
         if len(self.colors) <= 1:
@@ -38,7 +36,6 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
             return
         self.optim_list.takeItem(len(self.colors) - 1)
         self.colors.pop()
-    
 
     def change_optimizer(self):
         indexes = self.optim_list.selectedIndexes()
@@ -52,7 +49,6 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
         self.colors[index] = color.name()
         self.optim_list.item(index).setBackground(QColor(self.colors[index]))
 
-    
     def accept(self):
         try:
             value = int(self.not_disappearing_edit.text())
