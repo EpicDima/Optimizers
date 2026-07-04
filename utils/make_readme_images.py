@@ -35,6 +35,8 @@ class Scene:
     threedimensional: bool
     # False — контуры, True — сплошная поверхность (осмысленно только в 3D)
     surface: bool
+    # 0 — вся траектория, иначе показываются только последние tail шагов
+    tail: int = 0
 
 
 SCENES = [
@@ -83,6 +85,7 @@ def apply_scene(window, scene):
     window.initial_x_textedit.setText(str(scene.start[0]))
     window.initial_y_textedit.setText(str(scene.start[1]))
     window.steps_textedit.setText(str(scene.steps))
+    window.tail_textedit.setText(str(scene.tail))
     window.three_dims_checkbox.setChecked(scene.threedimensional)
     window.graphics.contour_type = not scene.surface
     window.start()
