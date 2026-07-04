@@ -4,7 +4,15 @@ from pathlib import Path
 
 import numpy as np
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QMainWindow,
+    QMessageBox,
+    QVBoxLayout,
+)
 
 import optimizers
 from dialogs import PlotColormapDialog, PlotOptimizersDialog, PlotRangeDialog, PlotTypeDialog
@@ -24,11 +32,18 @@ class Application(QMainWindow, Ui_MainWindow):
         self.setWindowFlags(
             Qt.WindowType.CustomizeWindowHint
             | Qt.WindowType.WindowMinimizeButtonHint
+            | Qt.WindowType.WindowMaximizeButtonHint
             | Qt.WindowType.WindowCloseButtonHint
         )
-        self.setFixedSize(self.frameGeometry().width(), self.frameGeometry().height())
+        # окно можно растягивать больше стандартного размера, но не меньше
+        self.setMinimumSize(self.size())
 
-        self.plot_widget = MatplotlibWidget(self.plot_widget)
+        placeholder = self.plot_widget
+        self.plot_widget = MatplotlibWidget()
+        self.build_layout()
+        placeholder.hide()
+        placeholder.deleteLater()
+
         self.start_button.clicked.connect(self.start)
 
         self.add_button.clicked.connect(self.add_optimizer)
@@ -66,9 +81,6 @@ class Application(QMainWindow, Ui_MainWindow):
         self.optimizer_widget_list = []
         self.add_optimizer()
 
-        self.step_label.setParent(None)
-        self.step_label.setParent(self.plot_widget)
-
         self.function_check_button.clicked.connect(self.plot_function)
         self.plot_function()
 
@@ -89,6 +101,62 @@ class Application(QMainWindow, Ui_MainWindow):
                     lambda: self.set_standard_function(name)
                 )
             )(name)
+
+    def build_layout(self):
+        # виджеты из .ui расставлены абсолютными координатами и не умеют
+        # растягиваться — здесь они собираются в layout'ы заново
+        left = QVBoxLayout()
+
+        # метка шага живёт в отдельной строке над графиком; место под неё
+        # резервируется всегда, чтобы график не прыгал при показе анимации
+        size_policy = self.step_label.sizePolicy()
+        size_policy.setRetainSizeWhenHidden(True)
+        self.step_label.setSizePolicy(size_policy)
+        left.addWidget(self.step_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        left.addWidget(self.plot_widget, stretch=1)
+
+        controls = QGridLayout()
+        controls.addWidget(self.three_dims_checkbox, 0, 0)
+        controls.addWidget(self.initial_x_textedit, 0, 1)
+        controls.addWidget(self.label, 0, 2)
+        controls.addWidget(self.steps_textedit, 0, 3)
+        controls.addWidget(self.label_3, 0, 4)
+        controls.addWidget(self.animation_checkbox, 1, 0)
+        controls.addWidget(self.initial_y_textedit, 1, 1)
+        controls.addWidget(self.label_2, 1, 2)
+        controls.setColumnStretch(5, 1)
+        left.addLayout(controls)
+
+        function_row = QHBoxLayout()
+        function_row.addWidget(self.function_textedit, stretch=1)
+        function_row.addWidget(self.label_4)
+        left.addLayout(function_row)
+
+        right = QVBoxLayout()
+        self.optimizers_listview.setMinimumWidth(291)
+        right.addWidget(self.optimizers_listview, stretch=1)
+
+        list_buttons_row = QHBoxLayout()
+        list_buttons_row.addWidget(self.remove_button)
+        list_buttons_row.addStretch()
+        list_buttons_row.addWidget(self.add_button)
+        right.addLayout(list_buttons_row)
+
+        function_check_row = QHBoxLayout()
+        function_check_row.addStretch()
+        function_check_row.addWidget(self.function_check_button)
+        right.addLayout(function_check_row)
+
+        start_row = QHBoxLayout()
+        start_row.addWidget(self.animation_trigger_button)
+        start_row.addStretch()
+        start_row.addWidget(self.reset_checkbox)
+        start_row.addWidget(self.start_button)
+        right.addLayout(start_row)
+
+        layout = QHBoxLayout(self.centralwidget)
+        layout.addLayout(left, stretch=1)
+        layout.addLayout(right)
 
     def show_about(self):
         msg_box = QMessageBox()

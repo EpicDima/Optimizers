@@ -8,7 +8,7 @@ class MatplotlibCanvas(FigureCanvasQTAgg):
         self.fig = Figure(figsize=[4.2, 4.1], tight_layout=True)
         self.create_subplot()
         super().__init__(self.fig)
-        FigureCanvasQTAgg.setSizePolicy(self, QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        FigureCanvasQTAgg.setSizePolicy(self, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         FigureCanvasQTAgg.updateGeometry(self)
 
     def create_subplot(self, threedimensional=False):
