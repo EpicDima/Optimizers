@@ -19,6 +19,11 @@ class LevenbergMarquardt(Optimizer):
     и удваивается при неудачном.
     """
 
+    param_descriptions = {
+        "lr": "масштаб шага по решению системы (H + m*I) d = g, обычно 1",
+        "damping": "начальный демпфер m: сдвигает шаг от ньютоновского к градиентному; далее адаптируется сам",
+    }
+
     m: float
 
     def __init__(self, initial_x: np.ndarray, function, lr: float = 1.0, damping: float = 0.001) -> None:

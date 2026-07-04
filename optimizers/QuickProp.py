@@ -15,6 +15,11 @@ class QuickProp(Optimizer):
     alpha_max; при нулевом предыдущем шаге — градиентный шаг с lr.
     """
 
+    param_descriptions = {
+        "lr": "скорость обучения для градиентного шага по координате, когда её предыдущий шаг нулевой",
+        "alpha_max": "максимальный фактор роста: во сколько раз новый шаг может превысить предыдущий",
+    }
+
     previous_update: np.ndarray
     previous_gradient: np.ndarray
 

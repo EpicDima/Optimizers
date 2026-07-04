@@ -15,6 +15,10 @@ class Newton(Optimizer):
     выполняется откат на градиентный шаг.
     """
 
+    param_descriptions = {
+        "lr": "демпфер ньютоновского шага: 1 — полный шаг x - H^(-1) g, меньше — осторожнее",
+    }
+
     def __init__(self, initial_x: np.ndarray, function, lr: float = 0.01) -> None:
         params = dict(lr=lr)
         super().__init__(initial_x, function, params)
