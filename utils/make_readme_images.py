@@ -119,6 +119,14 @@ def main():
     from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
+    if sys.platform == "darwin":
+        # платформа offscreen просит несуществующее на macOS семейство
+        # «Sans Serif», из-за чего Qt ~150 мс строит таблицу алиасов
+        # шрифтов; явное указание системного шрифта (в него и разрешается
+        # «Sans Serif») убирает задержку, не меняя вид скриншотов
+        font = app.font()
+        font.setFamily(".AppleSystemUIFont")
+        app.setFont(font)
     window = load_application_class()()
     window.resize(*WINDOW_SIZE)
     window.show()
