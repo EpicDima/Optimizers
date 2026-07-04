@@ -1,0 +1,9 @@
+[project]
+name = "optimizers"
+version = "1.0.0"
+description = "Песочница для визуализации градиентных методов нахождения минимума функции"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "EpicDima" }]
+requires-python = ">=3.14"
+dependencies = []
