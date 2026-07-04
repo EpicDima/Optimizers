@@ -50,3 +50,8 @@ class TestOptimizer:
         optimizer = optimizer_class(np.array([0.0, 0.0]), sphere)
         assert isinstance(optimizer.params, dict)
         assert len(optimizer.params) > 0
+
+    def test_param_descriptions_cover_all_params(self, optimizer_class, sphere):
+        optimizer = optimizer_class(np.array([0.0, 0.0]), sphere)
+        assert set(optimizer.param_descriptions) == set(optimizer.params)
+        assert all(optimizer.param_descriptions.values())
