@@ -1,5 +1,8 @@
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QColorDialog
+
 from .BaseDialog import BaseDialog
-from ui_templates.ui_plotoptims import Ui_Dialog, QtGui, QtWidgets
+from ui_templates.ui_plotoptims import Ui_Dialog
 
 
 class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
@@ -25,7 +28,7 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
             return
         self.optim_list.addItem("Оптимизатор #{}".format(len(self.colors) + 1))
         self.colors.append(color)
-        self.optim_list.item(len(self.colors) - 1).setBackground(QtGui.QColor(self.colors[-1]))
+        self.optim_list.item(len(self.colors) - 1).setBackground(QColor(self.colors[-1]))
         
 
     def remove_optimizer(self):
@@ -42,11 +45,11 @@ class PlotOptimizersDialog(BaseDialog, Ui_Dialog):
             self.show_msg_box("Для изменения нужно выделить оптимизатор в списке!")
             return
         index = indexes[0].row()
-        color = QtWidgets.QColorDialog.getColor()
+        color = QColorDialog.getColor()
         if not color.isValid():
             return
         self.colors[index] = color.name()
-        self.optim_list.item(index).setBackground(QtGui.QColor(self.colors[index]))
+        self.optim_list.item(index).setBackground(QColor(self.colors[index]))
 
     
     def accept(self):

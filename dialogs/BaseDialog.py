@@ -1,12 +1,13 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QAction, QMessageBox
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QWidget, QMessageBox
 
 
 class BaseDialog(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.setupUi(self)
-        self.setWindowFlags(Qt.CustomizeWindowHint | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.setWindowFlags(Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         self.setFixedSize(self.frameGeometry().width(), self.frameGeometry().height())
 
         self.parent = parent
@@ -19,7 +20,7 @@ class BaseDialog(QWidget):
     
     def show_msg_box(self, text):
         msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setWindowTitle("Ошибка")
         msg_box.setText(text)
         msg_box.exec()
