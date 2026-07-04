@@ -2,6 +2,23 @@ from .Optimizer import Optimizer, np
 
 
 class LevenbergMarquardt(Optimizer):
+    """
+    Метод Левенберга—Марквардта — ньютоновский шаг с адаптивным демпфированием.
+
+    Первоисточники:
+    Levenberg K. "A Method for the Solution of Certain Non-Linear Problems
+    in Least Squares". Quarterly of Applied Mathematics 2, 1944.
+    https://doi.org/10.1090/qam/10666
+    Marquardt D. W. "An Algorithm for Least-Squares Estimation of Nonlinear
+    Parameters". Journal of the Society for Industrial and Applied Mathematics
+    11(2), 1963.
+    https://doi.org/10.1137/0111030
+    Реализация: классическая схема, но с точным гессианом function.hesse
+    вместо гаусс-ньютоновской аппроксимации J^T * J: решается
+    (H + m*I) * d = g, демпфирование m уменьшается при удачном шаге
+    и удваивается при неудачном.
+    """
+
     m: float
 
     def __init__(self, initial_x: np.ndarray, function, lr: float = 1.0, damping: float = 0.001) -> None:

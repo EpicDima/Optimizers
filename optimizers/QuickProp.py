@@ -2,6 +2,19 @@ from .Optimizer import Optimizer, np
 
 
 class QuickProp(Optimizer):
+    """
+    QuickProp — эвристика Фальмана второго порядка с параболической
+    аппроксимацией функции по разности последовательных градиентов.
+
+    Первоисточник: Fahlman S. E. "An Empirical Study of Learning Speed in
+    Back-Propagation Networks". Technical Report CMU-CS-88-162,
+    Carnegie Mellon University, 1988.
+    https://doi.org/10.1184/R1/6603266
+    Реализация: классическая формула Quickprop — шаг
+    dx_t = dx_(t-1) * g_t / (g_(t-1) - g_t) с ограничением фактора роста
+    alpha_max; при нулевом предыдущем шаге — градиентный шаг с lr.
+    """
+
     previous_update: np.ndarray
     previous_gradient: np.ndarray
 

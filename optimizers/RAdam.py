@@ -2,6 +2,16 @@ from .Optimizer import Optimizer, np
 
 
 class RAdam(Optimizer):
+    """
+    RAdam — Adam с ректификацией дисперсии адаптивного шага (Rectified Adam).
+
+    Первоисточник: Liu L., Jiang H., He P., Chen W., Liu X., Gao J., Han J.
+    "On the Variance of the Adaptive Learning Rate and Beyond". arXiv:1908.03265, 2019 (ICLR 2020).
+    https://arxiv.org/abs/1908.03265
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.RAdam.html
+    """
+
     v: np.ndarray
     acc: np.ndarray
     t: int

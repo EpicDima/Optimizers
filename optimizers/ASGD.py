@@ -2,6 +2,16 @@ from .Optimizer import Optimizer, np
 
 
 class ASGD(Optimizer):
+    """
+    ASGD — стохастический градиентный спуск с усреднением Поляка—Юдицкого.
+
+    Первоисточник: Polyak B. T., Juditsky A. B. "Acceleration of Stochastic
+    Approximation by Averaging". SIAM Journal on Control and Optimization 30(4), 1992.
+    https://doi.org/10.1137/0330046
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.ASGD.html
+    """
+
     step: float
     ax: np.ndarray
 

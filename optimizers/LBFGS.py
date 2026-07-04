@@ -5,7 +5,17 @@ class LBFGS(Optimizer):
     """
     Классический L-BFGS с двухцикловой рекурсией.
 
-    В отличие от PyTorch, где step(closure) делает много внутренних итераций,
+    Первоисточник (идея ограниченной памяти и двухцикловая рекурсия):
+    Nocedal J. "Updating Quasi-Newton Matrices with Limited Storage".
+    Mathematics of Computation 35(151), 1980.
+    https://doi.org/10.2307/2006193
+    Алгоритм L-BFGS в современном виде: Liu D. C., Nocedal J. "On the Limited
+    Memory BFGS Method for Large Scale Optimization". Mathematical Programming 45, 1989.
+    https://doi.org/10.1007/BF01589116
+
+    Реализация — классическая, по первоисточникам, а не по torch.optim.LBFGS
+    (https://docs.pytorch.org/docs/stable/generated/torch.optim.LBFGS.html):
+    в отличие от PyTorch, где step(closure) делает много внутренних итераций,
     здесь один вызов next_point() — одна итерация: обновление истории пар
     (s, y), вычисление направления d = -H·g и backtracking line search
     по условию Армихо.

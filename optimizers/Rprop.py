@@ -2,6 +2,18 @@ from .Optimizer import Optimizer, np
 
 
 class Rprop(Optimizer):
+    """
+    Rprop — метод с индивидуальными адаптивными шагами по знакам градиента
+    (resilient backpropagation).
+
+    Первоисточник: Riedmiller M., Braun H. "A Direct Adaptive Method for Faster
+    Backpropagation Learning: The RPROP Algorithm". IEEE International Conference
+    on Neural Networks, 1993.
+    https://doi.org/10.1109/ICNN.1993.298623
+    Реализация следует алгоритму из документации PyTorch:
+    https://docs.pytorch.org/docs/stable/generated/torch.optim.Rprop.html
+    """
+
     last_gradient: np.ndarray
     step_size: np.ndarray
 
