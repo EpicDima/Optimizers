@@ -12,6 +12,7 @@ from .NAdam import NAdam
 from .Nesterov import Nesterov
 from .Newton import Newton
 from .QuickProp import QuickProp
+from .RAdam import RAdam
 from .RMSprop import RMSprop
 from .Rprop import Rprop
 from .SGD import SGD
