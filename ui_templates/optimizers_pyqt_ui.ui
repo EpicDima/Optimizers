@@ -103,6 +103,9 @@
     <property name="text">
      <string>Animation</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLineEdit" name="initial_x_textedit">
     <property name="geometry">
