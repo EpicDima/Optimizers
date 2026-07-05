@@ -1,0 +1,88 @@
+@import "tailwindcss";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+/* .dark переключается вручную (ThemeProvider), а не через prefers-color-scheme,
+   чтобы поддержать выбор light/dark/system как в десктопном GUI */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* @theme объявляет токены темы сразу со значениями светлой темы — и как
+   CSS-переменные на :root, и как имена утилит (bg-bg, text-text, ...) */
+@theme {
+  --font-sans: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-bg: #f4f5f7;
+  --color-bg-elevated: #ffffff;
+  --color-bg-sunken: #e8eaed;
+  --color-border: #d7dade;
+  --color-border-strong: #b8bcc2;
+  --color-text: #14171a;
+  --color-text-muted: #5b626b;
+  --color-accent: #0284c7;
+  --color-accent-text: #ffffff;
+  --color-danger: #d0342c;
+  --color-danger-bg: #fdecea;
+
+  /* радиус нарочно мелкий — не «закруглённый SaaS», а точный техничный вид */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+}
+
+/* переопределяет те же переменные для тёмной темы — должен идти после
+   @theme, чтобы при равной специфичности с :root побеждать по порядку */
+.dark {
+  --color-bg: #0c0e11;
+  --color-bg-elevated: #14171b;
+  --color-bg-sunken: #08090b;
+  --color-border: #262b31;
+  --color-border-strong: #3a4048;
+  --color-text: #e7eaed;
+  --color-text-muted: #8b929b;
+  --color-accent: #3bb2ff;
+  --color-accent-text: #06131c;
+  --color-danger: #ff6b61;
+  --color-danger-bg: #2a1614;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html,
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-feature-settings: "tnum" 1;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 35%, transparent);
+  }
+
+  /* тонкий скроллбар в духе панели приборов, а не браузерный по умолчанию */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-sm);
+  }
+}
