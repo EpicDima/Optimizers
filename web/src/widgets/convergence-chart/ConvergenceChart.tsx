@@ -16,7 +16,10 @@ import { buildConvergenceTraces } from "./build-traces";
  * запуска общий цвет slot.color. Показывает полную кривую последнего
  * посчитанного результата каждого видимого запуска, не привязан к состоянию
  * проигрывания анимации. lr есть не у всех оптимизаторов (например, у LBFGS
- * или Ньютона его нет) — такие запуски молча остаются без пунктирной линии. */
+ * или Ньютона его нет) — такие запуски молча остаются без пунктирной линии.
+ * Ховер собран в один блок (hovermode: "x unified") — наведение в любой точке
+ * графика сразу показывает значения всех видимых линий на этом шаге, а не
+ * только той, что под курсором. */
 export function ConvergenceChart() {
   const { slots, results } = useRunsStore();
   const resolvedTheme = useResolvedTheme();
@@ -33,6 +36,12 @@ export function ConvergenceChart() {
       margin: { l: 44, r: 44, t: 10, b: 32 },
       showlegend: false,
       uirevision: "keep",
+      hovermode: "x unified",
+      hoverlabel: {
+        bgcolor: theme.paper,
+        bordercolor: theme.lineColor,
+        font: { color: theme.fontColor, family: "Space Grotesk, Inter, system-ui, sans-serif", size: 11 },
+      },
       xaxis: { title: { text: "Шаг" }, gridcolor: theme.gridColor, color: theme.mutedFontColor, zeroline: false },
       yaxis: {
         title: { text: "Значение" },
