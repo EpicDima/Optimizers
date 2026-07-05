@@ -7,6 +7,7 @@ describe("serializeDashboardState / deserializeDashboardState", () => {
   it("round-trips a full state", () => {
     const state: DashboardUrlState = {
       formula: "(x^2 + y - 11)^2 + (x + y^2 - 7)^2",
+      presetName: "Функция Химмельблау",
       range: [-5, 5, -5, 5],
       is3D: true,
       contourMode: "mesh",
@@ -41,6 +42,23 @@ describe("serializeDashboardState / deserializeDashboardState", () => {
   it("does not write a runs param when runs is an empty array", () => {
     const params = serializeDashboardState({ runs: [] });
     expect(params.has("runs")).toBe(false);
+  });
+
+  describe("presetName", () => {
+    it("round-trips a preset name", () => {
+      const params = serializeDashboardState({ presetName: "Функция Розенброка" });
+      expect(deserializeDashboardState(params).presetName).toBe("Функция Розенброка");
+    });
+
+    it("does not write a literal 'null' when presetName is null (custom formula)", () => {
+      const params = serializeDashboardState({ presetName: null as unknown as string | undefined });
+      expect(params.has("preset")).toBe(false);
+    });
+
+    it("omits the preset param when presetName is undefined", () => {
+      const params = serializeDashboardState({ formula: "x^2" });
+      expect(params.has("preset")).toBe(false);
+    });
   });
 
   describe("range parsing", () => {
