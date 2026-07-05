@@ -61,7 +61,7 @@ export function PlotPanel() {
       buildSurfaceTrace({ preview: preview.data, is3D, contourMode, contourLevels, colorscale }),
       buildMinimaTrace(preview.data, is3D),
       buildStartMarkersTrace(slots, results, is3D),
-      ...slots.map((slot) => buildTrajectoryTrace(slot, sliceResultToFrame(results[slot.slotId], frame), is3D, tailLength)),
+      ...slots.flatMap((slot) => buildTrajectoryTrace(slot, sliceResultToFrame(results[slot.slotId], frame), is3D, tailLength)),
     ];
   }, [preview.data, colorscale, is3D, contourMode, contourLevels, slots, results, tailLength, frame]);
 
