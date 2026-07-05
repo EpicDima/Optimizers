@@ -70,7 +70,7 @@ function seedRunWithResult() {
         x: [0, 1, 2],
         y: [0, 1, 2],
         value: [10, 5, 1],
-        lr: null,
+        lr: [0.3, 0.27, 0.24],
         error: null,
       },
     },
