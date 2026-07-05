@@ -6,7 +6,7 @@ import { computeMaxFrame, usePlaybackStore, usePlaybackTicker } from "@entities/
 import { usePlotSettingsStore } from "@entities/plot-settings";
 import { useRunsStore } from "@entities/run";
 import { useFunctionPreview, useFunctionStore } from "@entities/test-function";
-import { Plot } from "@shared/lib/plotly";
+import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
 import { Button, Panel, Slider } from "@shared/ui";
 
@@ -67,6 +67,8 @@ export function PlotPanel() {
 
   const layout = useMemo(() => buildLayout(is3D, plotlyThemeColors(resolvedTheme), range), [is3D, resolvedTheme, range]);
 
+  const plotRef = usePlotlyAutoResize();
+
   const canPlay = maxFrame > 0;
 
   return (
@@ -79,6 +81,7 @@ export function PlotPanel() {
             </div>
           )}
           <Plot
+            ref={plotRef}
             data={data}
             layout={layout}
             config={{ displayModeBar: false, responsive: true }}
