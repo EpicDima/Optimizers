@@ -29,8 +29,12 @@ export function ConvergenceChart() {
   const frame = usePlaybackStore((state) => state.frame);
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(false);
+  const [showLr, setShowLr] = useState(true);
 
-  const data = useMemo(() => buildConvergenceTraces(slots, results, frame), [slots, results, frame]);
+  const data = useMemo(
+    () => buildConvergenceTraces(slots, results, frame, showLr),
+    [slots, results, frame, showLr],
+  );
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
@@ -62,16 +66,22 @@ export function ConvergenceChart() {
         showgrid: false,
         color: theme.mutedFontColor,
         zeroline: false,
+        visible: showLr,
       },
     };
-  }, [resolvedTheme, logScale]);
+  }, [resolvedTheme, logScale, showLr]);
 
   const plotRef = usePlotlyAutoResize();
 
   return (
     <Panel
       heading="Сходимость"
-      actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала (значение)" />}
+      actions={
+        <div className="flex items-center gap-2">
+          <Checkbox checked={showLr} onChange={setShowLr} label="lr" />
+          <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала (значение)" />
+        </div>
+      }
       className="h-full min-h-0"
     >
       <Plot

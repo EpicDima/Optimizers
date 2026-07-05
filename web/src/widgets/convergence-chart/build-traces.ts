@@ -29,11 +29,16 @@ function sliceToFrame(series: number[], frame: number): number[] {
  * Plotly обнуляет trace.name у точек, чей hoverinfo не перечисляет "name" —
  * без этого строки «значение» и «lr» в общем окне навести было бы нечем
  * различить.
+ *
+ * showLr — чекбокс «lr» в ConvergenceChart: при выключении lr-трейсы совсем
+ * не строятся (а не просто скрываются через visible), чтобы правая ось не
+ * маячила пустой шкалой поверх чужого масштаба значений.
  */
 export function buildConvergenceTraces(
   slots: RunConfig[],
   results: Record<string, RunResult>,
   frame: number,
+  showLr: boolean,
 ): Data[] {
   const traces: Data[] = [];
 
@@ -54,7 +59,7 @@ export function buildConvergenceTraces(
       hoverinfo: "x+y+name",
     });
 
-    if (!result.lr) continue;
+    if (!showLr || !result.lr) continue;
 
     const lr = sliceToFrame(result.lr, frame);
     traces.push({
