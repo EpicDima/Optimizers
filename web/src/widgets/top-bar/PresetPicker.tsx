@@ -1,16 +1,18 @@
+import { useRunsStore } from "@entities/run";
 import { useFunctionPresets, useFunctionStore } from "@entities/test-function";
 import { Select } from "@shared/ui";
 
-/** Выбор готовой тестовой функции — applyPreset уже атомарно выставляет
- * формулу, диапазон и имя пресета в сторе, здесь только маппинг UI ↔ стор. */
 export function PresetPicker() {
   const { data: presets } = useFunctionPresets();
   const presetName = useFunctionStore((state) => state.presetName);
   const applyPreset = useFunctionStore((state) => state.applyPreset);
+  const setGlobalStart = useRunsStore((state) => state.setGlobalStart);
 
   function handleChange(name: string) {
     const preset = presets?.find((item) => item.name === name);
-    if (preset) applyPreset(preset);
+    if (!preset) return;
+    applyPreset(preset);
+    setGlobalStart(preset.start);
   }
 
   return (
