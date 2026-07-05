@@ -36,13 +36,22 @@ export function buildSurfaceTrace({ preview, is3D, contourMode, contourLevels, c
     if (contourMode === "contour") {
       // @types/plotly.js не описывает вложенный contours.{x,y,z} у surface
       // (только плоскую форму 2D-контура) — это валидная опция рантайма Plotly,
-      // которую приходится собирать в обход недостающих типов
+      // которую приходится собирать в обход недостающих типов.
+      //
+      // size сам по себе Plotly молча игнорирует: gl3d-сцена на каждый кадр
+      // рендера (scene.js render -> trace.setContourLevels) применяет
+      // пользовательский size только если ЗАОДНО заданы start и end
+      // (convert.js setContourLevels: contourStart/contourEnd !== null) —
+      // иначе откатывается на scene.contourLevels, посчитанный из авто-тиков
+      // оси z (tick_marks.js, обычно 4-9 уровней), и слайдер уровней ни на
+      // что не влияет. Поэтому здесь обязательно передаются все три поля.
+      const { min, max } = zExtent(preview.z);
       return {
         ...base,
         type: "surface",
         hidesurface: true,
         contours: {
-          z: { show: true, usecolormap: true, project: { z: false }, size: rangeSize(preview.z) / contourLevels },
+          z: { show: true, usecolormap: true, project: { z: false }, start: min, end: max, size: (max - min) / contourLevels },
         },
       } as unknown as Data;
     }
@@ -62,7 +71,10 @@ function formatValue(value: number | undefined): string {
   return value !== undefined ? value.toFixed(4) : "—";
 }
 
-function rangeSize(z: number[][]): number {
+/** Диапазон значений z по сетке. Вырожденный случай (плоская функция,
+ * max === min) разводится в единичный интервал, иначе end > start
+ * не выполняется и Plotly откатится на авто-уровни (см. buildSurfaceTrace). */
+function zExtent(z: number[][]): { min: number; max: number } {
   let min = Infinity;
   let max = -Infinity;
   for (const row of z) {
@@ -71,7 +83,7 @@ function rangeSize(z: number[][]): number {
       if (value > max) max = value;
     }
   }
-  return max > min ? max - min : 1;
+  return max > min ? { min, max } : { min, max: min + 1 };
 }
 
 /** Звёзды глобальных минимумов — в scatter3d нет символа «звезда», ближайший

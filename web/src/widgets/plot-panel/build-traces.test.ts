@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import type { RunConfig, RunResult } from "@entities/run";
+import type { FunctionPreviewResult } from "@entities/test-function";
 
-import { buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
+import { buildSurfaceTrace, buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
 
 function makeResult(length: number, withLr: boolean): RunResult {
   return {
@@ -53,6 +54,57 @@ describe("sliceResultToFrame", () => {
     const result = makeResult(5, false);
     const sliced = sliceResultToFrame(result, -1);
     expect(sliced?.x).toEqual([]);
+  });
+});
+
+describe("buildSurfaceTrace 3D contour lines", () => {
+  const preview: FunctionPreviewResult = {
+    valid: true,
+    error: null,
+    meshX: [0, 1],
+    meshY: [0, 1],
+    z: [
+      [0, 5],
+      [10, 20],
+    ],
+    minima: [],
+  };
+
+  it("sets start/end alongside size so Plotly doesn't silently ignore the custom interval", () => {
+    // Plotly.js (gl3d scene render -> surface trace setContourLevels) only
+    // honours contours.z.size when start/end are ALSO set (both non-null,
+    // end > start) — иначе откатывается на авто-уровни оси z и число линий
+    // не следует за contourLevels, что и было причиной бага.
+    const trace = buildSurfaceTrace({
+      preview,
+      is3D: true,
+      contourMode: "contour",
+      contourLevels: 5,
+      colorscale: [[0, "#000000"]],
+    }) as unknown as { contours: { z: { start: number; end: number; size: number } } };
+
+    expect(trace.contours.z.start).toBe(0);
+    expect(trace.contours.z.end).toBe(20);
+    expect(trace.contours.z.size).toBeCloseTo(4);
+  });
+
+  it("scales size inversely with contourLevels so the slider has a visible effect", () => {
+    const few = buildSurfaceTrace({
+      preview,
+      is3D: true,
+      contourMode: "contour",
+      contourLevels: 5,
+      colorscale: [[0, "#000000"]],
+    }) as unknown as { contours: { z: { size: number } } };
+    const many = buildSurfaceTrace({
+      preview,
+      is3D: true,
+      contourMode: "contour",
+      contourLevels: 80,
+      colorscale: [[0, "#000000"]],
+    }) as unknown as { contours: { z: { size: number } } };
+
+    expect(many.contours.z.size).toBeLessThan(few.contours.z.size);
   });
 });
 
