@@ -30,6 +30,7 @@ interface RunsState {
   setSteps: (steps: number) => void;
   setResetOnStart: (reset: boolean) => void;
   runAll: (formula: string) => Promise<void>;
+  clearResults: () => void;
 }
 
 // умолчания совпадают с main.pyw: старт (-4, 4), 100(-200) шагов — здесь
@@ -114,4 +115,6 @@ export const useRunsStore = create<RunsState>((set, get) => ({
       set({ isRunning: false, error: err instanceof ApiError ? err.message : "Не удалось выполнить запрос" });
     }
   },
+
+  clearResults: () => set({ results: {} }),
 }));
