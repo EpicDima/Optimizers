@@ -66,6 +66,7 @@ describe("buildConvergenceTraces", () => {
       line: { color: slot.color, width: 2, dash: "solid" },
       name: slot.optimizer,
       showlegend: false,
+      hoverinfo: "x+y+name",
     });
     expect(traces[0]).not.toHaveProperty("yaxis");
   });
@@ -90,7 +91,18 @@ describe("buildConvergenceTraces", () => {
       line: { color: slot.color, width: 2, dash: "dot" },
       name: `${slot.optimizer} · lr`,
       showlegend: false,
+      hoverinfo: "x+y+name",
     });
+  });
+
+  it("keeps trace names in hoverinfo so the unified tooltip can tell lines apart", () => {
+    const slot = makeSlot();
+    const result = makeResult({ lr: [0.1, 0.1] });
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result });
+
+    for (const trace of traces) {
+      expect((trace as { hoverinfo: string }).hoverinfo).toContain("name");
+    }
   });
 
   it("keeps value and lr traces tied to the same slot color", () => {

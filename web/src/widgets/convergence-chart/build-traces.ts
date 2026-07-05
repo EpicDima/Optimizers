@@ -12,6 +12,11 @@ import type { RunConfig, RunResult } from "@entities/run";
  * (это отдельная возможность, реализуемая параллельно). lr есть не у всех
  * оптимизаторов (например, у LBFGS или Ньютона его нет) — такие запуски молча
  * остаются без второй линии.
+ *
+ * hoverinfo включает "name": в едином (hovermode: "x unified") тултипе
+ * Plotly обнуляет trace.name у точек, чей hoverinfo не перечисляет "name" —
+ * без этого строки «значение» и «lr» в общем окне навести было бы нечем
+ * различить.
  */
 export function buildConvergenceTraces(slots: RunConfig[], results: Record<string, RunResult>): Data[] {
   const traces: Data[] = [];
@@ -29,7 +34,7 @@ export function buildConvergenceTraces(slots: RunConfig[], results: Record<strin
       line: { color: slot.color, width: 2, dash: "solid" },
       name: slot.optimizer,
       showlegend: false,
-      hoverinfo: "x+y",
+      hoverinfo: "x+y+name",
     });
 
     if (!result.lr) continue;
@@ -43,7 +48,7 @@ export function buildConvergenceTraces(slots: RunConfig[], results: Record<strin
       line: { color: slot.color, width: 2, dash: "dot" },
       name: `${slot.optimizer} · lr`,
       showlegend: false,
-      hoverinfo: "x+y",
+      hoverinfo: "x+y+name",
     });
   }
 
