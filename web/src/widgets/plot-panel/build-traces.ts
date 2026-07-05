@@ -55,6 +55,13 @@ export function buildSurfaceTrace({ preview, is3D, contourMode, contourLevels, c
   return { ...base, type: "heatmap" };
 }
 
+/** Форматирует значение функции для customdata тултипов: до прогона value
+ * ещё не определено (стартовая точка слота), поэтому вместо доверия
+ * Plotly-форматированию возможного undefined подставляется явный прочерк. */
+function formatValue(value: number | undefined): string {
+  return value !== undefined ? value.toFixed(4) : "—";
+}
+
 function rangeSize(z: number[][]): number {
   let min = Infinity;
   let max = -Infinity;
@@ -94,9 +101,10 @@ export function buildMinimaTrace(preview: FunctionPreviewResult, is3D: boolean):
     mode: "markers",
     x: preview.minima.map((point) => point[0]),
     y: preview.minima.map((point) => point[1]),
+    customdata: preview.minima.map((point) => point[2]),
     marker: { ...style, symbol: "star", size: 14 },
     showlegend: false,
-    hoverinfo: "x+y",
+    hovertemplate: "x=%{x:.4f}<br>y=%{y:.4f}<br>f=%{customdata}<extra></extra>",
     name: "минимум",
   };
 }
@@ -114,6 +122,8 @@ export function buildStartMarkersTrace(slots: RunConfig[], results: Record<strin
   });
 
   const style = { color: "#ffffff", line: { color: "#000000", width: 1.5 } };
+  const customdata = points.map((p) => formatValue(p.value));
+  const hovertemplate = "x=%{x:.4f}<br>y=%{y:.4f}<br>f=%{customdata}<extra></extra>";
 
   if (is3D) {
     return {
@@ -122,9 +132,10 @@ export function buildStartMarkersTrace(slots: RunConfig[], results: Record<strin
       x: points.map((p) => p.x),
       y: points.map((p) => p.y),
       z: points.map((p) => p.value ?? 0),
+      customdata,
       marker: { ...style, symbol: "circle", size: 4 },
       showlegend: false,
-      hoverinfo: "skip",
+      hovertemplate,
     };
   }
 
@@ -133,9 +144,10 @@ export function buildStartMarkersTrace(slots: RunConfig[], results: Record<strin
     mode: "markers",
     x: points.map((p) => p.x),
     y: points.map((p) => p.y),
+    customdata,
     marker: { ...style, symbol: "circle", size: 8 },
     showlegend: false,
-    hoverinfo: "skip",
+    hovertemplate,
   };
 }
 
