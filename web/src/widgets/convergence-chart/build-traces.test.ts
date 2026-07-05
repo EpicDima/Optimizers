@@ -4,6 +4,9 @@ import type { RunConfig, RunResult } from "@entities/run";
 
 import { buildConvergenceTraces } from "./build-traces";
 
+/** Заведомо больше длины любой серии в тестах — эквивалент «без обрезки». */
+const FULL = Number.POSITIVE_INFINITY;
+
 function makeSlot(patch: Partial<RunConfig> = {}): RunConfig {
   return {
     slotId: "slot-1",
@@ -32,30 +35,30 @@ function makeResult(patch: Partial<RunResult> = {}): RunResult {
 
 describe("buildConvergenceTraces", () => {
   it("returns an empty array for no slots", () => {
-    expect(buildConvergenceTraces([], {})).toEqual([]);
+    expect(buildConvergenceTraces([], {}, FULL)).toEqual([]);
   });
 
   it("excludes slots marked as not visible", () => {
     const slot = makeSlot({ visible: false });
     const results = { [slot.slotId]: makeResult({ lr: [0.1, 0.1, 0.1] }) };
-    expect(buildConvergenceTraces([slot], results)).toEqual([]);
+    expect(buildConvergenceTraces([slot], results, FULL)).toEqual([]);
   });
 
   it("excludes slots whose result has an error", () => {
     const slot = makeSlot();
     const results = { [slot.slotId]: makeResult({ error: "unknown optimizer" }) };
-    expect(buildConvergenceTraces([slot], results)).toEqual([]);
+    expect(buildConvergenceTraces([slot], results, FULL)).toEqual([]);
   });
 
   it("excludes slots with no result at all", () => {
     const slot = makeSlot();
-    expect(buildConvergenceTraces([slot], {})).toEqual([]);
+    expect(buildConvergenceTraces([slot], {}, FULL)).toEqual([]);
   });
 
   it("builds a single step-indexed value trace on the left axis when there is no lr", () => {
     const slot = makeSlot();
     const result = makeResult({ value: [10, 5, 1, 0.5], lr: null });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result });
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL);
 
     expect(traces).toHaveLength(1);
     expect(traces[0]).toMatchObject({
@@ -74,7 +77,7 @@ describe("buildConvergenceTraces", () => {
   it("adds a dashed lr trace on the secondary y-axis when lr is present", () => {
     const slot = makeSlot();
     const result = makeResult({ value: [10, 5, 1, 0.5], lr: [0.3, 0.27, 0.24, 0.22] });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result });
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL);
 
     expect(traces).toHaveLength(2);
     const [valueTrace, lrTrace] = traces;
@@ -98,7 +101,7 @@ describe("buildConvergenceTraces", () => {
   it("keeps trace names in hoverinfo so the unified tooltip can tell lines apart", () => {
     const slot = makeSlot();
     const result = makeResult({ lr: [0.1, 0.1] });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result });
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL);
 
     for (const trace of traces) {
       expect((trace as { hoverinfo: string }).hoverinfo).toContain("name");
@@ -108,7 +111,7 @@ describe("buildConvergenceTraces", () => {
   it("keeps value and lr traces tied to the same slot color", () => {
     const slot = makeSlot({ color: "#32cd32" });
     const result = makeResult({ lr: [0.1, 0.1] });
-    const [valueTrace, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result });
+    const [valueTrace, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL);
 
     expect((valueTrace as { line: { color: string } }).line.color).toBe(slot.color);
     expect((lrTrace as { line: { color: string } }).line.color).toBe(slot.color);
@@ -117,7 +120,7 @@ describe("buildConvergenceTraces", () => {
   it("omits the lr trace for optimizers without lr (e.g. LBFGS)", () => {
     const slot = makeSlot({ optimizer: "LBFGS" });
     const result = makeResult({ lr: null });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result });
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL);
 
     expect(traces).toHaveLength(1);
   });
@@ -130,8 +133,43 @@ describe("buildConvergenceTraces", () => {
       b: makeResult({ slotId: "b", value: [4, 2] }),
     };
 
-    const traces = buildConvergenceTraces([slotA, slotB], results);
+    const traces = buildConvergenceTraces([slotA, slotB], results, FULL);
     // slotA: value + lr, slotB: value only
     expect(traces).toHaveLength(3);
+  });
+
+  describe("frame truncation", () => {
+    it("truncates value and lr series to [0, frame] inclusive", () => {
+      const slot = makeSlot();
+      const result = makeResult({ value: [10, 5, 1, 0.5], lr: [0.3, 0.27, 0.24, 0.22] });
+      const [valueTrace, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 1);
+
+      expect(valueTrace).toMatchObject({ x: [0, 1], y: [10, 5] });
+      expect(lrTrace).toMatchObject({ x: [0, 1], y: [0.3, 0.27] });
+    });
+
+    it("clamps frame 0 to a single point", () => {
+      const slot = makeSlot();
+      const result = makeResult({ value: [10, 5, 1] });
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 0);
+
+      expect(valueTrace).toMatchObject({ x: [0], y: [10] });
+    });
+
+    it("clamps a frame past the end of the series to the full series", () => {
+      const slot = makeSlot();
+      const result = makeResult({ value: [10, 5, 1] });
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 100);
+
+      expect(valueTrace).toMatchObject({ x: [0, 1, 2], y: [10, 5, 1] });
+    });
+
+    it("clamps a negative frame to an empty series", () => {
+      const slot = makeSlot();
+      const result = makeResult({ value: [10, 5, 1] });
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, -1);
+
+      expect(valueTrace).toMatchObject({ x: [], y: [] });
+    });
   });
 });
