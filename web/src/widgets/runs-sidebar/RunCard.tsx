@@ -37,7 +37,7 @@ export function RunCard({ slot, canRemove }: RunCardProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2 border-b border-border p-3 last:border-b-0">
+    <div className="flex flex-col gap-2 rounded-sm border border-border-strong bg-bg-sunken p-3">
       <div className="flex items-center gap-2">
         <ColorSwatch color={slot.color} onChange={(color) => updateSlot(slot.slotId, { color })} title="Цвет траектории" />
         <Select

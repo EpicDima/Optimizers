@@ -78,7 +78,7 @@ export function RunsSidebar() {
           </Button>
         }
       >
-        <div className="h-full overflow-y-auto">
+        <div className="flex h-full flex-col gap-2 overflow-y-auto p-2">
           {slots.map((slot) => (
             <RunCard key={slot.slotId} slot={slot} canRemove={slots.length > 1} />
           ))}
