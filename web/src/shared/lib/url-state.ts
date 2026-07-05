@@ -18,6 +18,7 @@ export interface DashboardRunUrlState {
 
 export interface DashboardUrlState {
   formula?: string;
+  presetName?: string;
   range?: DashboardRange;
   is3D?: boolean;
   contourMode?: DashboardContourMode;
@@ -28,6 +29,7 @@ export interface DashboardUrlState {
 }
 
 const PARAM_FORMULA = "formula";
+const PARAM_PRESET = "preset";
 const PARAM_RANGE = "range";
 const PARAM_DIM = "dim";
 const PARAM_MODE = "mode";
@@ -40,6 +42,7 @@ export function serializeDashboardState(state: DashboardUrlState): URLSearchPara
   const params = new URLSearchParams();
 
   if (state.formula !== undefined) params.set(PARAM_FORMULA, state.formula);
+  if (state.presetName) params.set(PARAM_PRESET, state.presetName);
   if (state.range !== undefined) params.set(PARAM_RANGE, state.range.join(","));
   if (state.is3D !== undefined) params.set(PARAM_DIM, state.is3D ? "3d" : "2d");
   if (state.contourMode !== undefined) params.set(PARAM_MODE, state.contourMode);
@@ -56,6 +59,9 @@ export function deserializeDashboardState(params: URLSearchParams): DashboardUrl
 
   const formula = params.get(PARAM_FORMULA);
   if (formula) result.formula = formula;
+
+  const presetName = params.get(PARAM_PRESET);
+  if (presetName) result.presetName = presetName;
 
   const range = parseRange(params.get(PARAM_RANGE));
   if (range) result.range = range;

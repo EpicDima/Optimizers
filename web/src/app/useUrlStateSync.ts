@@ -19,7 +19,12 @@ export function useUrlStateSync() {
   useEffect(() => {
     const state = deserializeDashboardState(new URLSearchParams(window.location.search));
 
-    if (state.formula !== undefined) useFunctionStore.getState().setFormula(state.formula);
+    if (state.formula !== undefined || state.presetName !== undefined) {
+      useFunctionStore.setState({
+        formula: state.formula ?? useFunctionStore.getState().formula,
+        presetName: state.presetName ?? null,
+      });
+    }
     if (state.range !== undefined) useFunctionStore.getState().setRange(state.range);
 
     if (state.is3D !== undefined) usePlotSettingsStore.getState().setIs3D(state.is3D);
@@ -47,6 +52,7 @@ export function useUrlStateSync() {
   }, []);
 
   const formula = useFunctionStore((state) => state.formula);
+  const presetName = useFunctionStore((state) => state.presetName);
   const range = useFunctionStore((state) => state.range);
   const is3D = usePlotSettingsStore((state) => state.is3D);
   const contourMode = usePlotSettingsStore((state) => state.contourMode);
@@ -70,6 +76,7 @@ export function useUrlStateSync() {
     const timeout = setTimeout(() => {
       const params = serializeDashboardState({
         formula,
+        presetName: presetName ?? undefined,
         range,
         is3D,
         contourMode,
@@ -84,5 +91,5 @@ export function useUrlStateSync() {
     }, WRITE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
-  }, [hydrated, formula, range, is3D, contourMode, contourLevels, colormap, colormapReversed, slots]);
+  }, [hydrated, formula, presetName, range, is3D, contourMode, contourLevels, colormap, colormapReversed, slots]);
 }
