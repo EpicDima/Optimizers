@@ -4,7 +4,6 @@ import { ConvergenceChart } from "@widgets/convergence-chart";
 import { PlaybackControls } from "@widgets/playback-controls";
 import { PlotPanel } from "@widgets/plot-panel";
 import { RunsSidebar } from "@widgets/runs-sidebar";
-import { StatusBar } from "@widgets/status-bar";
 import { TopBar } from "@widgets/top-bar";
 import { ResizeHandle } from "@shared/ui";
 
@@ -61,7 +60,6 @@ export function DashboardPage() {
           </SplitPanel>
         </Group>
       </div>
-      <StatusBar />
     </div>
   );
 }
