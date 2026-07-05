@@ -182,44 +182,76 @@ export function sliceResultToFrame(result: RunResult | undefined, frame: number)
   };
 }
 
-/** Траектория одного запуска, обрезанная по длине хвоста с конца массива
- * (совпадает с Graphics.tail_start: 0 — показать всё). Легенда своя, не
- * плотличная — см. StatusBar/readout-оверлей, поэтому showlegend всегда false. */
+/** Индекс начала хвоста траектории относительно конца массива (совпадает с
+ * Graphics.tail_start: 0 — показать всё). */
+export function tailStart(length: number, tailLength: number): number {
+  return tailLength > 0 ? Math.max(length - 1 - tailLength, 0) : 0;
+}
+
+/** Траектория одного запуска, обрезанная по длине хвоста — плюс чёрная
+ * обводка под цветной линией (аналог matplotlib path_effects=withStroke из
+ * Graphics.py) и кружок на текущем конце пути. Обводка отдельным трейсом,
+ * потому что scatter/scatter3d не поддерживают стро́ковый path-effect —
+ * рисуется тем же путём, но чуть шире и чёрным, под цветной линией. */
 export function buildTrajectoryTrace(
   config: RunConfig,
   result: RunResult | undefined,
   is3D: boolean,
   tailLength: number,
-): Data {
+): Data[] {
   const x = result?.x ?? [];
   const y = result?.y ?? [];
   const value = result?.value ?? [];
-  const start = tailLength > 0 ? Math.max(x.length - 1 - tailLength, 0) : 0;
+  const start = tailStart(x.length, tailLength);
 
-  const common = {
-    line: { color: config.color, width: is3D ? 4 : 2 },
+  const xs = x.slice(start);
+  const ys = y.slice(start);
+  const zs = value.slice(start);
+  const lineWidth = is3D ? 4 : 2;
+
+  const shared = {
+    type: is3D ? ("scatter3d" as const) : ("scatter" as const),
+    mode: "lines" as const,
+    x: xs,
+    y: ys,
+    ...(is3D ? { z: zs } : {}),
     visible: config.visible,
     showlegend: false,
-    name: config.optimizer,
-    hoverinfo: "x+y" as const,
   };
 
-  if (is3D) {
-    return {
-      ...common,
-      type: "scatter3d",
-      mode: "lines",
-      x: x.slice(start),
-      y: y.slice(start),
-      z: value.slice(start),
-    };
+  const traces: Data[] = [
+    { ...shared, line: { color: "#000000", width: lineWidth + 2 }, hoverinfo: "skip" },
+    { ...shared, line: { color: config.color, width: lineWidth }, name: config.optimizer, hoverinfo: "x+y" },
+  ];
+
+  if (xs.length > 0) {
+    const lastIndex = xs.length - 1;
+    const marker = { size: is3D ? 5 : 8, color: config.color, line: { color: "#000000", width: 1 } };
+    traces.push(
+      is3D
+        ? {
+            type: "scatter3d",
+            mode: "markers",
+            x: [xs[lastIndex]],
+            y: [ys[lastIndex]],
+            z: [zs[lastIndex]],
+            marker,
+            visible: config.visible,
+            showlegend: false,
+            hoverinfo: "skip",
+          }
+        : {
+            type: "scatter",
+            mode: "markers",
+            x: [xs[lastIndex]],
+            y: [ys[lastIndex]],
+            marker,
+            visible: config.visible,
+            showlegend: false,
+            hoverinfo: "skip",
+          },
+    );
   }
 
-  return {
-    ...common,
-    type: "scatter",
-    mode: "lines",
-    x: x.slice(start),
-    y: y.slice(start),
-  };
+  return traces;
 }
