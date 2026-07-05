@@ -31,6 +31,7 @@ interface RunsState {
   setResetOnStart: (reset: boolean) => void;
   runAll: (formula: string) => Promise<void>;
   clearResults: () => void;
+  resetSlotStarts: () => void;
 }
 
 // умолчания совпадают с main.pyw: старт (-4, 4), 100(-200) шагов — здесь
@@ -117,4 +118,9 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   },
 
   clearResults: () => set({ results: {} }),
+
+  resetSlotStarts: () =>
+    set((state) => ({
+      slots: state.slots.map((slot) => ({ ...slot, start: state.globalStart })),
+    })),
 }));
