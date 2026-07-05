@@ -116,7 +116,7 @@ export function buildMinimaTrace(preview: FunctionPreviewResult, is3D: boolean):
     customdata: preview.minima.map((point) => point[2]),
     marker: { ...style, symbol: "star", size: 14 },
     showlegend: false,
-    hovertemplate: "x=%{x:.4f}<br>y=%{y:.4f}<br>f=%{customdata}<extra></extra>",
+    hovertemplate: "x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{customdata}<extra></extra>",
     name: "минимум",
   };
 }
@@ -135,7 +135,7 @@ export function buildStartMarkersTrace(slots: RunConfig[], results: Record<strin
 
   const style = { color: "#ffffff", line: { color: "#000000", width: 1.5 } };
   const customdata = points.map((p) => formatValue(p.value));
-  const hovertemplate = "x=%{x:.4f}<br>y=%{y:.4f}<br>f=%{customdata}<extra></extra>";
+  const hovertemplate = "x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{customdata}<extra></extra>";
 
   if (is3D) {
     return {
