@@ -67,24 +67,26 @@ export function RunsSidebar() {
   }
 
   return (
-    <Panel
-      heading="Оптимизаторы"
-      className="h-full"
-      actions={
-        <Button size="sm" variant="ghost" onClick={handleAdd} disabled={slots.length >= MAX_RUNS}>
-          <Plus size={13} />
-          Добавить
-        </Button>
-      }
-    >
-      <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-y-auto">
+    <div className="flex h-full flex-col gap-3">
+      <Panel
+        heading="Оптимизаторы"
+        className="min-h-0 flex-1"
+        actions={
+          <Button size="sm" variant="ghost" onClick={handleAdd} disabled={slots.length >= MAX_RUNS}>
+            <Plus size={13} />
+            Добавить
+          </Button>
+        }
+      >
+        <div className="h-full overflow-y-auto">
           {slots.map((slot) => (
             <RunCard key={slot.slotId} slot={slot} canRemove={slots.length > 1} />
           ))}
         </div>
+      </Panel>
 
-        <div className="flex flex-col gap-2 border-t border-border p-3">
+      <Panel heading="Запуск" className="shrink-0">
+        <div className="flex flex-col gap-2 p-3">
           <div className="grid grid-cols-2 gap-2">
             <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
             <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
@@ -96,7 +98,7 @@ export function RunsSidebar() {
             {isRunning ? "Считаем…" : "Start"}
           </Button>
         </div>
-      </div>
-    </Panel>
+      </Panel>
+    </div>
   );
 }
