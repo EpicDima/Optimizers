@@ -1,3 +1,4 @@
+import { Pause, Play } from "lucide-react";
 import { useEffect, useMemo } from "react";
 
 import { toPlotlyColorscale, useColormapCatalog } from "@entities/colormap";
@@ -7,7 +8,7 @@ import { useRunsStore } from "@entities/run";
 import { useFunctionPreview, useFunctionStore } from "@entities/test-function";
 import { Plot } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
-import { Panel } from "@shared/ui";
+import { Button, Panel, Slider } from "@shared/ui";
 
 import { buildMinimaTrace, buildStartMarkersTrace, buildSurfaceTrace, buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
 import { buildLayout } from "./layout";
@@ -22,9 +23,12 @@ export function PlotPanel() {
   const resolvedTheme = useResolvedTheme();
 
   const frame = usePlaybackStore((state) => state.frame);
+  const isPlaying = usePlaybackStore((state) => state.isPlaying);
   const autoPlay = usePlaybackStore((state) => state.autoPlay);
   const startAnimationFor = usePlaybackStore((state) => state.startAnimationFor);
   const skipToEnd = usePlaybackStore((state) => state.skipToEnd);
+  const seek = usePlaybackStore((state) => state.seek);
+  const toggle = usePlaybackStore((state) => state.toggle);
 
   const preview = useFunctionPreview({ formula, range, count: gridCount });
 
@@ -63,21 +67,45 @@ export function PlotPanel() {
 
   const layout = useMemo(() => buildLayout(is3D, plotlyThemeColors(resolvedTheme), range), [is3D, resolvedTheme, range]);
 
+  const canPlay = maxFrame > 0;
+
   return (
-    <Panel className="relative h-full min-h-0">
-      {preview.data && !preview.data.valid && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-bg/85 px-6 text-center font-body text-sm text-danger">
-          {preview.data.error}
+    <Panel className="h-full min-h-0">
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="relative min-h-0 flex-1">
+          {preview.data && !preview.data.valid && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-bg/85 px-6 text-center font-body text-sm text-danger">
+              {preview.data.error}
+            </div>
+          )}
+          <Plot
+            data={data}
+            layout={layout}
+            config={{ displayModeBar: false, responsive: true }}
+            useResizeHandler
+            style={{ width: "100%", height: "100%" }}
+          />
+          {(!preview.data || preview.data.valid) && <TrajectoryReadout slots={slots} results={results} frame={frame} />}
         </div>
-      )}
-      <Plot
-        data={data}
-        layout={layout}
-        config={{ displayModeBar: false, responsive: true }}
-        useResizeHandler
-        style={{ width: "100%", height: "100%" }}
-      />
-      {(!preview.data || preview.data.valid) && <TrajectoryReadout slots={slots} results={results} frame={frame} />}
+        {/* Таймлайн под графиком, как в видеоплеере: play/pause слева от шкалы
+            перемотки. Остальные настройки воспроизведения (скорость, хвост,
+            автовоспроизведение) остаются в PlaybackControls. */}
+        <div className="flex shrink-0 items-center gap-3 border-t border-border px-3 py-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggle}
+            disabled={!canPlay}
+            aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
+          >
+            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+          </Button>
+          <Slider value={frame} onChange={seek} min={0} max={maxFrame} step={1} className="flex-1" />
+          <span className="w-20 shrink-0 text-right font-mono text-xs whitespace-nowrap text-text-muted">
+            {frame} / {maxFrame}
+          </span>
+        </div>
+      </div>
     </Panel>
   );
 }
