@@ -37,7 +37,13 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   autoPlay: true,
   maxFrame: 0,
 
-  play: () => set((state) => ({ isPlaying: state.maxFrame > 0 })),
+  play: () =>
+    set((state) => {
+      if (state.maxFrame <= 0) return { isPlaying: false };
+      // на последнем кадре плей — это "проиграть заново", иначе тикер тут же
+      // снова упрётся в maxFrame и поставит на паузу без единого видимого кадра
+      return { isPlaying: true, frame: state.frame >= state.maxFrame ? 0 : state.frame };
+    }),
   pause: () => set({ isPlaying: false }),
   toggle: () => (get().isPlaying ? set({ isPlaying: false }) : get().play()),
   seek: (frame) => set((state) => ({ frame: clamp(frame, 0, state.maxFrame), isPlaying: false })),
