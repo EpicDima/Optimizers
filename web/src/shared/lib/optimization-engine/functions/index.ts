@@ -3,3 +3,4 @@ export { functionPresets } from "./presets";
 export { gradient, hessian } from "./calculus";
 export type { SurfaceGrid } from "./surface";
 export { buildSurface } from "./surface";
+export { findMinima } from "./minima";
