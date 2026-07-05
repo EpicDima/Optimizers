@@ -2,11 +2,16 @@ import type { Data } from "plotly.js";
 
 import type { RunConfig, RunResult } from "@entities/run";
 
-/** Полная кривая «значение функции от шага» для каждого видимого запуска —
- * статичный снимок текущего результата, без привязки к состоянию воспроизведения
- * анимации (это отдельная возможность, реализуемая параллельно). Цвет линии
- * совпадает с цветом траектории на основном графике (slot.color), чтобы связать
- * два графика визуально без легенды Plotly (она отключена по всему проекту).
+/** По одному трейсу «значение» (левая ось) и, если у оптимизатора есть
+ * learning rate, трейсу lr (правая ось y2, пунктиром) на каждый видимый
+ * запуск — наложены на один график, чтобы сравнивать динамику значения и lr
+ * без переключения вкладок. Обе линии одного запуска красятся в slot.color
+ * (связь с траекторией на основном графике), пунктир — единственное, что
+ * отличает lr от значения при таком же цвете. Строит полную кривую последнего
+ * посчитанного результата, без привязки к состоянию воспроизведения анимации
+ * (это отдельная возможность, реализуемая параллельно). lr есть не у всех
+ * оптимизаторов (например, у LBFGS или Ньютона его нет) — такие запуски молча
+ * остаются без второй линии.
  */
 export function buildConvergenceTraces(slots: RunConfig[], results: Record<string, RunResult>): Data[] {
   const traces: Data[] = [];
@@ -21,34 +26,22 @@ export function buildConvergenceTraces(slots: RunConfig[], results: Record<strin
       mode: "lines",
       x: result.value.map((_, i) => i),
       y: result.value,
-      line: { color: slot.color, width: 2 },
+      line: { color: slot.color, width: 2, dash: "solid" },
       name: slot.optimizer,
       showlegend: false,
       hoverinfo: "x+y",
     });
-  }
 
-  return traces;
-}
-
-/** То же самое, но для learning rate по шагам — есть не у всех оптимизаторов
- * (например, у LBFGS или Ньютона нет параметра lr), поэтому такие видимые
- * запуски здесь молча пропускаются, в отличие от buildConvergenceTraces. */
-export function buildLrTraces(slots: RunConfig[], results: Record<string, RunResult>): Data[] {
-  const traces: Data[] = [];
-
-  for (const slot of slots) {
-    if (!slot.visible) continue;
-    const result = results[slot.slotId];
-    if (!result || result.error || !result.lr) continue;
+    if (!result.lr) continue;
 
     traces.push({
       type: "scatter",
       mode: "lines",
       x: result.lr.map((_, i) => i),
       y: result.lr,
-      line: { color: slot.color, width: 2 },
-      name: slot.optimizer,
+      yaxis: "y2",
+      line: { color: slot.color, width: 2, dash: "dot" },
+      name: `${slot.optimizer} · lr`,
       showlegend: false,
       hoverinfo: "x+y",
     });
