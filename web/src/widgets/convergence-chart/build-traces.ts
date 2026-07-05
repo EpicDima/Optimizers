@@ -59,6 +59,24 @@ export function buildConvergenceTraces(
       hoverinfo: "x+y+name",
     });
 
+    // Кружок на текущем (последнем видимом) шаге линии значения — во время
+    // анимации линия растёт слева направо, и без этого маркера непонятно,
+    // где именно сейчас находится каждый оптимизатор, не сверяясь с легендой
+    // цветов. hoverinfo: "skip", чтобы не дублировать в едином тултипе строку,
+    // которую и так даёт линия в этой же точке.
+    if (value.length > 0) {
+      const headIndex = value.length - 1;
+      traces.push({
+        type: "scatter",
+        mode: "markers",
+        x: [headIndex],
+        y: [value[headIndex]],
+        marker: { size: 8, color: slot.color },
+        showlegend: false,
+        hoverinfo: "skip",
+      });
+    }
+
     if (!showLr || !result.lr) continue;
 
     const lr = sliceToFrame(result.lr, frame);
