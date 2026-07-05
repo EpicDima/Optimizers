@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Layout } from "plotly.js";
 
+import { usePlaybackStore } from "@entities/playback";
 import { useRunsStore } from "@entities/run";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
@@ -19,13 +20,17 @@ import { buildConvergenceTraces } from "./build-traces";
  * или Ньютона его нет) — такие запуски молча остаются без пунктирной линии.
  * Ховер собран в один блок (hovermode: "x unified") — наведение в любой точке
  * графика сразу показывает значения всех видимых линий на этом шаге, а не
- * только той, что под курсором. */
+ * только той, что под курсором. Кривые обрезаны до текущего кадра
+ * usePlaybackStore — во время автовоспроизведения и при ручной перемотке
+ * таймлайна график остаётся синхронным с основным графиком, а не показывает
+ * сразу всю финальную кривую. */
 export function ConvergenceChart() {
   const { slots, results } = useRunsStore();
+  const frame = usePlaybackStore((state) => state.frame);
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(false);
 
-  const data = useMemo(() => buildConvergenceTraces(slots, results), [slots, results]);
+  const data = useMemo(() => buildConvergenceTraces(slots, results, frame), [slots, results, frame]);
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
