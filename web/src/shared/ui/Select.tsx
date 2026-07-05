@@ -22,9 +22,12 @@ function normalize(option: SelectOption | string): SelectOption {
 }
 
 export function Select({ value, onChange, options, placeholder, className, disabled }: SelectProps) {
+  const selectedLabel = options.map(normalize).find((option) => option.value === value)?.label ?? value;
+
   return (
     <RadixSelect.Root value={value} onValueChange={onChange} disabled={disabled}>
       <RadixSelect.Trigger
+        title={selectedLabel || undefined}
         className={cn(
           "flex h-7 w-full items-center justify-between gap-2 rounded-sm border border-border bg-bg px-2",
           "font-sans text-xs text-text disabled:opacity-40",
@@ -32,8 +35,8 @@ export function Select({ value, onChange, options, placeholder, className, disab
           className,
         )}
       >
-        <RadixSelect.Value placeholder={placeholder} />
-        <RadixSelect.Icon>
+        <RadixSelect.Value placeholder={placeholder} className="min-w-0 flex-1 truncate text-left" />
+        <RadixSelect.Icon className="shrink-0">
           <ChevronDown size={13} className="text-text-muted" />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
