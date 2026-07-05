@@ -22,7 +22,7 @@ export function PlaybackControls() {
   const setTailLength = usePlotSettingsStore((state) => state.setTailLength);
 
   return (
-    <Panel heading="Воспроизведение" className="w-72 shrink-0">
+    <Panel heading="Воспроизведение" className="h-full min-h-0">
       <div className="flex flex-col gap-3 p-3">
         <SpeedControl />
 

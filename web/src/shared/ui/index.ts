@@ -3,6 +3,7 @@ export { Checkbox } from "./Checkbox";
 export { ColorSwatch } from "./ColorSwatch";
 export { NumberField } from "./NumberField";
 export { Panel } from "./Panel";
+export { ResizeHandle } from "./ResizeHandle";
 export { Select } from "./Select";
 export type { SelectOption } from "./Select";
 export { Slider } from "./Slider";
