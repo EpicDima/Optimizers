@@ -41,11 +41,11 @@ export function DashboardPage() {
                       defaultLayout={bottomRowLayout.defaultLayout}
                       onLayoutChanged={bottomRowLayout.onLayoutChanged}
                     >
-                      <SplitPanel id="playback" defaultSize="30" minSize={260}>
+                      <SplitPanel id="playback" defaultSize="20" minSize={260}>
                         <PlaybackControls />
                       </SplitPanel>
                       <ResizeHandle orientation="horizontal" />
-                      <SplitPanel id="convergence" defaultSize="70" minSize={280}>
+                      <SplitPanel id="convergence" defaultSize="80" minSize={280}>
                         <ConvergenceChart />
                       </SplitPanel>
                     </Group>
