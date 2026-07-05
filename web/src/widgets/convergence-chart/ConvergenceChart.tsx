@@ -3,7 +3,7 @@ import type { Layout } from "plotly.js";
 
 import { useRunsStore } from "@entities/run";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
-import { Plot } from "@shared/lib/plotly";
+import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
 import { Checkbox, Panel, ToggleGroup } from "@shared/ui";
 import type { ToggleGroupOption } from "@shared/ui";
@@ -59,6 +59,8 @@ export function ConvergenceChart() {
     };
   }, [resolvedTheme, logScale, metric]);
 
+  const plotRef = usePlotlyAutoResize();
+
   return (
     <Panel
       heading="Сходимость"
@@ -71,6 +73,7 @@ export function ConvergenceChart() {
       className="h-full min-h-0"
     >
       <Plot
+        ref={plotRef}
         data={data}
         layout={layout}
         config={{ displayModeBar: false, responsive: true }}
