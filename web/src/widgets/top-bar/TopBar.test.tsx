@@ -16,6 +16,17 @@ if (!("ResizeObserver" in globalThis)) {
   (globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver = ResizeObserverStub;
 }
 
+// jsdom не реализует matchMedia, а ThemeToggle (через useResolvedTheme)
+// вызывает его при монтировании — тот же приём, что и со ResizeObserver выше.
+class MediaQueryListStub {
+  matches = false;
+  addEventListener() {}
+  removeEventListener() {}
+}
+if (typeof window.matchMedia !== "function") {
+  (window as unknown as { matchMedia: (query: string) => MediaQueryListStub }).matchMedia = () => new MediaQueryListStub();
+}
+
 // Смоук-тест: TopBar должен рендериться без исключений поверх пустого
 // react-query кэша (presets/colormaps/preview ещё не загружены) — полное
 // покрытие поведения появится в отдельной тестовой задаче позже.
