@@ -1,20 +1,30 @@
-# Python
-__pycache__/
-*.pyc
-*.pyo
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Virtual environments
-.venv/
+node_modules
+dist
+dist-ssr
+*.local
+
+# Tauri
+src-tauri/target
+src-tauri/gen
 
 # Build artifacts
 *.exe
 *.7z
 build/
-dist/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 
 # macOS
 .DS_Store
