@@ -9,7 +9,6 @@ interface FunctionState {
   range: FunctionRange;
   gridCount: number;
   presetName: string | null;
-  setFormula: (formula: string) => void;
   setRange: (range: FunctionRange) => void;
   setGridCount: (count: number) => void;
   applyPreset: (preset: FunctionPreset) => void;
@@ -22,7 +21,6 @@ export const useFunctionStore = create<FunctionState>((set) => ({
   range: [-5, 5, -5, 5],
   gridCount: DEFAULT_GRID_COUNT,
   presetName: "Функция Химмельблау",
-  setFormula: (formula) => set({ formula, presetName: null }),
   setRange: (range) => set({ range }),
   setGridCount: (gridCount) => set({ gridCount }),
   applyPreset: (preset) =>

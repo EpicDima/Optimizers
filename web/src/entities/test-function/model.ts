@@ -17,9 +17,3 @@ export interface FunctionPreviewResult {
   /** (x, y, значение функции) — высота нужна для звёзд-маркеров в 3D. */
   minima: [number, number, number][];
 }
-
-export interface FunctionValueResult {
-  valid: boolean;
-  error: string | null;
-  value: number | null;
-}

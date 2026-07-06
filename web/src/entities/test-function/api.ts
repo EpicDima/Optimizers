@@ -1,13 +1,22 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { apiClient } from "@shared/api/client";
+import { buildSurface, findMinima, functionPresets } from "@shared/lib/optimization-engine/functions";
 
-import type { FunctionPreset, FunctionPreviewResult, FunctionRange, FunctionValueResult } from "./model";
+import type { FunctionPreset, FunctionPreviewResult, FunctionRange } from "./model";
+
+function listFunctionPresets(): FunctionPreset[] {
+  return functionPresets.map((preset) => ({
+    name: preset.name,
+    formula: preset.formula,
+    range: [preset.range[0], preset.range[1], preset.range[2], preset.range[3]],
+    start: [preset.start[0], preset.start[1]],
+  }));
+}
 
 export function useFunctionPresets() {
   return useQuery({
     queryKey: ["functions"],
-    queryFn: () => apiClient.get<FunctionPreset[]>("/functions"),
+    queryFn: () => listFunctionPresets(),
     staleTime: Infinity,
   });
 }
@@ -18,8 +27,34 @@ interface PreviewParams {
   count: number;
 }
 
-export function fetchFunctionPreview(params: PreviewParams) {
-  return apiClient.post<FunctionPreviewResult>("/function/preview", params);
+export function fetchFunctionPreview(params: PreviewParams): FunctionPreviewResult {
+  const preset = functionPresets.find((p) => p.formula === params.formula);
+  if (!preset) {
+    return { valid: false, error: "неизвестная формула", meshX: [], meshY: [], z: [], minima: [] };
+  }
+
+  const [fromX, toX, fromY, toY] = params.range;
+  if (fromX >= toX || fromY >= toY) {
+    return {
+      valid: false,
+      error: "некорректный диапазон: from должен быть меньше to по каждой оси",
+      meshX: [],
+      meshY: [],
+      z: [],
+      minima: [],
+    };
+  }
+
+  const grid = buildSurface(preset.fn, params.range, params.count);
+  const minimaPoints = findMinima(preset.fn, params.range, grid);
+  return {
+    valid: true,
+    error: null,
+    meshX: grid.meshX,
+    meshY: grid.meshY,
+    z: grid.z,
+    minima: minimaPoints.map(([x, y]) => [x, y, preset.fn(x, y)] as [number, number, number]),
+  };
 }
 
 export function useFunctionPreview(params: PreviewParams | null) {
@@ -29,8 +64,4 @@ export function useFunctionPreview(params: PreviewParams | null) {
     enabled: params !== null,
     placeholderData: keepPreviousData,
   });
-}
-
-export function fetchFunctionValue(params: { formula: string; x: number; y: number }) {
-  return apiClient.post<FunctionValueResult>("/function/value", params);
 }
