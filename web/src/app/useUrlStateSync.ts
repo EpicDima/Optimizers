@@ -4,6 +4,7 @@ import { usePlotSettingsStore } from "@entities/plot-settings";
 import { useRunsStore } from "@entities/run";
 import { useFunctionStore } from "@entities/test-function";
 import { colorForSlot } from "@shared/config/colors";
+import { functionPresets } from "@shared/lib/optimization-engine/functions";
 import { deserializeDashboardState, serializeDashboardState } from "@shared/lib/url-state";
 import type { DashboardRunUrlState } from "@shared/lib/url-state";
 
@@ -11,19 +12,19 @@ const WRITE_DEBOUNCE_MS = 350;
 
 /** Двусторонняя синхронизация ключевого состояния дашборда с query-строкой
  * URL: при монтировании — разовая гидратация сторов из ссылки, дальше —
- * запись в историю через replaceState (без новых записей) с той же задержкой,
- * что и коммит формулы в FormulaInput, чтобы не мешать рендеру на каждый чих. */
+ * запись в историю через replaceState (без новых записей) с задержкой,
+ * чтобы не мешать рендеру на каждый чих. */
 export function useUrlStateSync() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const state = deserializeDashboardState(new URLSearchParams(window.location.search));
 
-    if (state.formula !== undefined || state.presetName !== undefined) {
-      useFunctionStore.setState({
-        formula: state.formula ?? useFunctionStore.getState().formula,
-        presetName: state.presetName ?? null,
-      });
+    if (state.presetName !== undefined) {
+      const preset = functionPresets.find((p) => p.name === state.presetName);
+      if (preset) {
+        useFunctionStore.setState({ formula: preset.formula, presetName: preset.name });
+      }
     }
     if (state.range !== undefined) useFunctionStore.getState().setRange(state.range);
 
