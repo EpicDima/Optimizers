@@ -1,25 +1,25 @@
-import { apiClient } from "@shared/api/client";
+import { runAll as runAllSlots } from "@shared/lib/optimization-engine/run";
+import type { EngineSlotInput } from "@shared/lib/optimization-engine/run";
 
-import type { RunResult } from "./model";
+import { continuationMap } from "./continuation";
+import type { RunConfig, RunResult } from "./model";
 
-export interface OptimizeRunPayload {
-  slotId: string;
-  optimizer: string;
-  optimizerParams: Record<string, number>;
-  scheduler: string;
-  schedulerParams: Record<string, number>;
-  start: [number, number];
-  reset: boolean;
-}
+export function computeRuns(
+  fn: (x: number, y: number) => number,
+  slots: RunConfig[],
+  globalStart: [number, number],
+  steps: number,
+  resetOnStart: boolean,
+): RunResult[] {
+  const inputs: EngineSlotInput[] = slots.map((slot) => ({
+    slotId: slot.slotId,
+    optimizer: slot.optimizer,
+    optimizerParams: slot.optimizerParams,
+    scheduler: slot.scheduler,
+    schedulerParams: slot.schedulerParams,
+    start: resetOnStart ? globalStart : slot.start,
+    reset: resetOnStart,
+  }));
 
-export interface OptimizeRequestPayload {
-  function: { formula: string };
-  runs: OptimizeRunPayload[];
-  steps: number;
-}
-
-/** Не обёрнуто в useQuery/useMutation — результат живёт в runs-сторе
- * (Zustand), а не в кеше react-query, см. widgets/runs-sidebar. */
-export function fetchOptimize(payload: OptimizeRequestPayload) {
-  return apiClient.post<{ runs: RunResult[] }>("/optimize", payload);
+  return runAllSlots(fn, inputs, continuationMap, steps);
 }
