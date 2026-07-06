@@ -1,10 +1,11 @@
 import { create } from "zustand";
 
 import { colorForSlot } from "@shared/config/colors";
-import { DEFAULT_STEPS } from "@shared/config/constants";
-import { ApiError } from "@shared/api/client";
+import { DEFAULT_STEPS, MAX_TOTAL_STEPS } from "@shared/config/constants";
+import { functionPresets } from "@shared/lib/optimization-engine/functions";
 
-import { fetchOptimize } from "./api";
+import { computeRuns } from "./api";
+import { clearContinuationSlot } from "./continuation";
 import type { RunConfig, RunResult } from "./model";
 
 interface NewSlotDefaults {
@@ -64,6 +65,7 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   removeSlot: (slotId) =>
     set((state) => {
       if (state.slots.length <= 1) return state;
+      clearContinuationSlot(slotId);
       const { [slotId]: _removed, ...results } = state.results;
       return { slots: state.slots.filter((slot) => slot.slotId !== slotId), results };
     }),
@@ -81,40 +83,35 @@ export const useRunsStore = create<RunsState>((set, get) => ({
     const { slots, globalStart, steps, resetOnStart } = get();
     if (slots.length === 0) return;
 
-    set({ isRunning: true, error: null });
-    try {
-      const response = await fetchOptimize({
-        function: { formula },
-        steps,
-        runs: slots.map((slot) => ({
-          slotId: slot.slotId,
-          optimizer: slot.optimizer,
-          optimizerParams: slot.optimizerParams,
-          scheduler: slot.scheduler,
-          schedulerParams: slot.schedulerParams,
-          start: resetOnStart ? globalStart : slot.start,
-          reset: resetOnStart,
-        })),
-      });
-
-      const results: Record<string, RunResult> = {};
-      for (const run of response.runs) results[run.slotId] = run;
-
-      set((state) => ({
-        isRunning: false,
-        results: { ...state.results, ...results },
-        // локальная копия последней позиции — резервный старт, если сессия
-        // на сервере истекла или тип оптимизатора слота сменился
-        slots: state.slots.map((slot) => {
-          const result = results[slot.slotId];
-          if (!result || result.error || result.x.length === 0) return slot;
-          const lastIndex = result.x.length - 1;
-          return { ...slot, start: [result.x[lastIndex], result.y[lastIndex]] };
-        }),
-      }));
-    } catch (err) {
-      set({ isRunning: false, error: err instanceof ApiError ? err.message : "Не удалось выполнить запрос" });
+    if (steps * slots.length > MAX_TOTAL_STEPS) {
+      set({ error: `суммарный объём шагов (steps * количество запусков) превышает ${MAX_TOTAL_STEPS}` });
+      return;
     }
+
+    const preset = functionPresets.find((p) => p.formula === formula);
+    if (!preset) {
+      set({ error: "неизвестная формула" });
+      return;
+    }
+
+    set({ isRunning: true, error: null });
+
+    const runs = computeRuns(preset.fn, slots, globalStart, steps, resetOnStart);
+    const results: Record<string, RunResult> = {};
+    for (const run of runs) results[run.slotId] = run;
+
+    set((state) => ({
+      isRunning: false,
+      results: { ...state.results, ...results },
+      // локальная копия последней позиции — резервный старт, если тип
+      // оптимизатора слота сменился и continuation для него сбросилась
+      slots: state.slots.map((slot) => {
+        const result = results[slot.slotId];
+        if (!result || result.error || result.x.length === 0) return slot;
+        const lastIndex = result.x.length - 1;
+        return { ...slot, start: [result.x[lastIndex], result.y[lastIndex]] };
+      }),
+    }));
   },
 
   clearResults: () => set({ results: {} }),
