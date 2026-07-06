@@ -79,6 +79,32 @@ cd web && npm run build
 собирает статику в `web/dist` — обычный статический сайт, отдавать его можно
 любым статик-сервером.
 
+### Десктопное приложение (Tauri)
+
+Веб-версия полностью клиентская, поэтому её же можно упаковать в нативное
+десктопное приложение через [Tauri](https://tauri.app/) — без Node.js и без
+Python в итоговом бинарнике, только Rust-обвязка вокруг системного webview
+(WKWebView/WebView2/WebKitGTK).
+
+Нужен установленный Rust (`rustup` или Homebrew `cargo`); на Linux
+дополнительно системные пакеты для сборки (`libwebkit2gtk-4.1-dev`,
+`librsvg2-dev` и стандартные build-тулы) — требование самого Tauri v2.
+
+```sh
+cd web && npm run tauri dev
+```
+
+поднимает Vite и открывает нативное окно (аналог `npm run dev`, но в
+отдельном окне вместо браузера).
+
+```sh
+cd web && npm run tauri build
+```
+
+собирает готовое приложение — `.app`/`.dmg` (macOS), `.msi`/`.exe`
+(Windows), `.deb`/`.AppImage` (Linux) — в
+`web/src-tauri/target/release/bundle/`.
+
 ## Примеры
 
 ![2D график](images/example1.png?raw=true "2D график")
