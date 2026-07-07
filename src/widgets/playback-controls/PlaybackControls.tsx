@@ -36,8 +36,6 @@ export function PlaybackControls() {
     setExportProgress("0%");
     try {
       const blob = await exportGif({
-        fps: 10,
-        frameStep: Math.max(1, Math.floor(maxFrame / 200)),
         onProgress: (current, total) => {
           setExportProgress(`${current}/${total}`);
         },
