@@ -2,7 +2,8 @@ import type { Data } from "plotly.js";
 
 import type { ContourMode } from "@entities/plot-settings";
 import type { RunConfig, RunResult } from "@entities/run";
-import type { FunctionPreviewResult } from "@entities/test-function";
+import type { FunctionPreviewResult, FunctionRange } from "@entities/test-function";
+import { gradient } from "@shared/lib/optimization-engine/functions";
 
 const MINIMUM_MARKER_COLOR = "#ffe14d";
 
@@ -252,4 +253,69 @@ export function buildTrajectoryTrace(
   }
 
   return traces;
+}
+
+const GRADIENT_GRID = 15;
+const ARROW_SCALE = 0.8;
+const ARROWHEAD_SIZE = 0.25;
+const GRADIENT_COLOR = "rgba(80, 80, 80, 0.55)";
+
+interface GradientFieldParams {
+  fn: (x: number, y: number) => number;
+  range: FunctionRange;
+}
+
+export function buildGradientFieldTrace({ fn, range }: GradientFieldParams): Data {
+  const [fromX, toX, fromY, toY] = range;
+  const dx = (toX - fromX) / GRADIENT_GRID;
+  const dy = (toY - fromY) / GRADIENT_GRID;
+  const spacing = Math.min(dx, dy);
+  const maxLen = ARROW_SCALE * spacing;
+
+  const xs: (number | null)[] = [];
+  const ys: (number | null)[] = [];
+
+  for (let i = 0; i <= GRADIENT_GRID; i++) {
+    const gx = fromX + i * dx;
+    for (let j = 0; j <= GRADIENT_GRID; j++) {
+      const gy = fromY + j * dy;
+      const [gradX, gradY] = gradient(fn, gx, gy);
+      const negX = -gradX;
+      const negY = -gradY;
+      const mag = Math.sqrt(negX * negX + negY * negY);
+      if (mag < 1e-12) continue;
+
+      const scale = Math.min(maxLen, maxLen * (mag / (mag + maxLen))) / mag;
+      const tipX = gx + negX * scale;
+      const tipY = gy + negY * scale;
+
+      xs.push(gx, tipX, null);
+      ys.push(gy, tipY, null);
+
+      const arrowLen = Math.sqrt((tipX - gx) ** 2 + (tipY - gy) ** 2) * ARROWHEAD_SIZE;
+      const ux = tipX - gx;
+      const uy = tipY - gy;
+      const uMag = Math.sqrt(ux * ux + uy * uy);
+      if (uMag < 1e-12) continue;
+      const unx = ux / uMag;
+      const uny = uy / uMag;
+      const perpX = -uny;
+      const perpY = unx;
+
+      const baseX = tipX - unx * arrowLen;
+      const baseY = tipY - uny * arrowLen;
+      xs.push(baseX + perpX * arrowLen * 0.5, tipX, baseX - perpX * arrowLen * 0.5, null);
+      ys.push(baseY + perpY * arrowLen * 0.5, tipY, baseY - perpY * arrowLen * 0.5, null);
+    }
+  }
+
+  return {
+    type: "scatter",
+    mode: "lines",
+    x: xs,
+    y: ys,
+    line: { color: GRADIENT_COLOR, width: 1 },
+    showlegend: false,
+    hoverinfo: "skip",
+  };
 }

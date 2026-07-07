@@ -7,4 +7,5 @@ export interface PlotSettings {
   colormap: string;
   colormapReversed: boolean;
   tailLength: number;
+  showGradientField: boolean;
 }

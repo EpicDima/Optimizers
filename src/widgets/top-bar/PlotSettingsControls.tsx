@@ -29,6 +29,8 @@ export function PlotSettingsControls() {
   const setColormap = usePlotSettingsStore((state) => state.setColormap);
   const colormapReversed = usePlotSettingsStore((state) => state.colormapReversed);
   const setColormapReversed = usePlotSettingsStore((state) => state.setColormapReversed);
+  const showGradientField = usePlotSettingsStore((state) => state.showGradientField);
+  const setShowGradientField = usePlotSettingsStore((state) => state.setShowGradientField);
 
   return (
     <div className="flex flex-wrap items-end gap-3">
@@ -54,6 +56,8 @@ export function PlotSettingsControls() {
       <ColormapPicker colormap={colormap} colormapReversed={colormapReversed} onChange={setColormap} />
 
       <Checkbox checked={colormapReversed} onChange={setColormapReversed} label="Инверсия" className="pb-1.5" />
+
+      {!is3D && <Checkbox checked={showGradientField} onChange={setShowGradientField} label="Градиент" className="pb-1.5" />}
     </div>
   );
 }

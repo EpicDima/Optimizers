@@ -6,11 +6,12 @@ import { computeMaxFrame, usePlaybackStore, usePlaybackTicker } from "@entities/
 import { usePlotSettingsStore } from "@entities/plot-settings";
 import { useRunsStore } from "@entities/run";
 import { useFunctionPreview, useFunctionStore } from "@entities/test-function";
+import { functionPresets } from "@shared/lib/optimization-engine/functions";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
 import { Button, Panel, Slider } from "@shared/ui";
 
-import { buildMinimaTrace, buildStartMarkersTrace, buildSurfaceTrace, buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
+import { buildGradientFieldTrace, buildMinimaTrace, buildStartMarkersTrace, buildSurfaceTrace, buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
 import { formatCompactCount } from "./format-value";
 import { buildLayout } from "./layout";
 import { plotlyThemeColors } from "./plotly-theme";
@@ -18,7 +19,7 @@ import { TrajectoryReadout } from "./TrajectoryReadout";
 
 export function PlotPanel() {
   const { formula, range, gridCount } = useFunctionStore();
-  const { is3D, contourMode, contourLevels, colormap, colormapReversed, tailLength } = usePlotSettingsStore();
+  const { is3D, contourMode, contourLevels, colormap, colormapReversed, tailLength, showGradientField } = usePlotSettingsStore();
   const { slots, results } = useRunsStore();
   const colormapCatalog = useColormapCatalog();
   const resolvedTheme = useResolvedTheme();
@@ -57,13 +58,20 @@ export function PlotPanel() {
 
   const data = useMemo(() => {
     if (!preview.data?.valid || !colorscale) return [];
-    return [
+    const traces = [
       buildSurfaceTrace({ preview: preview.data, is3D, contourMode, contourLevels, colorscale }),
       buildMinimaTrace(preview.data, is3D),
       buildStartMarkersTrace(slots, results, is3D),
       ...slots.flatMap((slot) => buildTrajectoryTrace(slot, sliceResultToFrame(results[slot.slotId], frame), is3D, tailLength)),
     ];
-  }, [preview.data, colorscale, is3D, contourMode, contourLevels, slots, results, tailLength, frame]);
+    if (showGradientField && !is3D) {
+      const preset = functionPresets.find((p) => p.formula === formula);
+      if (preset) {
+        traces.splice(1, 0, buildGradientFieldTrace({ fn: preset.fn, range }));
+      }
+    }
+    return traces;
+  }, [preview.data, colorscale, is3D, contourMode, contourLevels, slots, results, tailLength, frame, showGradientField, formula, range]);
 
   const layout = useMemo(() => buildLayout(is3D, plotlyThemeColors(resolvedTheme), range), [is3D, resolvedTheme, range]);
 
