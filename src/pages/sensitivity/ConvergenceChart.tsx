@@ -21,7 +21,6 @@ export function SensitivityConvergenceChart() {
       y: r.values,
       name: `${paramName}=${Number(r.paramValue.toPrecision(4))}`,
       line: { color: r.color, width: 1.5 },
-      hovertemplate: `${paramName}=${Number(r.paramValue.toPrecision(4))}<br>Шаг %{x}<br>Значение %{y:.4g}<extra></extra>`,
     })),
     [results, paramName],
   );
@@ -36,7 +35,7 @@ export function SensitivityConvergenceChart() {
       showlegend: true,
       legend: { font: { size: 10 }, bgcolor: "rgba(0,0,0,0)" },
       uirevision: "keep",
-      hovermode: "closest",
+      hovermode: "x unified",
       xaxis: { title: { text: "Шаг" }, gridcolor: theme.gridColor, color: theme.mutedFontColor, zeroline: false },
       yaxis: {
         title: { text: "Значение" },

@@ -26,7 +26,6 @@ export function FinalValueChart() {
           size: 7,
         },
         line: { color: results[0].color, width: 1.5, dash: "dot" as const },
-        hovertemplate: `${paramName}=%{x:.4g}<br>Финальное значение=%{y:.4g}<extra></extra>`,
       },
     ];
   }, [results, paramName]);
@@ -40,7 +39,7 @@ export function FinalValueChart() {
       margin: { l: 50, r: 16, t: 10, b: 36 },
       showlegend: false,
       uirevision: "keep",
-      hovermode: "closest",
+      hovermode: "x unified",
       xaxis: {
         title: { text: paramName },
         gridcolor: theme.gridColor,
