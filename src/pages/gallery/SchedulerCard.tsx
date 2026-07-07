@@ -1,14 +1,12 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 
 import type { SchedulerDescriptor } from "@shared/lib/optimization-engine/schedulers/types";
 import { useResolvedTheme } from "@shared/lib/theme";
+import { NumberField } from "@shared/ui";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 
 import { renderLineThumbnail } from "./render-thumbnail";
 
-const TOTAL_STEPS = 200;
-const BASE_LR = 0.01;
 const ACCENT_LIGHT = "#0284c7";
 const ACCENT_DARK = "#3bb2ff";
 
@@ -19,40 +17,46 @@ interface SchedulerCardProps {
 export function SchedulerCard({ descriptor }: SchedulerCardProps) {
   const resolvedTheme = useResolvedTheme();
 
-  const defaults = useMemo(
-    () => Object.fromEntries(Object.entries(descriptor.params).map(([k, v]) => [k, v.default])),
-    [descriptor],
+  const [params, setParams] = useState<Record<string, number>>(() =>
+    Object.fromEntries(Object.entries(descriptor.params).map(([k, v]) => [k, v.default])),
   );
+  const [steps, setSteps] = useState(200);
+  const [baseLr, setBaseLr] = useState(0.01);
 
-  const { data: src } = useQuery({
-    queryKey: ["scheduler-thumbnail", descriptor.name, resolvedTheme],
-    queryFn: () => {
-      const xs: number[] = [];
-      const ys: number[] = [];
-      for (let step = 0; step < TOTAL_STEPS; step++) {
-        xs.push(step);
-        ys.push(descriptor.lr(defaults, step, TOTAL_STEPS, BASE_LR));
-      }
-      const bg = plotlyThemeColors(resolvedTheme).paper;
-      const lineColor = resolvedTheme === "dark" ? ACCENT_DARK : ACCENT_LIGHT;
-      return renderLineThumbnail(xs, ys, 560, 256, lineColor, bg);
-    },
-    staleTime: Infinity,
-  });
+  const src = useMemo(() => {
+    const xs: number[] = [];
+    const ys: number[] = [];
+    for (let step = 0; step < steps; step++) {
+      xs.push(step);
+      ys.push(descriptor.lr(params, step, steps, baseLr));
+    }
+    const bg = plotlyThemeColors(resolvedTheme).paper;
+    const lineColor = resolvedTheme === "dark" ? ACCENT_DARK : ACCENT_LIGHT;
+    return renderLineThumbnail(xs, ys, 560, 256, lineColor, bg);
+  }, [descriptor, params, steps, baseLr, resolvedTheme]);
+
+  const paramEntries = Object.entries(descriptor.params);
 
   return (
     <div className="flex flex-col overflow-hidden rounded-sm border border-border bg-bg-elevated">
       <div className="h-32">
-        {src ? (
-          <img src={src} alt={descriptor.name} className="h-full w-full object-cover" draggable={false} />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-bg-sunken">
-            <span className="text-xs text-text-muted">Загрузка…</span>
-          </div>
-        )}
+        <img src={src} alt={descriptor.name} className="h-full w-full object-cover" draggable={false} />
       </div>
-      <div className="border-t border-border px-3 py-2">
+      <div className="flex flex-col gap-2 border-t border-border px-3 py-2">
         <span className="font-sans text-sm font-medium text-text">{descriptor.name}</span>
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+          <NumberField label="Шаги" value={steps} onChange={setSteps} description="Общее число шагов" />
+          <NumberField label="Base LR" value={baseLr} onChange={setBaseLr} description="Базовый learning rate" />
+          {paramEntries.map(([key, meta]) => (
+            <NumberField
+              key={key}
+              label={key}
+              description={meta.description ?? undefined}
+              value={params[key]}
+              onChange={(v) => setParams((prev) => ({ ...prev, [key]: v }))}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
