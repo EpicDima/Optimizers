@@ -28,9 +28,7 @@ self.onmessage = async (event: MessageEvent<RunWorkerRequest>) => {
   }
 
   try {
-    const results = await runAllAsync(preset.fn, slots, continuation, steps, (progress) => {
-      post({ type: "progress", requestId, progress });
-    });
+    const results = await runAllAsync(preset.fn, slots, continuation, steps);
     post({ type: "done", requestId, results });
   } catch (err) {
     post({ type: "error", requestId, message: err instanceof Error ? err.message : String(err) });

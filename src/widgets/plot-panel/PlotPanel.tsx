@@ -11,6 +11,7 @@ import { useResolvedTheme } from "@shared/lib/theme";
 import { Button, Panel, Slider } from "@shared/ui";
 
 import { buildMinimaTrace, buildStartMarkersTrace, buildSurfaceTrace, buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
+import { formatCompactCount } from "./format-value";
 import { buildLayout } from "./layout";
 import { plotlyThemeColors } from "./plotly-theme";
 import { TrajectoryReadout } from "./TrajectoryReadout";
@@ -103,8 +104,8 @@ export function PlotPanel() {
             {isPlaying ? <Pause size={14} /> : <Play size={14} />}
           </Button>
           <Slider value={frame} onChange={seek} min={0} max={maxFrame} step={1} className="flex-1" />
-          <span className="w-20 shrink-0 text-right font-mono text-xs whitespace-nowrap text-text-muted">
-            {frame} / {maxFrame}
+          <span className="shrink-0 font-mono text-xs whitespace-nowrap text-text-muted">
+            {formatCompactCount(frame)} / {formatCompactCount(maxFrame)}
           </span>
         </div>
       </div>

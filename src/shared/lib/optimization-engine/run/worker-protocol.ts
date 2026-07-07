@@ -1,4 +1,4 @@
-import type { EngineRunResult, EngineSlotInput, RunProgress } from "./types";
+import type { EngineRunResult, EngineSlotInput } from "./types";
 
 export interface RunWorkerRunRequest {
   type: "run";
@@ -15,12 +15,6 @@ export interface RunWorkerClearRequest {
 
 export type RunWorkerRequest = RunWorkerRunRequest | RunWorkerClearRequest;
 
-export interface RunWorkerProgressMessage {
-  type: "progress";
-  requestId: number;
-  progress: RunProgress;
-}
-
 export interface RunWorkerDoneMessage {
   type: "done";
   requestId: number;
@@ -33,4 +27,4 @@ export interface RunWorkerErrorMessage {
   message: string;
 }
 
-export type RunWorkerResponse = RunWorkerProgressMessage | RunWorkerDoneMessage | RunWorkerErrorMessage;
+export type RunWorkerResponse = RunWorkerDoneMessage | RunWorkerErrorMessage;

@@ -1,4 +1,4 @@
-import type { EngineRunResult, EngineSlotInput, RunProgress } from "./types";
+import type { EngineRunResult, EngineSlotInput } from "./types";
 import type { RunWorkerRequest, RunWorkerResponse } from "./worker-protocol";
 
 let worker: Worker | null = null;
@@ -9,12 +9,7 @@ function getWorker(): Worker {
   return worker;
 }
 
-export function runInWorker(
-  formula: string,
-  slots: EngineSlotInput[],
-  steps: number,
-  onProgress?: (progress: RunProgress) => void,
-): Promise<EngineRunResult[]> {
+export function runInWorker(formula: string, slots: EngineSlotInput[], steps: number): Promise<EngineRunResult[]> {
   const requestId = nextRequestId++;
   const instance = getWorker();
 
@@ -22,11 +17,6 @@ export function runInWorker(
     function handleMessage(event: MessageEvent<RunWorkerResponse>): void {
       const message = event.data;
       if (message.requestId !== requestId) return;
-
-      if (message.type === "progress") {
-        onProgress?.(message.progress);
-        return;
-      }
 
       instance.removeEventListener("message", handleMessage);
       if (message.type === "done") resolve(message.results);

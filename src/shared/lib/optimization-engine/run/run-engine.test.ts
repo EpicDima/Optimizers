@@ -98,15 +98,6 @@ describe("runSlotAsync", () => {
     expect(second.x[0]).toBe(-4);
     expect(second.y[0]).toBe(4);
   });
-
-  it("reports progress ending at the total step count", async () => {
-    const continuation: ContinuationMap = new Map();
-    const completed: number[] = [];
-    await runSlotAsync(sphere, slot(), continuation, 20, (steps) => completed.push(steps));
-
-    expect(completed.at(-1)).toBe(20);
-    expect(completed.every((value, index) => index === 0 || value >= completed[index - 1])).toBe(true);
-  });
 });
 
 describe("runAllAsync", () => {
@@ -121,23 +112,5 @@ describe("runAllAsync", () => {
 
     expect(results.map((r) => r.slotId)).toEqual(["a", "b"]);
     expect(results.every((r) => r.error === null)).toBe(true);
-  });
-
-  it("reports progress tagged with the right slot index and id", async () => {
-    const continuation: ContinuationMap = new Map();
-    const seenSlotIds = new Set<string>();
-    await runAllAsync(
-      sphere,
-      [slot({ slotId: "a" }), slot({ slotId: "b", optimizer: "SGD", optimizerParams: {} })],
-      continuation,
-      10,
-      (progress) => {
-        seenSlotIds.add(progress.slotId);
-        expect(progress.totalSlots).toBe(2);
-        expect(progress.totalSteps).toBe(10);
-      },
-    );
-
-    expect(seenSlotIds).toEqual(new Set(["a", "b"]));
   });
 });
