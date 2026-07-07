@@ -14,6 +14,7 @@ import { Button, Panel, Slider } from "@shared/ui";
 import { buildGradientFieldTrace, buildMinimaTrace, buildStartMarkersTrace, buildSurfaceTrace, buildTrajectoryTrace, sliceResultToFrame } from "./build-traces";
 import { formatCompactCount } from "./format-value";
 import { buildLayout } from "./layout";
+import { plotDivRef } from "./plot-ref";
 import { plotlyThemeColors } from "./plotly-theme";
 import { StepInfoOverlay } from "./StepInfoOverlay";
 import { TrajectoryReadout } from "./TrajectoryReadout";
@@ -80,6 +81,11 @@ export function PlotPanel() {
   const layout = useMemo(() => buildLayout(is3D, plotlyThemeColors(resolvedTheme), range), [is3D, resolvedTheme, range]);
 
   const plotRef = usePlotlyAutoResize();
+
+  useEffect(() => {
+    plotDivRef.current = plotRef.current;
+    return () => { plotDivRef.current = null; };
+  }, [plotRef]);
 
   const canPlay = maxFrame > 0;
 
