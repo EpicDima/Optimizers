@@ -128,13 +128,19 @@ export const useSensitivityStore = create<SensitivityState>((set, get) => {
           slotId: `sensitivity-${i}`,
           optimizer: optimizerName,
           optimizerParams: { ...defaultParams, [paramName]: value },
-          scheduler: "none",
+          scheduler: "Constant",
           schedulerParams: {},
           start: [preset.start[0], preset.start[1]],
           reset: true,
         }));
 
         const engineResults = await runInWorker(preset.formula, slots, steps);
+
+        const firstError = engineResults.find((r) => r.error);
+        if (firstError) {
+          set({ isRunning: false, error: firstError.error });
+          return;
+        }
 
         const results: SensitivityResult[] = engineResults.map((r, i) => ({
           paramValue: sampledValues[i],
