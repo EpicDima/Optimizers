@@ -1,4 +1,4 @@
-import { Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useEffect, useMemo } from "react";
 
 import { toPlotlyColorscale, useColormapCatalog } from "@entities/colormap";
@@ -15,6 +15,7 @@ import { buildGradientFieldTrace, buildMinimaTrace, buildStartMarkersTrace, buil
 import { formatCompactCount } from "./format-value";
 import { buildLayout } from "./layout";
 import { plotlyThemeColors } from "./plotly-theme";
+import { StepInfoOverlay } from "./StepInfoOverlay";
 import { TrajectoryReadout } from "./TrajectoryReadout";
 
 export function PlotPanel() {
@@ -27,10 +28,13 @@ export function PlotPanel() {
   const frame = usePlaybackStore((state) => state.frame);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
   const autoPlay = usePlaybackStore((state) => state.autoPlay);
+  const stepMode = usePlaybackStore((state) => state.stepMode);
   const startAnimationFor = usePlaybackStore((state) => state.startAnimationFor);
   const skipToEnd = usePlaybackStore((state) => state.skipToEnd);
   const seek = usePlaybackStore((state) => state.seek);
   const toggle = usePlaybackStore((state) => state.toggle);
+  const stepForward = usePlaybackStore((state) => state.stepForward);
+  const stepBackward = usePlaybackStore((state) => state.stepBackward);
 
   const preview = useFunctionPreview({ formula, range, count: gridCount });
 
@@ -97,20 +101,29 @@ export function PlotPanel() {
             style={{ width: "100%", height: "100%" }}
           />
           {(!preview.data || preview.data.valid) && <TrajectoryReadout slots={slots} results={results} frame={frame} />}
+          {stepMode && (!preview.data || preview.data.valid) && <StepInfoOverlay slots={slots} results={results} frame={frame} />}
         </div>
-        {/* Таймлайн под графиком, как в видеоплеере: play/pause слева от шкалы
-            перемотки. Остальные настройки воспроизведения (скорость, хвост,
-            автовоспроизведение) остаются в PlaybackControls. */}
         <div className="flex shrink-0 items-center gap-3 border-t border-border px-3 py-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggle}
-            disabled={!canPlay}
-            aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
-          >
-            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-          </Button>
+          {stepMode ? (
+            <>
+              <Button variant="outline" size="sm" onClick={stepBackward} disabled={frame <= 0} aria-label="Шаг назад">
+                <ChevronLeft size={14} />
+              </Button>
+              <Button variant="outline" size="sm" onClick={stepForward} disabled={frame >= maxFrame} aria-label="Шаг вперёд">
+                <ChevronRight size={14} />
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggle}
+              disabled={!canPlay}
+              aria-label={isPlaying ? "Пауза" : "Воспроизвести"}
+            >
+              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+            </Button>
+          )}
           <Slider value={frame} onChange={seek} min={0} max={maxFrame} step={1} className="flex-1" />
           <span className="shrink-0 font-mono text-xs whitespace-nowrap text-text-muted">
             {formatCompactCount(frame)} / {formatCompactCount(maxFrame)}

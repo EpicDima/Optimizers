@@ -17,6 +17,8 @@ const TAIL_LENGTH_CAP = 500;
 export function PlaybackControls() {
   const autoPlay = usePlaybackStore((state) => state.autoPlay);
   const setAutoPlay = usePlaybackStore((state) => state.setAutoPlay);
+  const stepMode = usePlaybackStore((state) => state.stepMode);
+  const setStepMode = usePlaybackStore((state) => state.setStepMode);
 
   const tailLength = usePlotSettingsStore((state) => state.tailLength);
   const setTailLength = usePlotSettingsStore((state) => state.setTailLength);
@@ -33,6 +35,7 @@ export function PlaybackControls() {
         </div>
 
         <Checkbox checked={autoPlay} onChange={setAutoPlay} label="Автовоспроизведение" />
+        <Checkbox checked={stepMode} onChange={setStepMode} label="Пошаговый режим" />
       </div>
     </Panel>
   );

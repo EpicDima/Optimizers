@@ -14,6 +14,7 @@ interface PlaybackState {
   /** Последний доступный кадр текущей партии результатов — единственный
    * источник истины и для PlotPanel (тикер), и для PlaybackControls (слайдер). */
   maxFrame: number;
+  stepMode: boolean;
 
   play: () => void;
   pause: () => void;
@@ -23,6 +24,9 @@ interface PlaybackState {
   setFrame: (frame: number) => void;
   setSpeedStep: (step: number) => void;
   setAutoPlay: (enabled: boolean) => void;
+  setStepMode: (enabled: boolean) => void;
+  stepForward: () => void;
+  stepBackward: () => void;
   /** Новая партия результатов при включённом autoPlay: анимация с нуля. */
   startAnimationFor: (maxFrame: number) => void;
   /** Новая партия результатов при выключенном autoPlay: сразу финальный кадр
@@ -36,12 +40,11 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   speedStep: DEFAULT_SPEED_STEP,
   autoPlay: true,
   maxFrame: 0,
+  stepMode: false,
 
   play: () =>
     set((state) => {
-      if (state.maxFrame <= 0) return { isPlaying: false };
-      // на последнем кадре плей — это "проиграть заново", иначе тикер тут же
-      // снова упрётся в maxFrame и поставит на паузу без единого видимого кадра
+      if (state.maxFrame <= 0 || state.stepMode) return { isPlaying: false };
       return { isPlaying: true, frame: state.frame >= state.maxFrame ? 0 : state.frame };
     }),
   pause: () => set({ isPlaying: false }),
@@ -50,6 +53,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   setFrame: (frame) => set({ frame }),
   setSpeedStep: (step) => set({ speedStep: clamp(step, MIN_SPEED_STEP, MAX_SPEED_STEP) }),
   setAutoPlay: (autoPlay) => set({ autoPlay }),
-  startAnimationFor: (maxFrame) => set({ maxFrame, frame: 0, isPlaying: maxFrame > 0 }),
+  setStepMode: (enabled) => set({ stepMode: enabled, isPlaying: enabled ? false : get().isPlaying }),
+  stepForward: () => set((state) => ({ frame: clamp(state.frame + 1, 0, state.maxFrame) })),
+  stepBackward: () => set((state) => ({ frame: clamp(state.frame - 1, 0, state.maxFrame) })),
+  startAnimationFor: (maxFrame) =>
+    set((state) => ({ maxFrame, frame: 0, isPlaying: state.stepMode ? false : maxFrame > 0 })),
   skipToEnd: (maxFrame) => set({ maxFrame, frame: maxFrame, isPlaying: false }),
 }));
