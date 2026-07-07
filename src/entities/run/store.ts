@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { colorForSlot } from "@shared/config/colors";
-import { DEFAULT_STEPS, MAX_TOTAL_STEPS } from "@shared/config/constants";
+import { DEFAULT_STEPS } from "@shared/config/constants";
 import { functionPresets } from "@shared/lib/optimization-engine/functions";
 
 import { computeRuns } from "./api";
@@ -35,8 +35,7 @@ interface RunsState {
   resetSlotStarts: () => void;
 }
 
-// умолчания совпадают с main.pyw: старт (-4, 4), 100(-200) шагов — здесь
-// взят более наглядный дефолт для анимации, минимум один слот
+// старт (-4, 4), минимум один слот
 export const useRunsStore = create<RunsState>((set, get) => ({
   slots: [],
   results: {},
@@ -82,11 +81,6 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   runAll: async (formula) => {
     const { slots, globalStart, steps, resetOnStart } = get();
     if (slots.length === 0) return;
-
-    if (steps * slots.length > MAX_TOTAL_STEPS) {
-      set({ error: `суммарный объём шагов (steps * количество запусков) превышает ${MAX_TOTAL_STEPS}` });
-      return;
-    }
 
     const preset = functionPresets.find((p) => p.formula === formula);
     if (!preset) {
