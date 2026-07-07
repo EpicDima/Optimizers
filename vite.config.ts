@@ -7,6 +7,9 @@ import { defineConfig } from 'vitest/config'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    global: 'globalThis',
+  },
   resolve: {
     alias: {
       '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
