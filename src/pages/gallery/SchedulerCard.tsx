@@ -7,6 +7,7 @@ import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 
 import { renderLineThumbnail } from "./render-thumbnail";
 
+const TOTAL_STEPS = 10_000;
 const ACCENT_LIGHT = "#0284c7";
 const ACCENT_DARK = "#3bb2ff";
 
@@ -20,20 +21,19 @@ export function SchedulerCard({ descriptor }: SchedulerCardProps) {
   const [params, setParams] = useState<Record<string, number>>(() =>
     Object.fromEntries(Object.entries(descriptor.params).map(([k, v]) => [k, v.default])),
   );
-  const [steps, setSteps] = useState(200);
   const [baseLr, setBaseLr] = useState(0.01);
 
   const src = useMemo(() => {
     const xs: number[] = [];
     const ys: number[] = [];
-    for (let step = 0; step < steps; step++) {
+    for (let step = 0; step < TOTAL_STEPS; step++) {
       xs.push(step);
-      ys.push(descriptor.lr(params, step, steps, baseLr));
+      ys.push(descriptor.lr(params, step, TOTAL_STEPS, baseLr));
     }
     const bg = plotlyThemeColors(resolvedTheme).paper;
     const lineColor = resolvedTheme === "dark" ? ACCENT_DARK : ACCENT_LIGHT;
     return renderLineThumbnail(xs, ys, 560, 256, lineColor, bg);
-  }, [descriptor, params, steps, baseLr, resolvedTheme]);
+  }, [descriptor, params, baseLr, resolvedTheme]);
 
   const paramEntries = Object.entries(descriptor.params);
 
@@ -45,7 +45,6 @@ export function SchedulerCard({ descriptor }: SchedulerCardProps) {
       <div className="flex flex-col gap-2 border-t border-border px-3 py-2">
         <span className="font-sans text-sm font-medium text-text">{descriptor.name}</span>
         <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
-          <NumberField label="Шаги" value={steps} onChange={setSteps} description="Общее число шагов" />
           <NumberField label="Base LR" value={baseLr} onChange={setBaseLr} description="Базовый learning rate" />
           {paramEntries.map(([key, meta]) => (
             <NumberField
