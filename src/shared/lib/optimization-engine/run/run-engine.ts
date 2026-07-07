@@ -1,7 +1,7 @@
 import { getOptimizerDescriptor, type OptimizerInstance } from "@shared/lib/optimization-engine/optimizers";
 import { getSchedulerDescriptor } from "@shared/lib/optimization-engine/schedulers";
 
-import type { ContinuationMap, EngineRunResult, EngineSlotInput, RunProgress } from "./types";
+import type { ContinuationMap, EngineRunResult, EngineSlotInput } from "./types";
 
 // как часто отдаём управление event loop и шлём прогресс во время долгого
 // расчёта — компромисс между отзывчивостью UI и накладными расходами на yield
@@ -40,7 +40,6 @@ export async function runSlotAsync(
   cfg: EngineSlotInput,
   continuation: ContinuationMap,
   steps: number,
-  onProgress?: (completedSteps: number) => void,
 ): Promise<EngineRunResult> {
   const existing = continuation.get(cfg.slotId);
   let instance: OptimizerInstance;
@@ -85,14 +84,12 @@ export async function runSlotAsync(
 
     const now = performance.now();
     if (now - lastYield >= YIELD_INTERVAL_MS) {
-      onProgress?.(step + 1);
       await yieldToEventLoop();
       lastYield = performance.now();
     }
   }
 
   if (hasLr) instance.params.lr = baseLr;
-  onProgress?.(steps);
 
   return { slotId: cfg.slotId, x: xs, y: ys, value: values, lr: lrs, error: null };
 }
@@ -102,15 +99,10 @@ export async function runAllAsync(
   slots: EngineSlotInput[],
   continuation: ContinuationMap,
   steps: number,
-  onProgress?: (progress: RunProgress) => void,
 ): Promise<EngineRunResult[]> {
   const results: EngineRunResult[] = [];
-  for (let slotIndex = 0; slotIndex < slots.length; slotIndex++) {
-    const cfg = slots[slotIndex];
-    const result = await runSlotAsync(fn, cfg, continuation, steps, (completedSteps) => {
-      onProgress?.({ slotIndex, totalSlots: slots.length, slotId: cfg.slotId, completedSteps, totalSteps: steps });
-    });
-    results.push(result);
+  for (const cfg of slots) {
+    results.push(await runSlotAsync(fn, cfg, continuation, steps));
   }
   return results;
 }

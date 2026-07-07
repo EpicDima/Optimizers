@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatSignificant } from "./format-value";
+import { formatCompactCount, formatSignificant } from "./format-value";
 
 describe("formatSignificant", () => {
   it("strips trailing zeros like Python's %g", () => {
@@ -22,5 +22,19 @@ describe("formatSignificant", () => {
     // toPrecision переходит в экспоненциальную запись, когда порядок числа
     // выходит за пределы точности (здесь 1.235e+8 при precision=4)
     expect(formatSignificant(123456789, 4)).toContain("e");
+  });
+});
+
+describe("formatCompactCount", () => {
+  it("leaves counts below 100 000 as plain digits", () => {
+    expect(formatCompactCount(0)).toBe("0");
+    expect(formatCompactCount(200)).toBe("200");
+    expect(formatCompactCount(99_999)).toBe("99999");
+  });
+
+  it("abbreviates counts from 100 000 up", () => {
+    // Intl вставляет неразрывный пробел (U+00A0) перед единицей измерения
+    expect(formatCompactCount(100_000)).toBe("100 тыс.");
+    expect(formatCompactCount(5_000_000)).toBe("5 млн");
   });
 });

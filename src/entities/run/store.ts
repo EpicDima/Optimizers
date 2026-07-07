@@ -22,8 +22,6 @@ interface RunsState {
   steps: number;
   resetOnStart: boolean;
   isRunning: boolean;
-  // доля выполненного расчёта (0..1) по всем слотам сразу, null — когда не считаем
-  progress: number | null;
   error: string | null;
 
   addSlot: (defaults: NewSlotDefaults) => void;
@@ -45,7 +43,6 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   steps: DEFAULT_STEPS,
   resetOnStart: true,
   isRunning: false,
-  progress: null,
   error: null,
 
   addSlot: (defaults) =>
@@ -93,21 +90,15 @@ export const useRunsStore = create<RunsState>((set, get) => ({
       return;
     }
 
-    set({ isRunning: true, error: null, progress: 0 });
+    set({ isRunning: true, error: null });
 
     try {
-      const runs = await computeRuns(formula, slots, globalStart, steps, resetOnStart, (progress) => {
-        const overall =
-          (progress.slotIndex * progress.totalSteps + progress.completedSteps) /
-          (progress.totalSlots * progress.totalSteps);
-        set({ progress: overall });
-      });
+      const runs = await computeRuns(formula, slots, globalStart, steps, resetOnStart);
       const results: Record<string, RunResult> = {};
       for (const run of runs) results[run.slotId] = run;
 
       set((state) => ({
         isRunning: false,
-        progress: null,
         results: { ...state.results, ...results },
         // локальная копия последней позиции — резервный старт, если тип
         // оптимизатора слота сменился и continuation для него сбросилась
@@ -119,7 +110,7 @@ export const useRunsStore = create<RunsState>((set, get) => ({
         }),
       }));
     } catch (err) {
-      set({ isRunning: false, progress: null, error: err instanceof Error ? err.message : String(err) });
+      set({ isRunning: false, error: err instanceof Error ? err.message : String(err) });
     }
   },
 
