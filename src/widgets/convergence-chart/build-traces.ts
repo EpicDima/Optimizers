@@ -3,11 +3,10 @@ import type { Data } from "plotly.js";
 import type { RunConfig, RunResult } from "@entities/run";
 
 /** Обрезает плоскую серию (value или lr) до текущего кадра анимации [0, frame]
- * включительно. Логика та же, что у sliceResultToFrame из plot-panel/build-traces
- * (см. её комментарий про tail_start(frame_idx) в десктопе), но здесь нечего
- * переиспользовать напрямую: виджеты — один слой FSD и не должны зависеть друг
- * от друга, а этому графику не нужны ни x/y, ни хвостовое окно — только
- * усечение одного числового массива. */
+ * включительно. Логика та же, что у sliceResultToFrame из plot-panel/build-traces,
+ * но здесь нечего переиспользовать напрямую: виджеты — отдельные, независимые
+ * друг от друга модули, а этому графику не нужны ни x/y, ни хвостовое окно —
+ * только усечение одного числового массива. */
 function sliceToFrame(series: number[], frame: number): number[] {
   const end = Math.max(0, Math.min(frame + 1, series.length));
   return series.slice(0, end);

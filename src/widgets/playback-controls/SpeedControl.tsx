@@ -1,9 +1,9 @@
 import { formatSpeed, MAX_SPEED_STEP, MIN_SPEED_STEP, usePlaybackStore } from "@entities/playback";
 import { Slider } from "@shared/ui";
 
-/** Лог2-слайдер скорости, -3..6 -> ×0.125..×64 (см. entities/playback/model.ts) —
- * зеркалит Speed-слайдер из main.pyw, применяется на лету через usePlaybackTicker,
- * который читает speedStep из стора на каждом rAF-тике. */
+/** Лог2-слайдер скорости, -3..6 -> ×0.125..×64 (см. entities/playback/model.ts),
+ * применяется на лету через usePlaybackTicker, который читает speedStep из
+ * стора на каждом тике requestAnimationFrame. */
 export function SpeedControl() {
   const speedStep = usePlaybackStore((state) => state.speedStep);
   const setSpeedStep = usePlaybackStore((state) => state.setSpeedStep);

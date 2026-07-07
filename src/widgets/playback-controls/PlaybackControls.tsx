@@ -9,8 +9,8 @@ import { SpeedControl } from "./SpeedControl";
 // фиксированный потолок слайдера, 0 по-прежнему означает "вся траектория".
 const TAIL_LENGTH_CAP = 500;
 
-/** Настройки воспроизведения — скорость (лог2-слайдер как в main.pyw) и длина
- * хвоста (Graphics.not_disappearing). Play/pause и шкала перемотки — на
+/** Настройки воспроизведения — скорость (лог2-слайдер) и длина
+ * хвоста. Play/pause и шкала перемотки — на
  * PlotPanel, под графиком, как таймлайн в видеоплеере. Читает/пишет только
  * usePlaybackStore + usePlotSettingsStore.tailLength, поэтому монтируется
  * независимо от PlotPanel/RunsSidebar. */

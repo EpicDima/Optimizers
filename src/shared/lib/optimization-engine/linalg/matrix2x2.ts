@@ -65,7 +65,7 @@ export function invSqrtSymmetric2(m: Mat2): Mat2 {
   const [[v00, v01], [v10, v11]] = vectors;
   const d0 = 1 / Math.sqrt(values[0]);
   const d1 = 1 / Math.sqrt(values[1]);
-  // V @ diag(1/sqrt(λ)) @ Vᵀ, mirroring Shampoo.py's eigenvectors @ diag(...) @ eigenvectors.T
+  // V @ diag(1/sqrt(λ)) @ Vᵀ — обратный квадратный корень симметричной матрицы
   return [
     [v00 * v00 * d0 + v01 * v01 * d1, v00 * v10 * d0 + v01 * v11 * d1],
     [v10 * v00 * d0 + v11 * v01 * d1, v10 * v10 * d0 + v11 * v11 * d1],

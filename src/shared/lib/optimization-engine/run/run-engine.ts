@@ -7,7 +7,7 @@ function defaultParamsOf(descriptor: { params: Record<string, { default: number 
   return Object.fromEntries(Object.entries(descriptor.params).map(([key, meta]) => [key, meta.default]));
 }
 
-// как OptimizerWidget.get_params(): только уже существующие ключи, лишнее из вызова игнорируется
+// только уже существующие ключи, лишнее из вызова игнорируется
 function applyKnownParams(target: Record<string, number>, updates: Record<string, number>): void {
   for (const key of Object.keys(target)) {
     if (key in updates) target[key] = updates[key];
@@ -55,8 +55,7 @@ export function runSlot(
   const schedulerParams = mergeValidatedParams(defaultParamsOf(schedulerDescriptor), cfg.schedulerParams);
   if (schedulerParams === null) return failed(cfg.slotId, `некорректные параметры планировщика: ${cfg.scheduler}`);
 
-  // цикл дословно повторяет OptimizerWidget.optimize: расписание подставляется
-  // в lr перед каждым шагом, base_lr восстанавливается в конце
+  // расписание подставляется в lr перед каждым шагом, base_lr восстанавливается в конце
   const xs = [instance.x[0]];
   const ys = [instance.x[1]];
   const values = [fn(instance.x[0], instance.x[1])];

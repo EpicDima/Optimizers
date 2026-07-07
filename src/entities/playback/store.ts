@@ -8,8 +8,8 @@ interface PlaybackState {
   isPlaying: boolean;
   /** Целочисленная экспонента лог2-слайдера скорости, -3..6 (см. model.ts). */
   speedStep: number;
-  /** Зеркалит animation_checkbox из main.pyw — по умолчанию включено:
-   * при появлении новых результатов анимация стартует с нулевого кадра сама. */
+  /** По умолчанию включено: при появлении новых результатов анимация
+   * стартует с нулевого кадра сама. */
   autoPlay: boolean;
   /** Последний доступный кадр текущей партии результатов — единственный
    * источник истины и для PlotPanel (тикер), и для PlaybackControls (слайдер). */
@@ -19,7 +19,7 @@ interface PlaybackState {
   pause: () => void;
   toggle: () => void;
   seek: (frame: number) => void;
-  /** Внутренний сеттер для rAF-тикера — в отличие от seek() не ставит на паузу. */
+  /** Внутренний сеттер для тикера анимации — в отличие от seek() не ставит на паузу. */
   setFrame: (frame: number) => void;
   setSpeedStep: (step: number) => void;
   setAutoPlay: (enabled: boolean) => void;

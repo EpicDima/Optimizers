@@ -16,10 +16,9 @@ interface SurfaceTraceParams {
 
 /** Фон графика: контур/поверхность рельефа функции.
  *
- * В 3D названия режимов зеркалят draw_3d_function_plot из graphics/Graphics.py
- * буквально: contour_type=True там рисует ЛИНИИ (ax.contour), а не заливку —
- * поэтому "contour" здесь тоже означает линии поверх скрытой поверхности,
- * а "mesh" — сплошную закрашенную поверхность (аналог plot_surface).
+ * В 3D "contour" означает линии поверх скрытой поверхности (аналог
+ * ax.contour), а "mesh" — сплошную закрашенную поверхность (аналог
+ * plot_surface).
  */
 export function buildSurfaceTrace({ preview, is3D, contourMode, contourLevels, colorscale }: SurfaceTraceParams): Data {
   const base = {
@@ -182,17 +181,16 @@ export function sliceResultToFrame(result: RunResult | undefined, frame: number)
   };
 }
 
-/** Индекс начала хвоста траектории относительно конца массива (совпадает с
- * Graphics.tail_start: 0 — показать всё). */
+/** Индекс начала хвоста траектории относительно конца массива (0 — показать всё). */
 export function tailStart(length: number, tailLength: number): number {
   return tailLength > 0 ? Math.max(length - 1 - tailLength, 0) : 0;
 }
 
 /** Траектория одного запуска, обрезанная по длине хвоста — плюс чёрная
- * обводка под цветной линией (аналог matplotlib path_effects=withStroke из
- * Graphics.py) и кружок на текущем конце пути. Обводка отдельным трейсом,
- * потому что scatter/scatter3d не поддерживают стро́ковый path-effect —
- * рисуется тем же путём, но чуть шире и чёрным, под цветной линией. */
+ * обводка под цветной линией и кружок на текущем конце пути. Обводка
+ * отдельным трейсом, потому что scatter/scatter3d не поддерживают
+ * стро́ковый path-effect — рисуется тем же путём, но чуть шире и чёрным,
+ * под цветной линией. */
 export function buildTrajectoryTrace(
   config: RunConfig,
   result: RunResult | undefined,

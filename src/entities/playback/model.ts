@@ -1,14 +1,13 @@
-// зеркалит диапазон Speed-слайдера из main.pyw (QSlider -3..6, change_speed):
 // speed = 2**value, экспонента -3..6 даёт 0.125x..64x, 0 -> 1x по умолчанию
 export const MIN_SPEED_STEP = -3;
 export const MAX_SPEED_STEP = 6;
 export const DEFAULT_SPEED_STEP = 0;
 
 // базовый интервал тика в графике десктопа (30мс при speed=1x). Это НЕ таймер
-// здесь — rAF-цикл использует его только как масштаб "кадров за миллисекунду"
+// здесь — цикл на requestAnimationFrame использует его только как масштаб "кадров за миллисекунду"
 export const BASE_TICK_MS = 30;
 
-/** speed = 2**speedStep — зеркалит change_speed(value) из main.pyw буквально. */
+/** speed = 2**speedStep. */
 export function speedFromStep(speedStep: number): number {
   return 2 ** speedStep;
 }

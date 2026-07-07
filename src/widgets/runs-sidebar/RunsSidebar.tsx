@@ -30,8 +30,8 @@ export function RunsSidebar() {
   } = useRunsStore();
   const seeded = useRef(false);
 
-  // умолчания повторяют main.pyw: Adam(lr=0.3) и Momentum(lr=0.005) на
-  // Химмельблау — контрастное поведение на одной паре минимумов
+  // Adam(lr=0.3) и Momentum(lr=0.005) на Химмельблау — контрастное поведение
+  // на одной паре минимумов
   useEffect(() => {
     if (seeded.current || slots.length > 0 || !optimizers || !schedulers) return;
     const adam = optimizers.find((option) => option.name === "Adam");
