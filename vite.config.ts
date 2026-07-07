@@ -16,6 +16,9 @@ export default defineConfig({
       '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
     },
   },
+  build: {
+    target: "esnext",
+  },
   server: {
     port: 47913,
   },
