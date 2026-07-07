@@ -17,11 +17,7 @@ function viridis(t: number): [number, number, number] {
   ];
 }
 
-export function renderHeatmapThumbnail(
-  z: number[][],
-  size: number,
-  bgColor: string,
-): string {
+export function renderHeatmapThumbnail(z: number[][]): string {
   const rows = z.length;
   const cols = z[0].length;
   let min = Infinity;
@@ -35,25 +31,24 @@ export function renderHeatmapThumbnail(
   const range = max > min ? max - min : 1;
 
   const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = cols;
+  canvas.height = rows;
   const ctx = canvas.getContext("2d")!;
-
-  ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, size, size);
-
-  const cellW = size / cols;
-  const cellH = size / rows;
+  const img = ctx.createImageData(cols, rows);
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const t = (z[r][c] - min) / range;
       const [rv, gv, bv] = viridis(t);
-      ctx.fillStyle = `rgb(${rv},${gv},${bv})`;
-      ctx.fillRect(Math.floor(c * cellW), Math.floor((rows - 1 - r) * cellH), Math.ceil(cellW), Math.ceil(cellH));
+      const i = ((rows - 1 - r) * cols + c) * 4;
+      img.data[i] = rv;
+      img.data[i + 1] = gv;
+      img.data[i + 2] = bv;
+      img.data[i + 3] = 255;
     }
   }
 
+  ctx.putImageData(img, 0, 0);
   return canvas.toDataURL("image/png");
 }
 

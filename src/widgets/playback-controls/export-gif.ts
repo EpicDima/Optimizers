@@ -16,6 +16,8 @@ export interface ExportGifOptions {
   onProgress?: (current: number, total: number) => void;
 }
 
+const yieldToMain = () => new Promise<void>((r) => setTimeout(r, 0));
+
 function dataUrlToImage(dataUrl: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -70,6 +72,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
       const img = await dataUrlToImage(dataUrl);
       gifFrames.push({ data: img, delay });
       onProgress?.(gifFrames.length, totalFrames);
+      await yieldToMain();
     }
 
     return (await encode({
