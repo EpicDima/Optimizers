@@ -1,2 +1,2 @@
-export { runAll, runSlot } from "./run-engine";
-export type { ContinuationMap, ContinuationSlot, EngineRunResult, EngineSlotInput } from "./types";
+export { runAll } from "./run-engine";
+export type { ContinuationMap, EngineSlotInput } from "./types";

@@ -1,4 +1,4 @@
-export interface ParamMeta {
+interface ParamMeta {
   default: number;
   description: string | null;
 }

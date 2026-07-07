@@ -1,7 +1,7 @@
 import type { AlgorithmMeta } from "@shared/api/types";
 import type { Vec2 } from "@shared/lib/optimization-engine/linalg";
 
-export interface OptimizerStep {
+interface OptimizerStep {
   x: Vec2;
   value: number;
 }
