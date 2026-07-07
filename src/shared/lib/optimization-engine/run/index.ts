@@ -1,2 +1,3 @@
-export { runAll } from "./run-engine";
-export type { ContinuationMap, EngineSlotInput } from "./types";
+export { runAllAsync, runSlotAsync } from "./run-engine";
+export { clearWorkerContinuationSlot, runInWorker } from "./worker-client";
+export type { ContinuationMap, EngineRunResult, EngineSlotInput, RunProgress } from "./types";

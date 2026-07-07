@@ -1,7 +1,15 @@
 import { getOptimizerDescriptor, type OptimizerInstance } from "@shared/lib/optimization-engine/optimizers";
 import { getSchedulerDescriptor } from "@shared/lib/optimization-engine/schedulers";
 
-import type { ContinuationMap, EngineRunResult, EngineSlotInput } from "./types";
+import type { ContinuationMap, EngineRunResult, EngineSlotInput, RunProgress } from "./types";
+
+// как часто отдаём управление event loop и шлём прогресс во время долгого
+// расчёта — компромисс между отзывчивостью UI и накладными расходами на yield
+const YIELD_INTERVAL_MS = 50;
+
+function yieldToEventLoop(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
 
 function defaultParamsOf(descriptor: { params: Record<string, { default: number }> }): Record<string, number> {
   return Object.fromEntries(Object.entries(descriptor.params).map(([key, meta]) => [key, meta.default]));
@@ -27,12 +35,13 @@ function failed(slotId: string, error: string): EngineRunResult {
   return { slotId, x: [], y: [], value: [], lr: null, error };
 }
 
-export function runSlot(
+export async function runSlotAsync(
   fn: (x: number, y: number) => number,
   cfg: EngineSlotInput,
   continuation: ContinuationMap,
   steps: number,
-): EngineRunResult {
+  onProgress?: (completedSteps: number) => void,
+): Promise<EngineRunResult> {
   const existing = continuation.get(cfg.slotId);
   let instance: OptimizerInstance;
 
@@ -63,6 +72,7 @@ export function runSlot(
   const hasLr = baseLr !== undefined;
   const lrs: number[] | null = hasLr ? [schedulerDescriptor.lr(schedulerParams, 0, steps, baseLr)] : null;
 
+  let lastYield = performance.now();
   for (let step = 0; step < steps; step++) {
     if (hasLr) {
       instance.params.lr = schedulerDescriptor.lr(schedulerParams, step, steps, baseLr);
@@ -72,18 +82,35 @@ export function runSlot(
     xs.push(point.x[0]);
     ys.push(point.x[1]);
     values.push(point.value);
+
+    const now = performance.now();
+    if (now - lastYield >= YIELD_INTERVAL_MS) {
+      onProgress?.(step + 1);
+      await yieldToEventLoop();
+      lastYield = performance.now();
+    }
   }
 
   if (hasLr) instance.params.lr = baseLr;
+  onProgress?.(steps);
 
   return { slotId: cfg.slotId, x: xs, y: ys, value: values, lr: lrs, error: null };
 }
 
-export function runAll(
+export async function runAllAsync(
   fn: (x: number, y: number) => number,
   slots: EngineSlotInput[],
   continuation: ContinuationMap,
   steps: number,
-): EngineRunResult[] {
-  return slots.map((cfg) => runSlot(fn, cfg, continuation, steps));
+  onProgress?: (progress: RunProgress) => void,
+): Promise<EngineRunResult[]> {
+  const results: EngineRunResult[] = [];
+  for (let slotIndex = 0; slotIndex < slots.length; slotIndex++) {
+    const cfg = slots[slotIndex];
+    const result = await runSlotAsync(fn, cfg, continuation, steps, (completedSteps) => {
+      onProgress?.({ slotIndex, totalSlots: slots.length, slotId: cfg.slotId, completedSteps, totalSteps: steps });
+    });
+    results.push(result);
+  }
+  return results;
 }

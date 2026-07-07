@@ -28,3 +28,11 @@ interface ContinuationSlot {
 
 // состояние живёт в памяти процесса ровно столько, сколько живёт сама вкладка
 export type ContinuationMap = Map<string, ContinuationSlot>;
+
+export interface RunProgress {
+  slotIndex: number;
+  totalSlots: number;
+  slotId: string;
+  completedSteps: number;
+  totalSteps: number;
+}

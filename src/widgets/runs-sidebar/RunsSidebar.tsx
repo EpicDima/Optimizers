@@ -7,7 +7,7 @@ import { useSchedulers } from "@entities/scheduler";
 import { useFunctionStore } from "@entities/test-function";
 import { MAX_RUNS } from "@shared/config/constants";
 import { defaultParams } from "@shared/lib/algorithm";
-import { Button, Checkbox, NumberField, Panel } from "@shared/ui";
+import { Button, Checkbox, NumberField, Panel, ProgressBar } from "@shared/ui";
 
 import { RunCard } from "./RunCard";
 
@@ -26,6 +26,7 @@ export function RunsSidebar() {
     setResetOnStart,
     runAll,
     isRunning,
+    progress,
     error,
   } = useRunsStore();
   const seeded = useRef(false);
@@ -94,6 +95,7 @@ export function RunsSidebar() {
           <NumberField label="Шагов" value={steps} onChange={setSteps} />
           <Checkbox checked={resetOnStart} onChange={setResetOnStart} label="Сбрасывать позицию" />
           {error && <p className="font-body text-xs text-danger">{error}</p>}
+          {isRunning && progress !== null && <ProgressBar value={progress} />}
           <Button variant="solid" onClick={() => void runAll(formula)} disabled={isRunning || slots.length === 0}>
             {isRunning ? "Считаем…" : "Start"}
           </Button>

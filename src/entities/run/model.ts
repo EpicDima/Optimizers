@@ -10,7 +10,7 @@ export interface RunConfig {
   visible: boolean;
 }
 
-/** Траектория, посчитанная бэкендом на один запуск /optimize. */
+/** Траектория, посчитанная движком оптимизации за один запуск. */
 export interface RunResult {
   slotId: string;
   x: number[];
