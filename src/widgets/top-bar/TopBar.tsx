@@ -4,11 +4,7 @@ import { FormulaDisplay } from "./FormulaDisplay";
 import { PlotSettingsControls } from "./PlotSettingsControls";
 import { PresetPicker } from "./PresetPicker";
 import { RangeEditor } from "./RangeEditor";
-import { ThemeToggle } from "./ThemeToggle";
 
-/** Панель над графиком: редактор формулы + пресеты слева, настройки
- * отображения графика справа. Композиция из атомарных под-компонентов —
- * сама панель не хранит состояния. */
 export function TopBar() {
   return (
     <Panel className="w-full">
@@ -19,10 +15,7 @@ export function TopBar() {
           <RangeEditor />
         </div>
 
-        <div className="flex items-end gap-3">
-          <PlotSettingsControls />
-          <ThemeToggle />
-        </div>
+        <PlotSettingsControls />
       </div>
     </Panel>
   );

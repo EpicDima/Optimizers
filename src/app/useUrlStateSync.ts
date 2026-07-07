@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 
 import { usePlotSettingsStore } from "@entities/plot-settings";
 import { useRunsStore } from "@entities/run";
@@ -10,15 +11,12 @@ import type { DashboardRunUrlState } from "@shared/lib/url-state";
 
 const WRITE_DEBOUNCE_MS = 350;
 
-/** Двусторонняя синхронизация ключевого состояния дашборда с query-строкой
- * URL: при монтировании — разовая гидратация сторов из ссылки, дальше —
- * запись в историю через replaceState (без новых записей) с задержкой,
- * чтобы не мешать рендеру на каждый чих. */
 export function useUrlStateSync() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const state = deserializeDashboardState(new URLSearchParams(window.location.search));
+    const state = deserializeDashboardState(searchParams);
 
     if (state.presetName !== undefined) {
       const preset = functionPresets.find((p) => p.name === state.presetName);
@@ -50,6 +48,7 @@ export function useUrlStateSync() {
     }
 
     setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formula = useFunctionStore((state) => state.formula);
@@ -86,11 +85,9 @@ export function useUrlStateSync() {
         colormapReversed,
         runs,
       });
-      const query = params.toString();
-      const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
-      window.history.replaceState(null, "", url);
+      setSearchParams(params, { replace: true });
     }, WRITE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
-  }, [hydrated, formula, presetName, range, is3D, contourMode, contourLevels, colormap, colormapReversed, slots]);
+  }, [hydrated, formula, presetName, range, is3D, contourMode, contourLevels, colormap, colormapReversed, slots, setSearchParams]);
 }
