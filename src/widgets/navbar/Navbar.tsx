@@ -1,4 +1,4 @@
-import { GalleryHorizontalEnd, LayoutDashboard } from "lucide-react";
+import { GalleryHorizontalEnd, LayoutDashboard, SlidersHorizontal } from "lucide-react";
 import { NavLink } from "react-router";
 
 import { ThemeToggle } from "@widgets/top-bar/ThemeToggle";
@@ -6,6 +6,7 @@ import { ThemeToggle } from "@widgets/top-bar/ThemeToggle";
 const tabs = [
   { to: "/dashboard", label: "Площадка", icon: LayoutDashboard },
   { to: "/gallery", label: "Галерея", icon: GalleryHorizontalEnd },
+  { to: "/sensitivity", label: "Чувствительность", icon: SlidersHorizontal },
 ] as const;
 
 export function Navbar() {

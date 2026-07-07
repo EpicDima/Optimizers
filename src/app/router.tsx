@@ -15,6 +15,10 @@ export const router = createHashRouter([
         path: "gallery",
         lazy: () => import("@pages/gallery/GalleryPage").then((m) => ({ Component: m.GalleryPage })),
       },
+      {
+        path: "sensitivity",
+        lazy: () => import("@pages/sensitivity/SensitivityPage").then((m) => ({ Component: m.SensitivityPage })),
+      },
     ],
   },
 ]);
