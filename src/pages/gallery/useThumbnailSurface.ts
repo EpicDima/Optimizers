@@ -7,7 +7,7 @@ import type { FunctionDescriptor } from "@shared/lib/optimization-engine/functio
 
 import { renderHeatmapThumbnail } from "./render-thumbnail";
 
-const GRID = 80;
+const GRID = 300;
 
 export function useThumbnailImage(preset: FunctionDescriptor, enabled: boolean) {
   const { data: catalog } = useColormapCatalog();
