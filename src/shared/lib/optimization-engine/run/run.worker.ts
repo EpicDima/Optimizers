@@ -20,7 +20,7 @@ self.onmessage = async (event: MessageEvent<RunWorkerRequest>) => {
     return;
   }
 
-  const { requestId, formula, slots, steps } = request;
+  const { requestId, formula, slots, steps, gradientNoise } = request;
   const preset = functionPresets.find((p) => p.formula === formula);
   if (!preset) {
     post({ type: "error", requestId, message: `неизвестная формула: ${formula}` });
@@ -28,7 +28,7 @@ self.onmessage = async (event: MessageEvent<RunWorkerRequest>) => {
   }
 
   try {
-    const results = await runAllAsync(preset.fn, slots, continuation, steps);
+    const results = await runAllAsync(preset.fn, slots, continuation, steps, gradientNoise);
     post({ type: "done", requestId, results });
   } catch (err) {
     post({ type: "error", requestId, message: err instanceof Error ? err.message : String(err) });

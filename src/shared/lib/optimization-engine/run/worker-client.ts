@@ -9,7 +9,7 @@ function getWorker(): Worker {
   return worker;
 }
 
-export function runInWorker(formula: string, slots: EngineSlotInput[], steps: number): Promise<EngineRunResult[]> {
+export function runInWorker(formula: string, slots: EngineSlotInput[], steps: number, gradientNoise: number = 0): Promise<EngineRunResult[]> {
   const requestId = nextRequestId++;
   const instance = getWorker();
 
@@ -24,7 +24,7 @@ export function runInWorker(formula: string, slots: EngineSlotInput[], steps: nu
     }
 
     instance.addEventListener("message", handleMessage);
-    instance.postMessage({ type: "run", requestId, formula, slots, steps } satisfies RunWorkerRequest);
+    instance.postMessage({ type: "run", requestId, formula, slots, steps, gradientNoise } satisfies RunWorkerRequest);
   });
 }
 

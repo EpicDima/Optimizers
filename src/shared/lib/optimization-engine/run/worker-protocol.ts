@@ -6,6 +6,7 @@ export interface RunWorkerRunRequest {
   formula: string;
   slots: EngineSlotInput[];
   steps: number;
+  gradientNoise: number;
 }
 
 export interface RunWorkerClearRequest {

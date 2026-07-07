@@ -9,6 +9,7 @@ export function computeRuns(
   globalStart: [number, number],
   steps: number,
   resetOnStart: boolean,
+  gradientNoise: number = 0,
 ): Promise<RunResult[]> {
   const inputs: EngineSlotInput[] = slots.map((slot) => ({
     slotId: slot.slotId,
@@ -20,5 +21,5 @@ export function computeRuns(
     reset: resetOnStart,
   }));
 
-  return runInWorker(formula, inputs, steps);
+  return runInWorker(formula, inputs, steps, gradientNoise);
 }

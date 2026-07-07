@@ -22,6 +22,8 @@ export function RunsSidebar() {
     setGlobalStart,
     steps,
     setSteps,
+    gradientNoise,
+    setGradientNoise,
     resetOnStart,
     setResetOnStart,
     runAll,
@@ -92,6 +94,7 @@ export function RunsSidebar() {
             <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
           </div>
           <NumberField label="Шагов" value={steps} onChange={setSteps} />
+          <NumberField label="Шум градиента (σ)" value={gradientNoise} onChange={setGradientNoise} />
           <Checkbox checked={resetOnStart} onChange={setResetOnStart} label="Сбрасывать позицию" />
           {error && <p className="font-body text-xs text-danger">{error}</p>}
           <Button variant="solid" onClick={() => void runAll(formula)} disabled={isRunning || slots.length === 0}>

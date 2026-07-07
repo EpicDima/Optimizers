@@ -7,6 +7,18 @@ import type { ContinuationMap, EngineRunResult, EngineSlotInput } from "./types"
 // расчёта — компромисс между отзывчивостью UI и накладными расходами на yield
 const YIELD_INTERVAL_MS = 50;
 
+type Fn = (x: number, y: number) => number;
+
+function boxMullerNormal(): number {
+  const u1 = Math.random();
+  const u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+function addNoise(baseFn: Fn, sigma: number): Fn {
+  return (x, y) => baseFn(x, y) + sigma * boxMullerNormal();
+}
+
 function yieldToEventLoop(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
@@ -40,7 +52,9 @@ export async function runSlotAsync(
   cfg: EngineSlotInput,
   continuation: ContinuationMap,
   steps: number,
+  gradientNoise: number = 0,
 ): Promise<EngineRunResult> {
+  const noisyFn = gradientNoise > 0 ? addNoise(fn, gradientNoise) : fn;
   const existing = continuation.get(cfg.slotId);
   let instance: OptimizerInstance;
 
@@ -54,7 +68,7 @@ export async function runSlotAsync(
     if (descriptor === undefined) return failed(cfg.slotId, `неизвестный оптимизатор: ${cfg.optimizer}`);
     const params = mergeValidatedParams(defaultParamsOf(descriptor), cfg.optimizerParams);
     if (params === null) return failed(cfg.slotId, `некорректные параметры оптимизатора: ${cfg.optimizer}`);
-    instance = descriptor.createInstance(fn, cfg.start, params);
+    instance = descriptor.createInstance(noisyFn, cfg.start, params);
     continuation.set(cfg.slotId, { optimizerName: cfg.optimizer, instance });
   }
 
@@ -99,10 +113,11 @@ export async function runAllAsync(
   slots: EngineSlotInput[],
   continuation: ContinuationMap,
   steps: number,
+  gradientNoise: number = 0,
 ): Promise<EngineRunResult[]> {
   const results: EngineRunResult[] = [];
   for (const cfg of slots) {
-    results.push(await runSlotAsync(fn, cfg, continuation, steps));
+    results.push(await runSlotAsync(fn, cfg, continuation, steps, gradientNoise));
   }
   return results;
 }

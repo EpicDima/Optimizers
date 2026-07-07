@@ -20,6 +20,7 @@ interface RunsState {
   results: Record<string, RunResult>;
   globalStart: [number, number];
   steps: number;
+  gradientNoise: number;
   resetOnStart: boolean;
   isRunning: boolean;
   error: string | null;
@@ -29,6 +30,7 @@ interface RunsState {
   updateSlot: (slotId: string, patch: Partial<RunConfig>) => void;
   setGlobalStart: (start: [number, number]) => void;
   setSteps: (steps: number) => void;
+  setGradientNoise: (noise: number) => void;
   setResetOnStart: (reset: boolean) => void;
   runAll: (formula: string) => Promise<void>;
   clearResults: () => void;
@@ -41,6 +43,7 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   results: {},
   globalStart: [-4, 4],
   steps: DEFAULT_STEPS,
+  gradientNoise: 0,
   resetOnStart: true,
   isRunning: false,
   error: null,
@@ -76,10 +79,11 @@ export const useRunsStore = create<RunsState>((set, get) => ({
 
   setGlobalStart: (globalStart) => set({ globalStart }),
   setSteps: (steps) => set({ steps }),
+  setGradientNoise: (gradientNoise) => set({ gradientNoise }),
   setResetOnStart: (resetOnStart) => set({ resetOnStart }),
 
   runAll: async (formula) => {
-    const { slots, globalStart, steps, resetOnStart, isRunning } = get();
+    const { slots, globalStart, steps, gradientNoise, resetOnStart, isRunning } = get();
     // одно вычисление за раз — повторный запуск, пока идёт предыдущее,
     // просто игнорируется
     if (isRunning || slots.length === 0) return;
@@ -93,7 +97,7 @@ export const useRunsStore = create<RunsState>((set, get) => ({
     set({ isRunning: true, error: null });
 
     try {
-      const runs = await computeRuns(formula, slots, globalStart, steps, resetOnStart);
+      const runs = await computeRuns(formula, slots, globalStart, steps, resetOnStart, gradientNoise);
       const results: Record<string, RunResult> = {};
       for (const run of runs) results[run.slotId] = run;
 
