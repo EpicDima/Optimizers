@@ -1,16 +1,11 @@
-import { useMemo } from "react";
 import { useNavigate } from "react-router";
-import type { Data, Layout } from "plotly.js";
 
 import { useRunsStore } from "@entities/run";
 import { useFunctionStore } from "@entities/test-function";
-import { Plot } from "@shared/lib/plotly";
-import { useResolvedTheme } from "@shared/lib/theme";
 import type { FunctionDescriptor } from "@shared/lib/optimization-engine/functions/types";
-import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 
 import { useInView } from "./useInView";
-import { useThumbnailSurface } from "./useThumbnailSurface";
+import { useThumbnailImage } from "./useThumbnailSurface";
 
 interface GalleryCardProps {
   preset: FunctionDescriptor;
@@ -18,9 +13,8 @@ interface GalleryCardProps {
 
 export function GalleryCard({ preset }: GalleryCardProps) {
   const { ref, visible } = useInView<HTMLDivElement>();
-  const { data: surface } = useThumbnailSurface(preset, visible);
+  const { data: src } = useThumbnailImage(preset, visible);
   const navigate = useNavigate();
-  const resolvedTheme = useResolvedTheme();
 
   function handleClick() {
     useFunctionStore.getState().applyPreset({
@@ -35,34 +29,6 @@ export function GalleryCard({ preset }: GalleryCardProps) {
     navigate("/dashboard");
   }
 
-  const plotData = useMemo((): Data[] => {
-    if (!surface) return [];
-    return [
-      {
-        type: "contour",
-        x: surface.meshX,
-        y: surface.meshY,
-        z: surface.z,
-        colorscale: "Viridis",
-        showscale: false,
-        contours: { coloring: "heatmap" },
-        hoverinfo: "none",
-      } as Data,
-    ];
-  }, [surface]);
-
-  const layout = useMemo((): Partial<Layout> => {
-    const theme = plotlyThemeColors(resolvedTheme);
-    return {
-      paper_bgcolor: theme.paper,
-      plot_bgcolor: theme.paper,
-      margin: { l: 0, r: 0, t: 0, b: 0 },
-      xaxis: { visible: false },
-      yaxis: { visible: false, scaleanchor: "x" },
-      showlegend: false,
-    };
-  }, [resolvedTheme]);
-
   return (
     <div
       ref={ref}
@@ -70,13 +36,8 @@ export function GalleryCard({ preset }: GalleryCardProps) {
       className="group flex cursor-pointer flex-col overflow-hidden border border-border bg-bg-elevated transition-all hover:ring-2 hover:ring-accent"
     >
       <div className="aspect-square w-full">
-        {surface ? (
-          <Plot
-            data={plotData}
-            layout={layout}
-            config={{ staticPlot: true, displayModeBar: false }}
-            style={{ width: "100%", height: "100%" }}
-          />
+        {src ? (
+          <img src={src} alt={preset.name} className="h-full w-full object-cover" draggable={false} />
         ) : (
           <div className="flex h-full items-center justify-center bg-bg-sunken">
             <span className="text-xs text-text-muted">Загрузка…</span>
