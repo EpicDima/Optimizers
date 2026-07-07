@@ -35,7 +35,7 @@ export function SchedulerCard({ descriptor }: SchedulerCardProps) {
       }
       const bg = plotlyThemeColors(resolvedTheme).paper;
       const lineColor = resolvedTheme === "dark" ? ACCENT_DARK : ACCENT_LIGHT;
-      return renderLineThumbnail(xs, ys, 300, lineColor, bg);
+      return renderLineThumbnail(xs, ys, 560, 256, lineColor, bg);
     },
     staleTime: Infinity,
   });

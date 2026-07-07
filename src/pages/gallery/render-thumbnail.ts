@@ -65,23 +65,25 @@ export function renderHeatmapThumbnail(z: number[][], stops: ColorStops): string
 export function renderLineThumbnail(
   xs: number[],
   ys: number[],
-  size: number,
+  width: number,
+  height: number,
   lineColor: string,
   bgColor: string,
 ): string {
   const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d")!;
 
   ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(0, 0, width, height);
 
   if (xs.length < 2) return canvas.toDataURL("image/png");
 
-  const pad = size * 0.08;
-  const w = size - pad * 2;
-  const h = size - pad * 2;
+  const padX = width * 0.08;
+  const padY = height * 0.12;
+  const w = width - padX * 2;
+  const h = height - padY * 2;
 
   const xMin = xs[0];
   const xMax = xs[xs.length - 1];
@@ -100,8 +102,8 @@ export function renderLineThumbnail(
   ctx.lineJoin = "round";
   ctx.beginPath();
   for (let i = 0; i < xs.length; i++) {
-    const px = pad + ((xs[i] - xMin) / xRange) * w;
-    const py = pad + (1 - (ys[i] - yMin) / yRange) * h;
+    const px = padX + ((xs[i] - xMin) / xRange) * w;
+    const py = padY + (1 - (ys[i] - yMin) / yRange) * h;
     if (i === 0) ctx.moveTo(px, py);
     else ctx.lineTo(px, py);
   }
