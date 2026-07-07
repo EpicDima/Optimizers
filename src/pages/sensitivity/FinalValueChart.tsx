@@ -1,15 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Data, Layout } from "plotly.js";
 
 import { useSensitivityStore } from "@entities/sensitivity";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
-import { Panel } from "@shared/ui";
+import { Checkbox, Panel } from "@shared/ui";
 
 export function FinalValueChart() {
   const { results, paramName } = useSensitivityStore();
   const resolvedTheme = useResolvedTheme();
+  const [logScale, setLogScale] = useState(true);
   const plotRef = usePlotlyAutoResize();
 
   const data = useMemo((): Data[] => {
@@ -48,15 +49,20 @@ export function FinalValueChart() {
       },
       yaxis: {
         title: { text: "Финальное значение" },
+        type: logScale ? "log" : "linear",
         gridcolor: theme.gridColor,
         color: theme.mutedFontColor,
         zeroline: false,
       },
     };
-  }, [resolvedTheme, paramName]);
+  }, [resolvedTheme, paramName, logScale]);
 
   return (
-    <Panel heading="Параметр → финальное значение" className="h-full min-h-0">
+    <Panel
+      heading="Параметр → финальное значение"
+      actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />}
+      className="h-full min-h-0"
+    >
       <Plot
         ref={plotRef}
         data={data}
