@@ -1,7 +1,7 @@
 import type { Mat2, Vec2 } from "@shared/lib/optimization-engine/linalg";
 
-export const GRAD_EPS = 1e-5;
-export const HESSE_EPS = 1e-4;
+const GRAD_EPS = 1e-5;
+const HESSE_EPS = 1e-4;
 
 export function gradient(fn: (x: number, y: number) => number, x: number, y: number): Vec2 {
   const e = GRAD_EPS;

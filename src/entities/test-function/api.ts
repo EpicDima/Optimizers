@@ -27,7 +27,7 @@ interface PreviewParams {
   count: number;
 }
 
-export function fetchFunctionPreview(params: PreviewParams): FunctionPreviewResult {
+function fetchFunctionPreview(params: PreviewParams): FunctionPreviewResult {
   const preset = functionPresets.find((p) => p.formula === params.formula);
   if (!preset) {
     return { valid: false, error: "неизвестная формула", meshX: [], meshY: [], z: [], minima: [] };

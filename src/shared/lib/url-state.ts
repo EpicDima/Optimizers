@@ -4,8 +4,8 @@
  * зависимость на вышестоящие слои; вызывающий код (app/) сам сопоставляет
  * поля со сторами. */
 
-export type DashboardRange = [number, number, number, number];
-export type DashboardContourMode = "contour" | "mesh";
+type DashboardRange = [number, number, number, number];
+type DashboardContourMode = "contour" | "mesh";
 
 export interface DashboardRunUrlState {
   optimizer: string;

@@ -21,11 +21,10 @@ export interface EngineRunResult {
   error: string | null;
 }
 
-export interface ContinuationSlot {
+interface ContinuationSlot {
   optimizerName: string;
   instance: OptimizerInstance;
 }
 
-// один Map на вкладку вместо серверной Session с TTL — состояние живёт
-// в памяти процесса ровно столько, сколько живёт сама вкладка
+// состояние живёт в памяти процесса ровно столько, сколько живёт сама вкладка
 export type ContinuationMap = Map<string, ContinuationSlot>;

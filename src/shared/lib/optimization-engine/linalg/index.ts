@@ -5,7 +5,6 @@ export type { Mat2 } from "./matrix2x2";
 export {
   addScaledIdentity2,
   det2,
-  eigh2,
   eigvalsh2,
   invSqrtSymmetric2,
   outer2,

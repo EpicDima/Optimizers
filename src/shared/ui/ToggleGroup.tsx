@@ -2,7 +2,7 @@ import * as RadixToggleGroup from "@radix-ui/react-toggle-group";
 
 import { cn } from "@shared/lib/cn";
 
-export interface ToggleGroupOption {
+interface ToggleGroupOption {
   value: string;
   label: string;
 }
@@ -15,7 +15,7 @@ interface ToggleGroupProps {
 }
 
 /** Сегментированный переключатель — веб-аналог пары радиокнопок/чекбоксов
- * десктопного GUI (2D/3D, contour/mesh и т.п.), но компактнее пары чекбоксов. */
+ * (2D/3D, contour/mesh и т.п.), но компактнее пары чекбоксов. */
 export function ToggleGroup({ value, onChange, options, className }: ToggleGroupProps) {
   return (
     <RadixToggleGroup.Root

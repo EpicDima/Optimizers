@@ -1,7 +1,7 @@
-export type ColormapType = "continuous" | "qualitative";
+type ColormapType = "continuous" | "qualitative";
 
-/** stops — пары [позиция 0..1, "#rrggbb"], сгенерированы scripts/generate_colormaps.py. */
-export interface ColormapEntry {
+/** stops — пары [позиция 0..1, "#rrggbb"]. */
+interface ColormapEntry {
   type: ColormapType;
   stops: [number, string][];
 }
