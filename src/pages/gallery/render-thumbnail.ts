@@ -1,23 +1,33 @@
-const VIRIDIS: [number, number, number][] = [
-  [68, 1, 84], [72, 35, 116], [64, 67, 135], [52, 94, 141],
-  [41, 120, 142], [32, 144, 140], [34, 167, 132], [68, 190, 112],
-  [121, 209, 81], [189, 222, 38], [253, 231, 37],
-];
+export type ColorStops = [number, string][];
 
-function viridis(t: number): [number, number, number] {
-  const n = VIRIDIS.length - 1;
-  const i = Math.min(Math.floor(t * n), n - 1);
-  const f = t * n - i;
-  const a = VIRIDIS[i];
-  const b = VIRIDIS[i + 1];
-  return [
-    Math.round(a[0] + (b[0] - a[0]) * f),
-    Math.round(a[1] + (b[1] - a[1]) * f),
-    Math.round(a[2] + (b[2] - a[2]) * f),
-  ];
+function parseHex(hex: string): [number, number, number] {
+  const h = hex.startsWith("#") ? hex.slice(1) : hex;
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
 
-export function renderHeatmapThumbnail(z: number[][]): string {
+function interpolateStops(stops: ColorStops, t: number): [number, number, number] {
+  if (stops.length === 0) return [0, 0, 0];
+  if (t <= stops[0][0]) return parseHex(stops[0][1]);
+  if (t >= stops[stops.length - 1][0]) return parseHex(stops[stops.length - 1][1]);
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [p0, c0] = stops[i];
+    const [p1, c1] = stops[i + 1];
+    if (t >= p0 && t <= p1) {
+      const f = (t - p0) / (p1 - p0);
+      const a = parseHex(c0);
+      const b = parseHex(c1);
+      return [
+        Math.round(a[0] + (b[0] - a[0]) * f),
+        Math.round(a[1] + (b[1] - a[1]) * f),
+        Math.round(a[2] + (b[2] - a[2]) * f),
+      ];
+    }
+  }
+  return parseHex(stops[stops.length - 1][1]);
+}
+
+export function renderHeatmapThumbnail(z: number[][], stops: ColorStops): string {
   const rows = z.length;
   const cols = z[0].length;
   let min = Infinity;
@@ -39,7 +49,7 @@ export function renderHeatmapThumbnail(z: number[][]): string {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const t = (z[r][c] - min) / range;
-      const [rv, gv, bv] = viridis(t);
+      const [rv, gv, bv] = interpolateStops(stops, t);
       const i = ((rows - 1 - r) * cols + c) * 4;
       img.data[i] = rv;
       img.data[i + 1] = gv;

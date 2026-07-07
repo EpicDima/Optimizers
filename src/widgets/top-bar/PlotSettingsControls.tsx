@@ -1,8 +1,6 @@
 import { usePlotSettingsStore } from "@entities/plot-settings";
 import { Checkbox, Slider, ToggleGroup } from "@shared/ui";
 
-import { ColormapPicker } from "./ColormapPicker";
-
 const DIMENSION_OPTIONS = [
   { value: "2d", label: "2D" },
   { value: "3d", label: "3D" },
@@ -25,10 +23,6 @@ export function PlotSettingsControls() {
   const setContourMode = usePlotSettingsStore((state) => state.setContourMode);
   const contourLevels = usePlotSettingsStore((state) => state.contourLevels);
   const setContourLevels = usePlotSettingsStore((state) => state.setContourLevels);
-  const colormap = usePlotSettingsStore((state) => state.colormap);
-  const setColormap = usePlotSettingsStore((state) => state.setColormap);
-  const colormapReversed = usePlotSettingsStore((state) => state.colormapReversed);
-  const setColormapReversed = usePlotSettingsStore((state) => state.setColormapReversed);
   const showGradientField = usePlotSettingsStore((state) => state.showGradientField);
   const setShowGradientField = usePlotSettingsStore((state) => state.setShowGradientField);
 
@@ -52,10 +46,6 @@ export function PlotSettingsControls() {
         <span className="font-sans text-[11px] text-text-muted">Уровни: {contourLevels}</span>
         <Slider value={contourLevels} onChange={setContourLevels} min={MIN_CONTOUR_LEVELS} max={MAX_CONTOUR_LEVELS} />
       </div>
-
-      <ColormapPicker colormap={colormap} colormapReversed={colormapReversed} onChange={setColormap} />
-
-      <Checkbox checked={colormapReversed} onChange={setColormapReversed} label="Инверсия" className="pb-1.5" />
 
       {!is3D && <Checkbox checked={showGradientField} onChange={setShowGradientField} label="Градиент" className="pb-1.5" />}
     </div>

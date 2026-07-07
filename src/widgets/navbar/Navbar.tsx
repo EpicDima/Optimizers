@@ -1,6 +1,9 @@
 import { GalleryHorizontalEnd, LayoutDashboard, SlidersHorizontal } from "lucide-react";
 import { NavLink } from "react-router";
 
+import { usePlotSettingsStore } from "@entities/plot-settings";
+import { Checkbox } from "@shared/ui";
+import { ColormapPicker } from "@widgets/top-bar/ColormapPicker";
 import { ThemeToggle } from "@widgets/top-bar/ThemeToggle";
 
 const tabs = [
@@ -10,6 +13,11 @@ const tabs = [
 ] as const;
 
 export function Navbar() {
+  const colormap = usePlotSettingsStore((s) => s.colormap);
+  const setColormap = usePlotSettingsStore((s) => s.setColormap);
+  const colormapReversed = usePlotSettingsStore((s) => s.colormapReversed);
+  const setColormapReversed = usePlotSettingsStore((s) => s.setColormapReversed);
+
   return (
     <nav className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-bg-elevated px-4">
       <div className="flex items-center gap-6">
@@ -33,7 +41,11 @@ export function Navbar() {
           ))}
         </div>
       </div>
-      <ThemeToggle />
+      <div className="flex items-center gap-3">
+        <ColormapPicker colormap={colormap} colormapReversed={colormapReversed} onChange={setColormap} />
+        <Checkbox checked={colormapReversed} onChange={setColormapReversed} label="Инверсия" />
+        <ThemeToggle />
+      </div>
     </nav>
   );
 }
