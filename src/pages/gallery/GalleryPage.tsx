@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useSearchParams } from "react-router";
 
 import { functionPresets } from "@shared/lib/optimization-engine/functions";
 import { ToggleGroup } from "@shared/ui";
@@ -14,7 +14,9 @@ const TAB_OPTIONS = [
 ] as const;
 
 export function GalleryPage() {
-  const [tab, setTab] = useState<Tab>("functions");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = (searchParams.get("tab") === "schedulers" ? "schedulers" : "functions") as Tab;
+  const setTab = (value: string) => setSearchParams({ tab: value }, { replace: true });
 
   return (
     <div className="h-full overflow-y-auto p-6">
