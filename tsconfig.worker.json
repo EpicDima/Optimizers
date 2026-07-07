@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.worker.tsbuildinfo",
     "target": "es2025",
-    "lib": ["ES2025", "DOM"],
+    "lib": ["ES2025", "WebWorker"],
     "module": "esnext",
-    "types": ["vite/client"],
-    "allowArbitraryExtensions": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
 
@@ -15,7 +13,6 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
-    "jsx": "react-jsx",
 
     /* Paths (feature-sliced layers) */
     "paths": {
@@ -32,6 +29,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.worker.ts"]
+  "include": ["src/**/*.worker.ts"]
 }

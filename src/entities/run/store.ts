@@ -3,9 +3,9 @@ import { create } from "zustand";
 import { colorForSlot } from "@shared/config/colors";
 import { DEFAULT_STEPS } from "@shared/config/constants";
 import { functionPresets } from "@shared/lib/optimization-engine/functions";
+import { clearWorkerContinuationSlot } from "@shared/lib/optimization-engine/run";
 
 import { computeRuns } from "./api";
-import { clearContinuationSlot } from "./continuation";
 import type { RunConfig, RunResult } from "./model";
 
 interface NewSlotDefaults {
@@ -22,6 +22,8 @@ interface RunsState {
   steps: number;
   resetOnStart: boolean;
   isRunning: boolean;
+  // доля выполненного расчёта (0..1) по всем слотам сразу, null — когда не считаем
+  progress: number | null;
   error: string | null;
 
   addSlot: (defaults: NewSlotDefaults) => void;
@@ -43,6 +45,7 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   steps: DEFAULT_STEPS,
   resetOnStart: true,
   isRunning: false,
+  progress: null,
   error: null,
 
   addSlot: (defaults) =>
@@ -64,7 +67,7 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   removeSlot: (slotId) =>
     set((state) => {
       if (state.slots.length <= 1) return state;
-      clearContinuationSlot(slotId);
+      clearWorkerContinuationSlot(slotId);
       const { [slotId]: _removed, ...results } = state.results;
       return { slots: state.slots.filter((slot) => slot.slotId !== slotId), results };
     }),
@@ -79,8 +82,10 @@ export const useRunsStore = create<RunsState>((set, get) => ({
   setResetOnStart: (resetOnStart) => set({ resetOnStart }),
 
   runAll: async (formula) => {
-    const { slots, globalStart, steps, resetOnStart } = get();
-    if (slots.length === 0) return;
+    const { slots, globalStart, steps, resetOnStart, isRunning } = get();
+    // одно вычисление за раз — повторный запуск, пока идёт предыдущее,
+    // просто игнорируется
+    if (isRunning || slots.length === 0) return;
 
     const preset = functionPresets.find((p) => p.formula === formula);
     if (!preset) {
@@ -88,24 +93,34 @@ export const useRunsStore = create<RunsState>((set, get) => ({
       return;
     }
 
-    set({ isRunning: true, error: null });
+    set({ isRunning: true, error: null, progress: 0 });
 
-    const runs = computeRuns(preset.fn, slots, globalStart, steps, resetOnStart);
-    const results: Record<string, RunResult> = {};
-    for (const run of runs) results[run.slotId] = run;
+    try {
+      const runs = await computeRuns(formula, slots, globalStart, steps, resetOnStart, (progress) => {
+        const overall =
+          (progress.slotIndex * progress.totalSteps + progress.completedSteps) /
+          (progress.totalSlots * progress.totalSteps);
+        set({ progress: overall });
+      });
+      const results: Record<string, RunResult> = {};
+      for (const run of runs) results[run.slotId] = run;
 
-    set((state) => ({
-      isRunning: false,
-      results: { ...state.results, ...results },
-      // локальная копия последней позиции — резервный старт, если тип
-      // оптимизатора слота сменился и continuation для него сбросилась
-      slots: state.slots.map((slot) => {
-        const result = results[slot.slotId];
-        if (!result || result.error || result.x.length === 0) return slot;
-        const lastIndex = result.x.length - 1;
-        return { ...slot, start: [result.x[lastIndex], result.y[lastIndex]] };
-      }),
-    }));
+      set((state) => ({
+        isRunning: false,
+        progress: null,
+        results: { ...state.results, ...results },
+        // локальная копия последней позиции — резервный старт, если тип
+        // оптимизатора слота сменился и continuation для него сбросилась
+        slots: state.slots.map((slot) => {
+          const result = results[slot.slotId];
+          if (!result || result.error || result.x.length === 0) return slot;
+          const lastIndex = result.x.length - 1;
+          return { ...slot, start: [result.x[lastIndex], result.y[lastIndex]] };
+        }),
+      }));
+    } catch (err) {
+      set({ isRunning: false, progress: null, error: err instanceof Error ? err.message : String(err) });
+    }
   },
 
   clearResults: () => set({ results: {} }),

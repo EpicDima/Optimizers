@@ -1,16 +1,16 @@
-import { runAll as runAllSlots } from "@shared/lib/optimization-engine/run";
-import type { EngineSlotInput } from "@shared/lib/optimization-engine/run";
+import { runInWorker } from "@shared/lib/optimization-engine/run";
+import type { EngineSlotInput, RunProgress } from "@shared/lib/optimization-engine/run";
 
-import { continuationMap } from "./continuation";
 import type { RunConfig, RunResult } from "./model";
 
 export function computeRuns(
-  fn: (x: number, y: number) => number,
+  formula: string,
   slots: RunConfig[],
   globalStart: [number, number],
   steps: number,
   resetOnStart: boolean,
-): RunResult[] {
+  onProgress?: (progress: RunProgress) => void,
+): Promise<RunResult[]> {
   const inputs: EngineSlotInput[] = slots.map((slot) => ({
     slotId: slot.slotId,
     optimizer: slot.optimizer,
@@ -21,5 +21,5 @@ export function computeRuns(
     reset: resetOnStart,
   }));
 
-  return runAllSlots(fn, inputs, continuationMap, steps);
+  return runInWorker(formula, inputs, steps, onProgress);
 }

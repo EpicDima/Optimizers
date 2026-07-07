@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { runAll, runSlot } from "./run-engine";
+import { runAllAsync, runSlotAsync } from "./run-engine";
 import type { ContinuationMap, EngineSlotInput } from "./types";
 
 const sphere = (x: number, y: number): number => x ** 2 + y ** 2;
@@ -18,10 +18,10 @@ function slot(overrides: Partial<EngineSlotInput> = {}): EngineSlotInput {
   };
 }
 
-describe("runSlot", () => {
-  it("produces a run of length steps+1 with matching lr when the optimizer has one", () => {
+describe("runSlotAsync", () => {
+  it("produces a run of length steps+1 with matching lr when the optimizer has one", async () => {
     const continuation: ContinuationMap = new Map();
-    const result = runSlot(sphere, slot(), continuation, 50);
+    const result = await runSlotAsync(sphere, slot(), continuation, 50);
 
     expect(result.error).toBeNull();
     expect(result.x).toHaveLength(51);
@@ -33,39 +33,39 @@ describe("runSlot", () => {
     expect(Math.abs(result.y.at(-1)!)).toBeLessThan(Math.abs(result.y[0]));
   });
 
-  it("returns a per-slot error for an unknown optimizer instead of throwing", () => {
+  it("returns a per-slot error for an unknown optimizer instead of throwing", async () => {
     const continuation: ContinuationMap = new Map();
-    const result = runSlot(sphere, slot({ optimizer: "NoSuchOptimizer" }), continuation, 50);
+    const result = await runSlotAsync(sphere, slot({ optimizer: "NoSuchOptimizer" }), continuation, 50);
 
     expect(result.error).not.toBeNull();
     expect(result.x).toEqual([]);
   });
 
-  it("returns a per-slot error for an unknown scheduler instead of throwing", () => {
+  it("returns a per-slot error for an unknown scheduler instead of throwing", async () => {
     const continuation: ContinuationMap = new Map();
-    const result = runSlot(sphere, slot({ scheduler: "NoSuchScheduler" }), continuation, 50);
+    const result = await runSlotAsync(sphere, slot({ scheduler: "NoSuchScheduler" }), continuation, 50);
 
     expect(result.error).not.toBeNull();
     expect(result.x).toEqual([]);
   });
 
-  it("returns a per-slot error for an unknown optimizer param instead of silently ignoring it", () => {
+  it("returns a per-slot error for an unknown optimizer param instead of silently ignoring it", async () => {
     const continuation: ContinuationMap = new Map();
-    const result = runSlot(sphere, slot({ optimizerParams: { lr: 0.1, notARealParam: 1.0 } }), continuation, 50);
+    const result = await runSlotAsync(sphere, slot({ optimizerParams: { lr: 0.1, notARealParam: 1.0 } }), continuation, 50);
 
     expect(result.error).not.toBeNull();
   });
 
-  it("returns a per-slot error for an unknown scheduler param instead of silently ignoring it", () => {
+  it("returns a per-slot error for an unknown scheduler param instead of silently ignoring it", async () => {
     const continuation: ContinuationMap = new Map();
-    const result = runSlot(sphere, slot({ schedulerParams: { notARealParam: 1.0 } }), continuation, 50);
+    const result = await runSlotAsync(sphere, slot({ schedulerParams: { notARealParam: 1.0 } }), continuation, 50);
 
     expect(result.error).not.toBeNull();
   });
 
-  it("leaves lr null when the optimizer has no lr param, ignoring the scheduler", () => {
+  it("leaves lr null when the optimizer has no lr param, ignoring the scheduler", async () => {
     const continuation: ContinuationMap = new Map();
-    const result = runSlot(
+    const result = await runSlotAsync(
       sphere,
       slot({
         optimizer: "Rprop",
@@ -81,29 +81,38 @@ describe("runSlot", () => {
     expect(result.lr).toBeNull();
   });
 
-  it("continues an existing instance across calls with the same slotId when reset is false", () => {
+  it("continues an existing instance across calls with the same slotId when reset is false", async () => {
     const continuation: ContinuationMap = new Map();
-    const first = runSlot(sphere, slot({ reset: true }), continuation, 20);
-    const second = runSlot(sphere, slot({ reset: false }), continuation, 20);
+    const first = await runSlotAsync(sphere, slot({ reset: true }), continuation, 20);
+    const second = await runSlotAsync(sphere, slot({ reset: false }), continuation, 20);
 
     expect(second.x[0]).toBe(first.x.at(-1));
     expect(second.y[0]).toBe(first.y.at(-1));
   });
 
-  it("starts fresh from cfg.start when the optimizer type changes even if reset is false", () => {
+  it("starts fresh from cfg.start when the optimizer type changes even if reset is false", async () => {
     const continuation: ContinuationMap = new Map();
-    runSlot(sphere, slot({ optimizer: "Adam", reset: true }), continuation, 20);
-    const second = runSlot(sphere, slot({ optimizer: "SGD", optimizerParams: {}, reset: false }), continuation, 20);
+    await runSlotAsync(sphere, slot({ optimizer: "Adam", reset: true }), continuation, 20);
+    const second = await runSlotAsync(sphere, slot({ optimizer: "SGD", optimizerParams: {}, reset: false }), continuation, 20);
 
     expect(second.x[0]).toBe(-4);
     expect(second.y[0]).toBe(4);
   });
+
+  it("reports progress ending at the total step count", async () => {
+    const continuation: ContinuationMap = new Map();
+    const completed: number[] = [];
+    await runSlotAsync(sphere, slot(), continuation, 20, (steps) => completed.push(steps));
+
+    expect(completed.at(-1)).toBe(20);
+    expect(completed.every((value, index) => index === 0 || value >= completed[index - 1])).toBe(true);
+  });
 });
 
-describe("runAll", () => {
-  it("runs every slot independently and preserves slotId ordering", () => {
+describe("runAllAsync", () => {
+  it("runs every slot independently and preserves slotId ordering", async () => {
     const continuation: ContinuationMap = new Map();
-    const results = runAll(
+    const results = await runAllAsync(
       sphere,
       [slot({ slotId: "a" }), slot({ slotId: "b", optimizer: "SGD", optimizerParams: {} })],
       continuation,
@@ -112,5 +121,23 @@ describe("runAll", () => {
 
     expect(results.map((r) => r.slotId)).toEqual(["a", "b"]);
     expect(results.every((r) => r.error === null)).toBe(true);
+  });
+
+  it("reports progress tagged with the right slot index and id", async () => {
+    const continuation: ContinuationMap = new Map();
+    const seenSlotIds = new Set<string>();
+    await runAllAsync(
+      sphere,
+      [slot({ slotId: "a" }), slot({ slotId: "b", optimizer: "SGD", optimizerParams: {} })],
+      continuation,
+      10,
+      (progress) => {
+        seenSlotIds.add(progress.slotId);
+        expect(progress.totalSlots).toBe(2);
+        expect(progress.totalSteps).toBe(10);
+      },
+    );
+
+    expect(seenSlotIds).toEqual(new Set(["a", "b"]));
   });
 });
