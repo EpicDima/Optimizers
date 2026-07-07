@@ -5,7 +5,7 @@ import type { SchedulerDescriptor } from "@shared/lib/optimization-engine/schedu
 import { useResolvedTheme } from "@shared/lib/theme";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 
-import { renderThumbnail } from "./render-thumbnail";
+import { renderLineThumbnail } from "./render-thumbnail";
 
 const TOTAL_STEPS = 200;
 const BASE_LR = 0.01;
@@ -33,28 +33,9 @@ export function SchedulerCard({ descriptor }: SchedulerCardProps) {
         xs.push(step);
         ys.push(descriptor.lr(defaults, step, TOTAL_STEPS, BASE_LR));
       }
-      const theme = plotlyThemeColors(resolvedTheme);
-      return renderThumbnail(
-        [
-          {
-            x: xs,
-            y: ys,
-            type: "scatter" as const,
-            mode: "lines" as const,
-            line: { color: resolvedTheme === "dark" ? ACCENT_DARK : ACCENT_LIGHT, width: 2 },
-            hoverinfo: "skip" as const,
-          },
-        ],
-        {
-          paper_bgcolor: theme.paper,
-          plot_bgcolor: theme.paper,
-          margin: { l: 0, r: 0, t: 0, b: 0 },
-          xaxis: { visible: false },
-          yaxis: { visible: false },
-          showlegend: false,
-        },
-        300,
-      );
+      const bg = plotlyThemeColors(resolvedTheme).paper;
+      const lineColor = resolvedTheme === "dark" ? ACCENT_DARK : ACCENT_LIGHT;
+      return renderLineThumbnail(xs, ys, 300, lineColor, bg);
     },
     staleTime: Infinity,
   });
