@@ -1,9 +1,14 @@
 import { useEffect, useRef } from "react";
 
-// plotly.js-dist-min — уже собранный бандл (с gl3d для surface/scatter3d),
-// поэтому react-plotly.js подключается через фабрику, а не готовый default-экспорт
-import Plotly from "plotly.js-dist-min";
+import Plotly from "plotly.js/lib/core";
+import contour from "plotly.js/lib/contour";
+import heatmap from "plotly.js/lib/heatmap";
+import scatter from "plotly.js/lib/scatter";
+import scatter3d from "plotly.js/lib/scatter3d";
+import surface from "plotly.js/lib/surface";
 import createPlotlyComponent from "react-plotly.js/factory";
+
+Plotly.register([scatter, scatter3d, surface, contour, heatmap]);
 
 export const Plot = createPlotlyComponent(Plotly);
 
