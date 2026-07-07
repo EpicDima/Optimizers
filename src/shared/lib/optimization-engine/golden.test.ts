@@ -4,16 +4,16 @@ import { functionPresets, gradient, hessian } from "./functions";
 import { getOptimizerDescriptor } from "./optimizers";
 import { getSchedulerDescriptor } from "./schedulers";
 
-// сгенерированы scripts/export_golden_fixtures.py из эталонной Python-реализации —
+// зафиксированные значения из эталонной реализации на момент переноса —
 // ловят числовые расхождения, которые property-тесты структурно не поймают
-// (см. комментарий в самом скрипте)
 import calculusFixtureJson from "./__fixtures__/golden/calculus.json";
 import optimizersFixtureJson from "./__fixtures__/golden/optimizers.json";
 import schedulersFixtureJson from "./__fixtures__/golden/schedulers.json";
 
-// не бит-в-бит: Math.cos/Math.sqrt в V8 и numpy/C дают безобидное расхождение на уровне ULP
+// не бит-в-бит: Math.cos/Math.sqrt в V8 и numpy/C дают безобидное расхождение
+// в последнем значащем бите мантиссы
 const EPSILON = 1e-8;
-// за десятки шагов адаптивных методов (damping, line search) ULP-шум накапливается сильнее
+// за десятки шагов адаптивных методов (damping, line search) такой микро-шум накапливается сильнее
 const TRAJECTORY_EPSILON = 1e-6;
 
 function expectClose(actual: number, expected: number, epsilon = EPSILON): void {

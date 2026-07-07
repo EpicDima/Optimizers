@@ -10,8 +10,8 @@ interface TrajectoryReadoutProps {
 
 /** HTML-оверлей поверх графика — замена отключённой Plotly-легенды
  * (showlegend: false везде в build-traces.ts, см. buildTrajectoryTrace).
- * Зеркалит value_label из graphics/Graphics.py: "Name = 1.234, lr: 0.01",
- * читая value/lr на текущем кадре анимации, а не последнее значение прогона. */
+ * Формат "Name = 1.234, lr: 0.01", читает value/lr на текущем кадре
+ * анимации, а не последнее значение прогона. */
 export function TrajectoryReadout({ slots, results, frame }: TrajectoryReadoutProps) {
   const visibleSlots = slots.filter((slot) => slot.visible);
   if (visibleSlots.length === 0) return null;

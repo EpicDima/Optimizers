@@ -17,7 +17,7 @@ const MIN_CONTOUR_LEVELS = 5;
 const MAX_CONTOUR_LEVELS = 100;
 
 /** Настройки отображения графика: проекция, режим рельефа, число уровней
- * контура и палитра — зеркалит поля graphics.Graphics из десктопного GUI. */
+ * контура и палитра. */
 export function PlotSettingsControls() {
   const is3D = usePlotSettingsStore((state) => state.is3D);
   const setIs3D = usePlotSettingsStore((state) => state.setIs3D);

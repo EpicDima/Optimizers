@@ -7,8 +7,7 @@ interface ColorSwatchProps {
   title?: string;
 }
 
-/** Квадрат цвета траектории, клик открывает нативный color-picker —
- * веб-аналог QColorDialog из PlotOptimizersDialog. */
+/** Квадрат цвета траектории, клик открывает нативный color-picker. */
 export function ColorSwatch({ color, onChange, className, title }: ColorSwatchProps) {
   return (
     <label

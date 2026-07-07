@@ -1,8 +1,7 @@
 import type { FunctionDescriptor } from "./types";
 
-// Порт `Function.py::standard_functions` — тот же порядок, те же имена/диапазоны/старты.
-// Формулы — прямая транскрипция строк Function.py в JS-замыкания, без парсера
-// (свободный ввод формулы в вебе отключён, "formula" — только для отображения).
+// Формулы — JS-замыкания без парсера (свободный ввод формулы в вебе отключён,
+// "formula" — только для отображения).
 export const functionPresets: FunctionDescriptor[] = [
   {
     name: "Функция сферы",

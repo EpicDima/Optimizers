@@ -14,8 +14,7 @@ interface FunctionState {
   applyPreset: (preset: FunctionPreset) => void;
 }
 
-// умолчание совпадает с десктопным GUI: main.pyw вызывает
-// set_standard_function("Функция Химмельблау") сразу после старта
+// дефолтный пресет при запуске — Химмельблау
 export const useFunctionStore = create<FunctionState>((set) => ({
   formula: "(x^2 + y - 11)^2 + (x + y^2 - 7)^2",
   range: [-5, 5, -5, 5],

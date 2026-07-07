@@ -15,8 +15,8 @@ interface NumberFieldProps {
 
 /** Текстовое поле с числовым буфером: во время набора («-», «1.», «1e-»)
  * промежуточные состояния не отбрасываются, наружу уходит только валидное
- * конечное число — как safe_input в десктопном GUI, но без сообщения об
- * ошибке (сохраняется последнее валидное значение). */
+ * конечное число, без сообщения об ошибке (сохраняется последнее валидное
+ * значение). */
 export function NumberField({ label, description, value, onChange, className, inputClassName }: NumberFieldProps) {
   const [text, setText] = useState(() => String(value));
   const focused = useRef(false);

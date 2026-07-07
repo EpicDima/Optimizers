@@ -4,12 +4,11 @@ import { findMinima } from "./minima";
 import { functionPresets } from "./presets";
 import { buildSurface } from "./surface";
 
-// Function.py::create_surface строит поверхность с count=200 — та же сетка,
-// на которой найдены KNOWN_MINIMA в tests/test_function_minima.py
+// та же сетка (count=200), на которой изначально найдены минимумы ниже
 const GRID_COUNT = 200;
 
-// Порт KNOWN_MINIMA из tests/test_function_minima.py: известные из литературы
-// глобальные минимумы предустановок в пределах их области + допуск по координатам
+// известные из литературы глобальные минимумы предустановок в пределах их
+// области + допуск по координатам
 const KNOWN_MINIMA: Record<string, { points: ReadonlyArray<readonly [number, number]>; tolerance: number }> = {
   "Функция сферы": { points: [[0, 0]], tolerance: 1e-3 },
   "Функция трёхгорбого верблюда": { points: [[0, 0]], tolerance: 1e-3 },
