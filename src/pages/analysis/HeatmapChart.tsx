@@ -51,6 +51,23 @@ export function HeatmapChart() {
     [catalog, colormap, colormapReversed],
   );
 
+  const zRange = useMemo(() => {
+    if (!heatmapData) return null;
+    let min = Infinity;
+    let max = -Infinity;
+    for (const row of heatmapData.values) {
+      for (const trajectory of row) {
+        for (const v of trajectory) {
+          if (!Number.isFinite(v)) continue;
+          if (v < min) min = v;
+          if (v > max) max = v;
+        }
+      }
+    }
+    if (!Number.isFinite(min)) return null;
+    return { min, max };
+  }, [heatmapData]);
+
   const { zDisplay, rawZ } = useMemo(() => {
     if (!heatmapData) return { zDisplay: [], rawZ: [] };
     const { z, raw } = zAtStep(heatmapData.values, displayStep);
@@ -61,7 +78,10 @@ export function HeatmapChart() {
   }, [heatmapData, displayStep, logScale]);
 
   const data = useMemo((): Data[] => {
-    if (!heatmapData || !baseColorscale || zDisplay.length === 0) return [];
+    if (!heatmapData || !baseColorscale || zDisplay.length === 0 || !zRange) return [];
+
+    const zmin = logScale ? (zRange.min > 0 ? Math.log10(zRange.min) : -10) : zRange.min;
+    const zmax = logScale ? (zRange.max > 0 ? Math.log10(zRange.max) : 0) : zRange.max;
 
     const traces: Data[] = [];
 
@@ -82,6 +102,9 @@ export function HeatmapChart() {
       x: heatmapData.xs,
       y: heatmapData.ys,
       z: zDisplay,
+      zmin,
+      zmax,
+      zauto: false,
       colorscale: baseColorscale,
       opacity: showBase ? overlayOpacity : 1,
       colorbar: {
@@ -94,7 +117,7 @@ export function HeatmapChart() {
     });
 
     return traces;
-  }, [heatmapData, baseColorscale, zDisplay, rawZ, showBase, overlayOpacity, logScale]);
+  }, [heatmapData, baseColorscale, zDisplay, rawZ, zRange, showBase, overlayOpacity, logScale]);
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
