@@ -26,6 +26,10 @@ export function useUrlStateSync() {
     }
     if (state.range !== undefined) useFunctionStore.getState().setRange(state.range);
 
+    if (state.globalStart !== undefined) {
+      useRunsStore.getState().setGlobalStart(state.globalStart);
+    }
+
     if (state.is3D !== undefined) usePlotSettingsStore.getState().setIs3D(state.is3D);
     if (state.contourMode !== undefined) usePlotSettingsStore.getState().setContourMode(state.contourMode);
     if (state.contourLevels !== undefined) usePlotSettingsStore.getState().setContourLevels(state.contourLevels);
@@ -59,6 +63,7 @@ export function useUrlStateSync() {
   const contourLevels = usePlotSettingsStore((state) => state.contourLevels);
   const colormap = usePlotSettingsStore((state) => state.colormap);
   const colormapReversed = usePlotSettingsStore((state) => state.colormapReversed);
+  const globalStart = useRunsStore((state) => state.globalStart);
   const slots = useRunsStore((state) => state.slots);
 
   useEffect(() => {
@@ -78,6 +83,7 @@ export function useUrlStateSync() {
         formula,
         presetName: presetName ?? undefined,
         range,
+        globalStart,
         is3D,
         contourMode,
         contourLevels,
@@ -89,5 +95,5 @@ export function useUrlStateSync() {
     }, WRITE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
-  }, [hydrated, formula, presetName, range, is3D, contourMode, contourLevels, colormap, colormapReversed, slots, setSearchParams]);
+  }, [hydrated, formula, presetName, range, globalStart, is3D, contourMode, contourLevels, colormap, colormapReversed, slots, setSearchParams]);
 }

@@ -20,6 +20,7 @@ export interface DashboardUrlState {
   formula?: string;
   presetName?: string;
   range?: DashboardRange;
+  globalStart?: [number, number];
   is3D?: boolean;
   contourMode?: DashboardContourMode;
   contourLevels?: number;
@@ -36,6 +37,7 @@ const PARAM_MODE = "mode";
 const PARAM_LEVELS = "levels";
 const PARAM_CMAP = "cmap";
 const PARAM_CMAP_REVERSED = "cmapRev";
+const PARAM_START = "start";
 const PARAM_RUNS = "runs";
 
 export function serializeDashboardState(state: DashboardUrlState): URLSearchParams {
@@ -44,6 +46,7 @@ export function serializeDashboardState(state: DashboardUrlState): URLSearchPara
   if (state.formula !== undefined) params.set(PARAM_FORMULA, state.formula);
   if (state.presetName) params.set(PARAM_PRESET, state.presetName);
   if (state.range !== undefined) params.set(PARAM_RANGE, state.range.join(","));
+  if (state.globalStart !== undefined) params.set(PARAM_START, state.globalStart.join(","));
   if (state.is3D !== undefined) params.set(PARAM_DIM, state.is3D ? "3d" : "2d");
   if (state.contourMode !== undefined) params.set(PARAM_MODE, state.contourMode);
   if (state.contourLevels !== undefined) params.set(PARAM_LEVELS, String(state.contourLevels));
@@ -65,6 +68,9 @@ export function deserializeDashboardState(params: URLSearchParams): DashboardUrl
 
   const range = parseRange(params.get(PARAM_RANGE));
   if (range) result.range = range;
+
+  const start = parseStart(params.get(PARAM_START));
+  if (start) result.globalStart = start;
 
   const dim = params.get(PARAM_DIM);
   if (dim === "2d" || dim === "3d") result.is3D = dim === "3d";
@@ -92,6 +98,13 @@ function parseRange(raw: string | null): DashboardRange | null {
   const parts = raw.split(",").map(Number);
   if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return null;
   return parts as DashboardRange;
+}
+
+function parseStart(raw: string | null): [number, number] | null {
+  if (!raw) return null;
+  const parts = raw.split(",").map(Number);
+  if (parts.length !== 2 || parts.some((n) => !Number.isFinite(n))) return null;
+  return parts as [number, number];
 }
 
 function parsePositiveInt(raw: string | null): number | null {
