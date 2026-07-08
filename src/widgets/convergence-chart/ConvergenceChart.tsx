@@ -55,6 +55,7 @@ export function ConvergenceChart() {
       xaxis: { title: { text: "Шаг" }, gridcolor: theme.gridColor, color: theme.mutedFontColor, zeroline: false },
       yaxis: {
         type: logLeft ? "log" : "linear",
+        rangemode: "tozero",
         gridcolor: theme.gridColor,
         color: theme.mutedFontColor,
         zeroline: false,
@@ -64,6 +65,7 @@ export function ConvergenceChart() {
         side: "right",
         showgrid: false,
         type: logRight ? "log" : "linear",
+        rangemode: "tozero",
         color: theme.mutedFontColor,
         zeroline: false,
         visible: !!secondaryMetric,
@@ -75,21 +77,21 @@ export function ConvergenceChart() {
 
   return (
     <Panel
+      heading={
+        <div className="flex items-center gap-1.5">
+          <Select value={primaryMetric} onChange={setPrimaryMetric} options={metricOptions} className="w-48" />
+          <Checkbox checked={logLeft} onChange={setLogLeft} label="Лог. шкала" />
+        </div>
+      }
       actions={
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <Select value={primaryMetric} onChange={setPrimaryMetric} options={metricOptions} className="w-44" />
-            <Checkbox checked={logLeft} onChange={setLogLeft} label="Лог. шкала" />
-          </div>
-          <div className="flex items-center gap-1">
-            <Select
-              value={secondaryMetric ?? "__none__"}
-              onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
-              options={[{ value: "__none__", label: "—" }, ...metricOptions]}
-              className="w-44"
-            />
-            <Checkbox checked={logRight} onChange={setLogRight} label="Лог. шкала" disabled={!secondaryMetric} />
-          </div>
+        <div className="flex items-center gap-1.5">
+          <Checkbox checked={logRight} onChange={setLogRight} label="Лог. шкала" disabled={!secondaryMetric} />
+          <Select
+            value={secondaryMetric ?? "__none__"}
+            onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
+            options={[{ value: "__none__", label: "—" }, ...metricOptions]}
+            className="w-48"
+          />
         </div>
       }
       className="h-full min-h-0"

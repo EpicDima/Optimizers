@@ -15,7 +15,9 @@ export function Panel({ heading, actions, className, children, ...props }: Panel
       {(heading || actions) && (
         <div className="flex items-center justify-between border-b border-border px-3 py-2">
           {heading && (
-            <h2 className="font-sans text-[11px] font-medium tracking-wide text-text-muted uppercase">{heading}</h2>
+            typeof heading === "string"
+              ? <h2 className="font-sans text-[11px] font-medium tracking-wide text-text-muted uppercase">{heading}</h2>
+              : heading
           )}
           {actions}
         </div>
