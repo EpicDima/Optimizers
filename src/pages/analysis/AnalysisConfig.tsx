@@ -70,6 +70,20 @@ export function AnalysisConfig() {
           </p>
         </div>
 
+        <div className="grid grid-cols-2 gap-2">
+          <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
+          <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
+        </div>
+
+        <NumberField label="Шаги" value={steps} onChange={setSteps} />
+
+        <NumberField
+          label="Шум градиента (σ)"
+          value={gradientNoise}
+          onChange={setGradientNoise}
+          description="Лёгкий шум: 1e-5–1e-4, сильный: 1e-3–1e-2."
+        />
+
         <label className="flex flex-col gap-1">
           <span className="font-sans text-[11px] text-text-muted">Оптимизатор</span>
           <Select
@@ -89,22 +103,9 @@ export function AnalysisConfig() {
           />
         </label>
 
-        <div className="grid grid-cols-2 gap-2">
-          <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
-          <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
-        </div>
-
-        <NumberField
-          label="Шум градиента (σ)"
-          value={gradientNoise}
-          onChange={setGradientNoise}
-          description="Лёгкий шум: 1e-5–1e-4, сильный: 1e-3–1e-2."
-        />
-
         <NumberField label="От" value={paramFrom} onChange={setParamFrom} />
         <NumberField label="До" value={paramTo} onChange={setParamTo} />
         <NumberField label="Точек" value={sampleCount} onChange={setSampleCount} />
-        <NumberField label="Шаги" value={steps} onChange={setSteps} />
 
         <Button variant="solid" size="md" disabled={isRunning} onClick={() => void runSweep()}>
           <Play size={14} />
