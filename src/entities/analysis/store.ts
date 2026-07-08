@@ -97,7 +97,8 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
       const { optimizerName, paramName, paramFrom, paramTo, sampleCount, steps, isRunning } = get();
       if (isRunning) return;
 
-      const { presetName } = useFunctionStore.getState();
+      const { presetName, formula } = useFunctionStore.getState();
+      const { globalStart, gradientNoise } = useRunsStore.getState();
       const preset = functionPresets.find((p) => p.name === presetName);
       if (!preset) {
         set({ error: "неизвестная функция" });
@@ -130,11 +131,11 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
           optimizerParams: { ...defaultParams, [paramName]: value },
           scheduler: "Constant",
           schedulerParams: {},
-          start: [preset.start[0], preset.start[1]],
+          start: [globalStart[0], globalStart[1]],
           reset: true,
         }));
 
-        const engineResults = await runInWorker(preset.formula, slots, steps);
+        const engineResults = await runInWorker(formula, slots, steps, gradientNoise);
 
         const firstError = engineResults.find((r) => r.error);
         if (firstError) {
