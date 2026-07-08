@@ -59,7 +59,12 @@ export const prodigyOptimizer: OptimizerDescriptor = {
           x[0] - lr * dCurrent * (m[0] / (Math.sqrt(v[0]) + dCurrent * params.eps)),
           x[1] - lr * dCurrent * (m[1] / (Math.sqrt(v[1]) + dCurrent * params.eps)),
         ];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "m.x": m[0], "m.y": m[1], "|m|": Math.sqrt(m[0] ** 2 + m[1] ** 2),
+          "v.x": v[0], "v.y": v[1],
+          "s.x": s[0], "s.y": s[1],
+          r, d,
+        } };
       },
       reset() {
         x = initialX;

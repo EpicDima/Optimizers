@@ -37,7 +37,12 @@ export const ademamixOptimizer: OptimizerDescriptor = {
         const denom: Vec2 = [Math.sqrt(vHat[0]) + params.eps, Math.sqrt(vHat[1]) + params.eps];
         const combined = add2(m1Hat, scale2(m2, params.alpha));
         x = sub2(x, [params.lr * (combined[0] / denom[0]), params.lr * (combined[1] / denom[1])]);
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "m1.x": m1[0], "m1.y": m1[1], "|m1|": Math.sqrt(m1[0] ** 2 + m1[1] ** 2),
+          "m2.x": m2[0], "m2.y": m2[1], "|m2|": Math.sqrt(m2[0] ** 2 + m2[1] ** 2),
+          "v.x": v[0], "v.y": v[1],
+          t,
+        } };
       },
       reset() {
         x = initialX;

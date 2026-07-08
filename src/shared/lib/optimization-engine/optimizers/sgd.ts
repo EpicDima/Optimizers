@@ -14,7 +14,7 @@ export const sgdOptimizer: OptimizerDescriptor = {
       params,
       next() {
         x = sub2(x, scale2(gradient(fn, x[0], x[1]), params.lr));
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {} };
       },
       reset() {
         x = initialX;

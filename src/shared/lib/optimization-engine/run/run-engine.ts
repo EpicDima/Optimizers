@@ -44,7 +44,7 @@ function mergeValidatedParams(defaults: Record<string, number>, overrides: Recor
 }
 
 function failed(slotId: string, error: string): EngineRunResult {
-  return { slotId, x: [], y: [], value: [], lr: null, error };
+  return { slotId, x: [], y: [], value: [], lr: null, internals: null, error };
 }
 
 export async function runSlotAsync(
@@ -85,6 +85,8 @@ export async function runSlotAsync(
   const hasLr = baseLr !== undefined;
   const lrs: number[] | null = hasLr ? [schedulerDescriptor.lr(schedulerParams, 0, steps, baseLr)] : null;
 
+  let internals: Record<string, number[]> | null = null;
+
   let lastYield = performance.now();
   for (let step = 0; step < steps; step++) {
     if (hasLr) {
@@ -96,6 +98,20 @@ export async function runSlotAsync(
     ys.push(point.x[1]);
     values.push(point.value);
 
+    if (point.internals) {
+      if (!internals) {
+        internals = {};
+        for (const key of Object.keys(point.internals)) {
+          internals[key] = new Array(step + 1).fill(0);
+          internals[key][step] = point.internals[key];
+        }
+      } else {
+        for (const [key, val] of Object.entries(point.internals)) {
+          (internals[key] ??= new Array(step).fill(0)).push(val);
+        }
+      }
+    }
+
     const now = performance.now();
     if (now - lastYield >= YIELD_INTERVAL_MS) {
       await yieldToEventLoop();
@@ -105,7 +121,7 @@ export async function runSlotAsync(
 
   if (hasLr) instance.params.lr = baseLr;
 
-  return { slotId: cfg.slotId, x: xs, y: ys, value: values, lr: lrs, error: null };
+  return { slotId: cfg.slotId, x: xs, y: ys, value: values, lr: lrs, internals, error: null };
 }
 
 export async function runAllAsync(

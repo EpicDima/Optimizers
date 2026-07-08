@@ -18,6 +18,7 @@ export interface EngineRunResult {
   y: number[];
   value: number[];
   lr: number[] | null;
+  internals: Record<string, number[]> | null;
   error: string | null;
 }
 

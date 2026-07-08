@@ -41,7 +41,11 @@ export const sophiaOptimizer: OptimizerDescriptor = {
           Math.min(Math.max(m[1] / Math.max(h[1], params.eps), -params.rho), params.rho),
         ];
         x = [x[0] - params.lr * update[0], x[1] - params.lr * update[1]];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "m.x": m[0], "m.y": m[1], "|m|": Math.sqrt(m[0] ** 2 + m[1] ** 2),
+          "h.x": h[0], "h.y": h[1],
+          "update.x": update[0], "update.y": update[1],
+        } };
       },
       reset() {
         x = initialX;

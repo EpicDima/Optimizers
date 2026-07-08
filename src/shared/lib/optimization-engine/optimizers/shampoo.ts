@@ -39,7 +39,11 @@ export const shampooOptimizer: OptimizerDescriptor = {
         const invSqrtH = invSqrtSymmetric2(addScaledIdentity2(h, params.eps));
         const update = matVec2(invSqrtH, grad);
         x = sub2(x, scale2(update, params.lr));
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "grad.x": grad[0], "grad.y": grad[1], "|grad|": Math.sqrt(grad[0] ** 2 + grad[1] ** 2),
+          "H.00": h[0][0], "H.01": h[0][1], "H.11": h[1][1],
+          "update.x": update[0], "update.y": update[1], "|update|": Math.sqrt(update[0] ** 2 + update[1] ** 2),
+        } };
       },
       reset() {
         x = initialX;

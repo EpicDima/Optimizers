@@ -92,7 +92,11 @@ export const lbfgsOptimizer: OptimizerDescriptor = {
 
         // degenerate cases: minimum already found or gradient undefined
         if (!Number.isFinite(grad[0]) || !Number.isFinite(grad[1]) || norm2(grad) < 1e-12) {
-          return { x, value: fn(x[0], x[1]) };
+          return { x, value: fn(x[0], x[1]), internals: {
+            "grad.x": grad[0], "grad.y": grad[1], "|grad|": norm2(grad),
+            "dir.x": 0, "dir.y": 0, "|dir|": 0,
+            histLen: sHistory.length,
+          } };
         }
 
         let direction = computeDirection(grad);
@@ -102,7 +106,11 @@ export const lbfgsOptimizer: OptimizerDescriptor = {
         }
 
         x = lineSearch(direction, grad);
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "grad.x": grad[0], "grad.y": grad[1], "|grad|": norm2(grad),
+          "dir.x": direction[0], "dir.y": direction[1], "|dir|": norm2(direction),
+          histLen: sHistory.length,
+        } };
       },
       reset() {
         x = initialX;

@@ -22,7 +22,7 @@ export const adagradOptimizer: OptimizerDescriptor = {
           params.lr / (Math.sqrt(acc[1]) + params.eps),
         ];
         x = [x[0] - adaptiveLr[0] * grad[0], x[1] - adaptiveLr[1] * grad[1]];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "acc.x": acc[0], "acc.y": acc[1], "|acc|": Math.sqrt(acc[0] ** 2 + acc[1] ** 2) } };
       },
       reset() {
         x = initialX;

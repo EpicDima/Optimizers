@@ -32,7 +32,7 @@ export const asgdOptimizer: OptimizerDescriptor = {
         // траектория (x) идёт по фактическим шагам, как param в PyTorch
         ax = add2(ax, scale2(sub2(nextX, ax), mu));
         x = nextX;
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "ax.x": ax[0], "ax.y": ax[1], "|ax|": Math.sqrt(ax[0] ** 2 + ax[1] ** 2), step, eta, mu } };
       },
       reset() {
         x = initialX;

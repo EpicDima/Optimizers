@@ -46,7 +46,12 @@ export const cautiousAdamWOptimizer: OptimizerDescriptor = {
         const scaleFactor = 2 / (mask[0] + mask[1] + 1e-8);
         const maskedUpdate: Vec2 = [update[0] * mask[0] * scaleFactor, update[1] * mask[1] * scaleFactor];
         x = [decayed[0] - maskedUpdate[0], decayed[1] - maskedUpdate[1]];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2),
+          "acc.x": acc[0], "acc.y": acc[1],
+          "mask.x": mask[0], "mask.y": mask[1],
+          scaleFactor, t,
+        } };
       },
       reset() {
         x = initialX;

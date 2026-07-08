@@ -33,7 +33,10 @@ export const quickPropOptimizer: OptimizerDescriptor = {
         previousGradient = grad;
         previousUpdate = update;
         x = sub2(x, update);
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "update.x": update[0], "update.y": update[1], "|update|": Math.sqrt(update[0] ** 2 + update[1] ** 2),
+          "prevGrad.x": previousGradient[0], "prevGrad.y": previousGradient[1],
+        } };
       },
       reset() {
         x = initialX;

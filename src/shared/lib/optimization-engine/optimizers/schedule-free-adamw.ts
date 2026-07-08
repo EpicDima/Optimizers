@@ -51,7 +51,12 @@ export const scheduleFreeAdamWOptimizer: OptimizerDescriptor = {
         const c = 1 / t;
         xAvg = [(1 - c) * xAvg[0] + c * z[0], (1 - c) * xAvg[1] + c * z[1]];
         // наружу отдаётся именно усреднённая последовательность — она и рисуется на графике
-        return { x: xAvg, value: fn(xAvg[0], xAvg[1]) };
+        return { x: xAvg, value: fn(xAvg[0], xAvg[1]), internals: {
+          "z.x": z[0], "z.y": z[1],
+          "v.x": v[0], "v.y": v[1],
+          "y.x": y[0], "y.y": y[1],
+          t,
+        } };
       },
       reset() {
         z = initialX;

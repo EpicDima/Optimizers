@@ -37,7 +37,7 @@ export function buildConvergenceTraces(
   slots: RunConfig[],
   results: Record<string, RunResult>,
   frame: number,
-  showLr: boolean,
+  secondaryMetric: string | null,
 ): Data[] {
   const traces: Data[] = [];
 
@@ -58,7 +58,6 @@ export function buildConvergenceTraces(
       hoverinfo: "x+y+name",
     });
 
-    // hoverinfo: "skip" — иначе точка задваивает строку линии в едином тултипе
     if (value.length > 0) {
       const headIndex = value.length - 1;
       traces.push({
@@ -72,21 +71,49 @@ export function buildConvergenceTraces(
       });
     }
 
-    if (!showLr || !result.lr) continue;
+    if (!secondaryMetric) continue;
 
-    const lr = sliceToFrame(result.lr, frame);
+    let series: number[] | undefined;
+    if (secondaryMetric === "lr") {
+      series = result.lr ?? undefined;
+    } else if (result.internals?.[secondaryMetric]) {
+      series = result.internals[secondaryMetric];
+    }
+    if (!series) continue;
+
+    const sliced = sliceToFrame(series, frame);
     traces.push({
       type: "scatter",
       mode: "lines",
-      x: lr.map((_, i) => i),
-      y: lr,
+      x: sliced.map((_, i) => secondaryMetric === "lr" ? i : i + 1),
+      y: sliced,
       yaxis: "y2",
       line: { color: slot.color, width: 2, dash: "dot" },
-      name: `${slot.optimizer} · lr`,
+      name: `${slot.optimizer} · ${secondaryMetric}`,
       showlegend: false,
       hoverinfo: "x+y+name",
     });
   }
 
   return traces;
+}
+
+export function collectAvailableMetrics(
+  slots: RunConfig[],
+  results: Record<string, RunResult>,
+): string[] {
+  const keys = new Set<string>();
+  let hasLr = false;
+  for (const slot of slots) {
+    if (!slot.visible) continue;
+    const result = results[slot.slotId];
+    if (!result || result.error) continue;
+    if (result.lr) hasLr = true;
+    if (result.internals) {
+      for (const key of Object.keys(result.internals)) keys.add(key);
+    }
+  }
+  const sorted = [...keys].sort();
+  if (hasLr) sorted.unshift("lr");
+  return sorted;
 }

@@ -50,7 +50,12 @@ export const marsOptimizer: OptimizerDescriptor = {
           x[1] - params.lr * (mHat[1] / denom[1] + params.weightDecay * x[1]),
         ];
         prevG = grad;
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "m.x": m[0], "m.y": m[1], "|m|": Math.sqrt(m[0] ** 2 + m[1] ** 2),
+          "v.x": v[0], "v.y": v[1],
+          "c.x": c[0], "c.y": c[1], "|c|": norm2(c),
+          t,
+        } };
       },
       reset() {
         x = initialX;

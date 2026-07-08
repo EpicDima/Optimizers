@@ -25,13 +25,23 @@ export const levenbergMarquardtOptimizer: OptimizerDescriptor = {
         if (fn(nextX[0], nextX[1]) < fn(x[0], x[1])) {
           m = Math.max(m / 3, 1e-12);
           x = nextX;
-          return { x, value: fn(x[0], x[1]) };
+          return { x, value: fn(x[0], x[1]), internals: {
+            "grad.x": grad[0], "grad.y": grad[1], "|grad|": Math.sqrt(grad[0] ** 2 + grad[1] ** 2),
+            damping: m,
+            "H.00": hesse[0][0], "H.01": hesse[0][1], "H.11": hesse[1][1],
+            accepted: 1,
+          } };
         }
 
         // rejected step: stay put and increase damping, matching Python's
         // return self.move_next(self.x) which re-evaluates at the unchanged x
         m *= 2;
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "grad.x": grad[0], "grad.y": grad[1], "|grad|": Math.sqrt(grad[0] ** 2 + grad[1] ** 2),
+          damping: m,
+          "H.00": hesse[0][0], "H.01": hesse[0][1], "H.11": hesse[1][1],
+          accepted: 0,
+        } };
       },
       reset() {
         x = initialX;

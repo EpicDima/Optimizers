@@ -28,6 +28,7 @@ function makeResult(patch: Partial<RunResult> = {}): RunResult {
     y: [0, 1, 2],
     value: [10, 5, 1],
     lr: null,
+    internals: null,
     error: null,
     ...patch,
   };
@@ -35,30 +36,30 @@ function makeResult(patch: Partial<RunResult> = {}): RunResult {
 
 describe("buildConvergenceTraces", () => {
   it("returns an empty array for no slots", () => {
-    expect(buildConvergenceTraces([], {}, FULL, true)).toEqual([]);
+    expect(buildConvergenceTraces([], {}, FULL, "lr")).toEqual([]);
   });
 
   it("excludes slots marked as not visible", () => {
     const slot = makeSlot({ visible: false });
     const results = { [slot.slotId]: makeResult({ lr: [0.1, 0.1, 0.1] }) };
-    expect(buildConvergenceTraces([slot], results, FULL, true)).toEqual([]);
+    expect(buildConvergenceTraces([slot], results, FULL, "lr")).toEqual([]);
   });
 
   it("excludes slots whose result has an error", () => {
     const slot = makeSlot();
     const results = { [slot.slotId]: makeResult({ error: "unknown optimizer" }) };
-    expect(buildConvergenceTraces([slot], results, FULL, true)).toEqual([]);
+    expect(buildConvergenceTraces([slot], results, FULL, "lr")).toEqual([]);
   });
 
   it("excludes slots with no result at all", () => {
     const slot = makeSlot();
-    expect(buildConvergenceTraces([slot], {}, FULL, true)).toEqual([]);
+    expect(buildConvergenceTraces([slot], {}, FULL, "lr")).toEqual([]);
   });
 
   it("builds a single step-indexed value trace on the left axis when there is no lr", () => {
     const slot = makeSlot();
     const result = makeResult({ value: [10, 5, 1, 0.5], lr: null });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, true);
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, "lr");
 
     expect(traces).toHaveLength(2);
     expect(traces[0]).toMatchObject({
@@ -77,7 +78,7 @@ describe("buildConvergenceTraces", () => {
   it("adds a small head marker at the current end of the value line", () => {
     const slot = makeSlot();
     const result = makeResult({ value: [10, 5, 1, 0.5], lr: null });
-    const [, headMarker] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, true);
+    const [, headMarker] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, "lr");
 
     expect(headMarker).toMatchObject({
       type: "scatter",
@@ -93,7 +94,7 @@ describe("buildConvergenceTraces", () => {
   it("adds a dashed lr trace on the secondary y-axis when lr is present", () => {
     const slot = makeSlot();
     const result = makeResult({ value: [10, 5, 1, 0.5], lr: [0.3, 0.27, 0.24, 0.22] });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, true);
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, "lr");
 
     expect(traces).toHaveLength(3);
     const [valueTrace, headMarker, lrTrace] = traces;
@@ -119,7 +120,7 @@ describe("buildConvergenceTraces", () => {
   it("keeps trace names in hoverinfo so the unified tooltip can tell lines apart", () => {
     const slot = makeSlot();
     const result = makeResult({ lr: [0.1, 0.1] });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, true);
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, "lr");
 
     // Кружок-маркер намеренно исключён из единого тултипа (hoverinfo: "skip"),
     // проверка касается только линий значения и lr.
@@ -132,7 +133,7 @@ describe("buildConvergenceTraces", () => {
   it("keeps value and lr traces tied to the same slot color", () => {
     const slot = makeSlot({ color: "#32cd32" });
     const result = makeResult({ lr: [0.1, 0.1] });
-    const [valueTrace, headMarker, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, true);
+    const [valueTrace, headMarker, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, "lr");
 
     expect((valueTrace as { line: { color: string } }).line.color).toBe(slot.color);
     expect((headMarker as { marker: { color: string } }).marker.color).toBe(slot.color);
@@ -142,7 +143,7 @@ describe("buildConvergenceTraces", () => {
   it("omits the lr trace for optimizers without lr (e.g. LBFGS)", () => {
     const slot = makeSlot({ optimizer: "LBFGS" });
     const result = makeResult({ lr: null });
-    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, true);
+    const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, "lr");
 
     expect(traces).toHaveLength(2);
   });
@@ -155,25 +156,25 @@ describe("buildConvergenceTraces", () => {
       b: makeResult({ slotId: "b", value: [4, 2] }),
     };
 
-    const traces = buildConvergenceTraces([slotA, slotB], results, FULL, true);
+    const traces = buildConvergenceTraces([slotA, slotB], results, FULL, "lr");
     // slotA: value + marker + lr, slotB: value + marker only
     expect(traces).toHaveLength(5);
   });
 
-  describe("showLr toggle", () => {
-    it("omits lr traces entirely when showLr is false, even if lr data is present", () => {
+  describe("secondaryMetric toggle", () => {
+    it("omits lr traces entirely when secondaryMetric is null, even if lr data is present", () => {
       const slot = makeSlot();
       const result = makeResult({ value: [10, 5, 1], lr: [0.3, 0.27, 0.24] });
-      const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, false);
+      const traces = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, null);
 
       expect(traces).toHaveLength(2);
       expect(traces[0]).not.toHaveProperty("yaxis");
     });
 
-    it("still builds the value trace when showLr is false", () => {
+    it("still builds the value trace when secondaryMetric is null", () => {
       const slot = makeSlot();
       const result = makeResult({ value: [10, 5, 1], lr: [0.3, 0.27, 0.24] });
-      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, false);
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, FULL, null);
 
       expect(valueTrace).toMatchObject({ y: [10, 5, 1] });
     });
@@ -183,7 +184,7 @@ describe("buildConvergenceTraces", () => {
     it("truncates value and lr series to [0, frame] inclusive", () => {
       const slot = makeSlot();
       const result = makeResult({ value: [10, 5, 1, 0.5], lr: [0.3, 0.27, 0.24, 0.22] });
-      const [valueTrace, headMarker, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 1, true);
+      const [valueTrace, headMarker, lrTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 1, "lr");
 
       expect(valueTrace).toMatchObject({ x: [0, 1], y: [10, 5] });
       expect(headMarker).toMatchObject({ x: [1], y: [5] });
@@ -193,7 +194,7 @@ describe("buildConvergenceTraces", () => {
     it("clamps frame 0 to a single point", () => {
       const slot = makeSlot();
       const result = makeResult({ value: [10, 5, 1] });
-      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 0, true);
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 0, "lr");
 
       expect(valueTrace).toMatchObject({ x: [0], y: [10] });
     });
@@ -201,7 +202,7 @@ describe("buildConvergenceTraces", () => {
     it("clamps a frame past the end of the series to the full series", () => {
       const slot = makeSlot();
       const result = makeResult({ value: [10, 5, 1] });
-      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 100, true);
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, 100, "lr");
 
       expect(valueTrace).toMatchObject({ x: [0, 1, 2], y: [10, 5, 1] });
     });
@@ -209,7 +210,7 @@ describe("buildConvergenceTraces", () => {
     it("clamps a negative frame to an empty series", () => {
       const slot = makeSlot();
       const result = makeResult({ value: [10, 5, 1] });
-      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, -1, true);
+      const [valueTrace] = buildConvergenceTraces([slot], { [slot.slotId]: result }, -1, "lr");
 
       expect(valueTrace).toMatchObject({ x: [], y: [] });
     });

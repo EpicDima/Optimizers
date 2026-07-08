@@ -46,7 +46,11 @@ export const adoptOptimizer: OptimizerDescriptor = {
         x = sub2(x, scale2(v, params.lr));
         const gradSq: Vec2 = [grad[0] ** 2, grad[1] ** 2];
         acc = add2(scale2(acc, params.beta2), scale2(gradSq, 1 - params.beta2));
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2),
+          "acc.x": acc[0], "acc.y": acc[1],
+          t, clip,
+        } };
       },
       reset() {
         x = initialX;

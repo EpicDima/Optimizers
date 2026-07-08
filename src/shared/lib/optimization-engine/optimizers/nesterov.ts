@@ -21,7 +21,7 @@ export const nesterovOptimizer: OptimizerDescriptor = {
         const grad = gradient(fn, x[0], x[1]);
         v = add2(scale2(v, params.coef), grad);
         x = sub2(x, scale2(add2(grad, scale2(v, params.coef)), params.lr));
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2) } };
       },
       reset() {
         x = initialX;

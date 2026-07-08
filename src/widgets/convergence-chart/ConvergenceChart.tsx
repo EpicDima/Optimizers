@@ -6,9 +6,9 @@ import { useRunsStore } from "@entities/run";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
-import { Checkbox, Panel } from "@shared/ui";
+import { Checkbox, Panel, Select } from "@shared/ui";
 
-import { buildConvergenceTraces } from "./build-traces";
+import { buildConvergenceTraces, collectAvailableMetrics } from "./build-traces";
 
 /** Мини-график «значение функции и learning rate от шага».
  * Значение и lr наложены на один график одновременно: значение — сплошной
@@ -28,11 +28,16 @@ export function ConvergenceChart() {
   const frame = usePlaybackStore((state) => state.frame);
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(false);
-  const [showLr, setShowLr] = useState(true);
+  const [secondaryMetric, setSecondaryMetric] = useState<string | null>("lr");
+
+  const availableMetrics = useMemo(
+    () => collectAvailableMetrics(slots, results),
+    [slots, results],
+  );
 
   const data = useMemo(
-    () => buildConvergenceTraces(slots, results, frame, showLr),
-    [slots, results, frame, showLr],
+    () => buildConvergenceTraces(slots, results, frame, secondaryMetric),
+    [slots, results, frame, secondaryMetric],
   );
 
   const layout = useMemo((): Partial<Layout> => {
@@ -59,16 +64,16 @@ export function ConvergenceChart() {
         zeroline: false,
       },
       yaxis2: {
-        title: { text: "lr" },
+        title: secondaryMetric ? { text: secondaryMetric } : undefined,
         overlaying: "y",
         side: "right",
         showgrid: false,
         color: theme.mutedFontColor,
         zeroline: false,
-        visible: showLr,
+        visible: !!secondaryMetric,
       },
     };
-  }, [resolvedTheme, logScale, showLr]);
+  }, [resolvedTheme, logScale, secondaryMetric]);
 
   const plotRef = usePlotlyAutoResize();
 
@@ -77,7 +82,12 @@ export function ConvergenceChart() {
       heading="Сходимость"
       actions={
         <div className="flex items-center gap-2">
-          <Checkbox checked={showLr} onChange={setShowLr} label="lr" />
+          <Select
+            value={secondaryMetric ?? "__none__"}
+            onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
+            options={[{ value: "__none__", label: "—" }, ...availableMetrics]}
+            className="w-28"
+          />
           <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала (значение)" />
         </div>
       }

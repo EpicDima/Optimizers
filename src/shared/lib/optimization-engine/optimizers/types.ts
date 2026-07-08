@@ -1,9 +1,10 @@
 import type { AlgorithmMeta } from "@shared/api/types";
 import type { Vec2 } from "@shared/lib/optimization-engine/linalg";
 
-interface OptimizerStep {
+export interface OptimizerStep {
   x: Vec2;
   value: number;
+  internals?: Record<string, number>;
 }
 
 export interface OptimizerInstance {

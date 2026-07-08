@@ -37,7 +37,7 @@ export const adadeltaOptimizer: OptimizerDescriptor = {
           params.rho * acc2[1] + (1 - params.rho) * update[1] ** 2,
         ];
         x = sub2(x, [params.lr * update[0], params.lr * update[1]]);
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "acc1.x": acc1[0], "acc1.y": acc1[1], "|acc1|": Math.sqrt(acc1[0] ** 2 + acc1[1] ** 2), "acc2.x": acc2[0], "acc2.y": acc2[1], "|acc2|": Math.sqrt(acc2[0] ** 2 + acc2[1] ** 2) } };
       },
       reset() {
         x = initialX;

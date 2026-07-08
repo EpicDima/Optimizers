@@ -15,8 +15,9 @@ export const newtonOptimizer: OptimizerDescriptor = {
       next() {
         const grad = gradient(fn, x[0], x[1]);
         const hesse = hessian(fn, x[0], x[1]);
+        const eigs = eigvalsh2(hesse);
         let update: Vec2;
-        if (eigvalsh2(hesse)[0] > 0) {
+        if (eigs[0] > 0) {
           const solved = solve2(hesse, grad);
           // near-singular гессиан: Python's raw sign-check would proceed into a
           // poorly-conditioned solve here, we fall back to the gradient instead
@@ -25,7 +26,12 @@ export const newtonOptimizer: OptimizerDescriptor = {
           update = grad;
         }
         x = sub2(x, scale2(update, params.lr));
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "grad.x": grad[0], "grad.y": grad[1], "|grad|": Math.sqrt(grad[0] ** 2 + grad[1] ** 2),
+          "H.00": hesse[0][0], "H.01": hesse[0][1], "H.11": hesse[1][1],
+          "eig.min": eigs[0], "eig.max": eigs[1],
+          "update.x": update[0], "update.y": update[1],
+        } };
       },
       reset() {
         x = initialX;

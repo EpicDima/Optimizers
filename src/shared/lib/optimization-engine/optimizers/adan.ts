@@ -42,7 +42,12 @@ export const adanOptimizer: OptimizerDescriptor = {
         const inner = add2(m, scale2(v, 1 - params.beta2));
         x = sub2(x, [eta[0] * inner[0], eta[1] * inner[1]]);
         gPrev = grad;
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "m.x": m[0], "m.y": m[1], "|m|": Math.sqrt(m[0] ** 2 + m[1] ** 2),
+          "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2),
+          "n.x": n[0], "n.y": n[1],
+          t,
+        } };
       },
       reset() {
         x = initialX;

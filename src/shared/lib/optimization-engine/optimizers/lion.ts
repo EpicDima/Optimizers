@@ -25,7 +25,10 @@ export const lionOptimizer: OptimizerDescriptor = {
         v = add2(scale2(v, params.beta2), scale2(grad, 1 - params.beta2));
         const decayed: Vec2 = scale2(x, 1 - params.lr * params.weightDecay);
         x = [decayed[0] - params.lr * update[0], decayed[1] - params.lr * update[1]];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2),
+          "update.x": update[0], "update.y": update[1],
+        } };
       },
       reset() {
         x = initialX;

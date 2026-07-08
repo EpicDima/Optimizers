@@ -20,7 +20,7 @@ export const momentumOptimizer: OptimizerDescriptor = {
       next() {
         v = add2(scale2(v, params.coef), gradient(fn, x[0], x[1]));
         x = sub2(x, scale2(v, params.lr));
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2) } };
       },
       reset() {
         x = initialX;

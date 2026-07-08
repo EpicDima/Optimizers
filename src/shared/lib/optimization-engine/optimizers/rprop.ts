@@ -39,7 +39,10 @@ export const rpropOptimizer: OptimizerDescriptor = {
           x[0] - Math.sign(lastGradient[0]) * stepSize[0],
           x[1] - Math.sign(lastGradient[1]) * stepSize[1],
         ];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: {
+          "step.x": stepSize[0], "step.y": stepSize[1],
+          "grad.x": lastGradient[0], "grad.y": lastGradient[1],
+        } };
       },
       reset() {
         x = initialX;

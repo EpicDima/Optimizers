@@ -42,7 +42,7 @@ export const adafactorOptimizer: OptimizerDescriptor = {
         ];
         const denom = Math.max(1.0, norm2(update) / (DIM_SQRT * params.d));
         x = [decayed[0] - (alpha / denom) * update[0], decayed[1] - (alpha / denom) * update[1]];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "variance.x": variance[0], "variance.y": variance[1], "|variance|": Math.sqrt(variance[0] ** 2 + variance[1] ** 2), step, rhoT, alpha } };
       },
       reset() {
         x = initialX;

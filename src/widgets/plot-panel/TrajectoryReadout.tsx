@@ -39,6 +39,15 @@ export function TrajectoryReadout({ slots, results, frame, showCoords }: Traject
                 {showCoords && x !== undefined && y !== undefined && (
                   <>, x: {formatSignificant(x, 4)}, y: {formatSignificant(y, 4)}</>
                 )}
+                {showCoords && result?.internals && (() => {
+                  const step = Math.min(frame, (Object.values(result.internals)[0]?.length ?? 1) - 1);
+                  if (step < 0) return null;
+                  const entries = Object.entries(result.internals);
+                  if (entries.length === 0) return null;
+                  return entries.slice(0, 4).map(([key, arr]) => (
+                    <span key={key}>, {key}: {formatSignificant(arr[step], 3)}</span>
+                  ));
+                })()}
               </span>
             ) : null}
           </div>

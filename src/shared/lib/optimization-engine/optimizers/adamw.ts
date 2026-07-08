@@ -40,7 +40,7 @@ export const adamWOptimizer: OptimizerDescriptor = {
           decayed[0] - stepSize * (v[0] / denom[0]),
           decayed[1] - stepSize * (v[1] / denom[1]),
         ];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "v.x": v[0], "v.y": v[1], "|v|": Math.sqrt(v[0] ** 2 + v[1] ** 2), "acc.x": acc[0], "acc.y": acc[1], "|acc|": Math.sqrt(acc[0] ** 2 + acc[1] ** 2), t } };
       },
       reset() {
         x = initialX;

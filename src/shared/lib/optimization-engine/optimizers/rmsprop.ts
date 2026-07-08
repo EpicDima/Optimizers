@@ -28,7 +28,7 @@ export const rmsPropOptimizer: OptimizerDescriptor = {
           x[0] - (params.lr / (Math.sqrt(acc[0]) + params.eps)) * grad[0],
           x[1] - (params.lr / (Math.sqrt(acc[1]) + params.eps)) * grad[1],
         ];
-        return { x, value: fn(x[0], x[1]) };
+        return { x, value: fn(x[0], x[1]), internals: { "acc.x": acc[0], "acc.y": acc[1], "|acc|": Math.sqrt(acc[0] ** 2 + acc[1] ** 2) } };
       },
       reset() {
         x = initialX;
