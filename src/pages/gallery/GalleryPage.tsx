@@ -32,7 +32,7 @@ export function GalleryPage() {
       {tab === "functions" ? (
         <>
           <p className="mt-1 text-sm text-text-muted">
-            Нажмите на карточку, чтобы открыть функцию на площадке
+            Нажмите на карточку, чтобы открыть функцию на главной
           </p>
           <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
             {functionPresets.map((preset) => (
