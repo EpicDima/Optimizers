@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import type { Data, Layout } from "plotly.js";
 
 import { useAnalysisStore } from "@entities/analysis";
+import { toPlotlyColorscale, useColormapCatalog } from "@entities/colormap";
+import { usePlotSettingsStore } from "@entities/plot-settings";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
@@ -9,13 +11,21 @@ import { Checkbox, Panel } from "@shared/ui";
 
 export function HeatmapChart() {
   const heatmapData = useAnalysisStore((s) => s.heatmapData);
+  const colormap = usePlotSettingsStore((s) => s.colormap);
+  const colormapReversed = usePlotSettingsStore((s) => s.colormapReversed);
+  const { data: catalog } = useColormapCatalog();
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(true);
   const [showContour, setShowContour] = useState(true);
   const plotRef = usePlotlyAutoResize();
 
+  const colorscale = useMemo(
+    () => (catalog ? toPlotlyColorscale(catalog, colormap, colormapReversed) : undefined),
+    [catalog, colormap, colormapReversed],
+  );
+
   const data = useMemo((): Data[] => {
-    if (!heatmapData) return [];
+    if (!heatmapData || !colorscale) return [];
 
     const z = logScale
       ? heatmapData.z.map((row) => row.map((v) => (v > 0 ? Math.log10(v) : NaN)))
@@ -27,8 +37,7 @@ export function HeatmapChart() {
         x: heatmapData.xs,
         y: heatmapData.ys,
         z,
-        colorscale: "Viridis",
-        reversescale: true,
+        colorscale,
         colorbar: {
           title: { text: logScale ? "log₁₀ f" : "f(x,y)", side: "right" as const },
           thickness: 12,
@@ -54,7 +63,7 @@ export function HeatmapChart() {
     }
 
     return traces;
-  }, [heatmapData, logScale, showContour, resolvedTheme]);
+  }, [heatmapData, colorscale, logScale, showContour, resolvedTheme]);
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
