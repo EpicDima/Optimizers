@@ -5,7 +5,7 @@ import type { RunConfig } from "@entities/run";
 import { useRunsStore } from "@entities/run";
 import { useSchedulers } from "@entities/scheduler";
 import { defaultParams } from "@shared/lib/algorithm";
-import { Button, Checkbox, ColorSwatch, Select } from "@shared/ui";
+import { Button, Checkbox, ColorSwatch, NumberField, Select } from "@shared/ui";
 
 import { ParamForm } from "./ParamForm";
 
@@ -54,11 +54,12 @@ export function RunCard({ slot, canRemove }: RunCardProps) {
       <ParamForm
         meta={optimizerMeta}
         values={slot.optimizerParams}
+        excludeKeys={["lr"]}
         onChange={(key, value) => updateSlot(slot.slotId, { optimizerParams: { ...slot.optimizerParams, [key]: value } })}
       />
 
       <div className="flex items-center gap-2 pt-1">
-        <span className="w-16 shrink-0 font-sans text-[11px] text-text-muted">Scheduler</span>
+        <span className="shrink-0 font-sans text-[11px] text-text-muted">Планировщик</span>
         <Select
           value={slot.scheduler}
           onChange={handleSchedulerChange}
@@ -68,11 +69,19 @@ export function RunCard({ slot, canRemove }: RunCardProps) {
         />
       </div>
       {hasLr && (
-        <ParamForm
-          meta={schedulerMeta}
-          values={slot.schedulerParams}
-          onChange={(key, value) => updateSlot(slot.slotId, { schedulerParams: { ...slot.schedulerParams, [key]: value } })}
-        />
+        <>
+          <NumberField
+            label="lr"
+            description="Learning rate"
+            value={slot.optimizerParams.lr ?? 0.01}
+            onChange={(value) => updateSlot(slot.slotId, { optimizerParams: { ...slot.optimizerParams, lr: value } })}
+          />
+          <ParamForm
+            meta={schedulerMeta}
+            values={slot.schedulerParams}
+            onChange={(key, value) => updateSlot(slot.slotId, { schedulerParams: { ...slot.schedulerParams, [key]: value } })}
+          />
+        </>
       )}
 
       <Checkbox checked={slot.visible} onChange={(visible) => updateSlot(slot.slotId, { visible })} label="Показывать траекторию" />
