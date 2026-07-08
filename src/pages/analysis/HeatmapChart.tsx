@@ -7,7 +7,14 @@ import { usePlotSettingsStore } from "@entities/plot-settings";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
-import { Checkbox, Panel } from "@shared/ui";
+import { Checkbox, Panel, Slider } from "@shared/ui";
+
+const OVERLAY_SCALE: [number, string][] = [
+  [0, "rgb(34,139,34)"],
+  [0.3, "rgb(255,255,80)"],
+  [0.6, "rgb(255,140,0)"],
+  [1, "rgb(180,0,0)"],
+];
 
 export function HeatmapChart() {
   const heatmapData = useAnalysisStore((s) => s.heatmapData);
@@ -16,54 +23,54 @@ export function HeatmapChart() {
   const { data: catalog } = useColormapCatalog();
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(true);
-  const [showContour, setShowContour] = useState(true);
+  const [showBase, setShowBase] = useState(true);
+  const [overlayOpacity, setOverlayOpacity] = useState(0.65);
   const plotRef = usePlotlyAutoResize();
 
-  const colorscale = useMemo(
+  const baseColorscale = useMemo(
     () => (catalog ? toPlotlyColorscale(catalog, colormap, colormapReversed) : undefined),
     [catalog, colormap, colormapReversed],
   );
 
   const data = useMemo((): Data[] => {
-    if (!heatmapData || !colorscale) return [];
+    if (!heatmapData || !baseColorscale) return [];
 
     const z = logScale
       ? heatmapData.z.map((row) => row.map((v) => (v > 0 ? Math.log10(v) : NaN)))
       : heatmapData.z;
 
-    const traces: Data[] = [
-      {
-        type: "heatmap" as const,
-        x: heatmapData.xs,
-        y: heatmapData.ys,
-        z,
-        colorscale,
-        colorbar: {
-          title: { text: logScale ? "log₁₀ f" : "f(x,y)", side: "right" as const },
-          thickness: 12,
-          len: 0.9,
-        },
-        hovertemplate: "x₀=%{x:.2f}<br>y₀=%{y:.2f}<br>f=%{customdata:.4g}<extra></extra>",
-        customdata: heatmapData.z,
-      },
-    ];
+    const traces: Data[] = [];
 
-    if (showContour) {
-      const contourColor = resolvedTheme === "dark" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)";
+    if (showBase) {
       traces.push({
-        type: "contour" as const,
+        type: "heatmap" as const,
         x: heatmapData.surfaceXs,
         y: heatmapData.surfaceYs,
         z: heatmapData.surfaceZ,
-        contours: { coloring: "none" as const },
-        line: { color: contourColor, width: 1.5 },
+        colorscale: baseColorscale,
         showscale: false,
         hoverinfo: "skip" as const,
       });
     }
 
+    traces.push({
+      type: "heatmap" as const,
+      x: heatmapData.xs,
+      y: heatmapData.ys,
+      z,
+      colorscale: OVERLAY_SCALE,
+      opacity: showBase ? overlayOpacity : 1,
+      colorbar: {
+        title: { text: logScale ? "log₁₀ f" : "f(x,y)", side: "right" as const },
+        thickness: 12,
+        len: 0.9,
+      },
+      hovertemplate: "x₀=%{x:.2f}<br>y₀=%{y:.2f}<br>f=%{customdata:.4g}<extra></extra>",
+      customdata: heatmapData.z,
+    });
+
     return traces;
-  }, [heatmapData, colorscale, logScale, showContour, resolvedTheme]);
+  }, [heatmapData, baseColorscale, logScale, showBase, overlayOpacity]);
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
@@ -92,7 +99,17 @@ export function HeatmapChart() {
       heading="Финальное f(x,y) от начальной точки"
       actions={
         <div className="flex items-center gap-3">
-          <Checkbox checked={showContour} onChange={setShowContour} label="Рельеф" />
+          <Checkbox checked={showBase} onChange={setShowBase} label="Подложка" />
+          {showBase && (
+            <Slider
+              min={0.2}
+              max={0.9}
+              step={0.05}
+              value={overlayOpacity}
+              onChange={setOverlayOpacity}
+              className="w-24"
+            />
+          )}
           <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />
         </div>
       }
