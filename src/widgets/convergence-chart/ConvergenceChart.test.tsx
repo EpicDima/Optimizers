@@ -71,6 +71,7 @@ function seedRunWithResult() {
         y: [0, 1, 2],
         value: [10, 5, 1],
         lr: [0.3, 0.27, 0.24],
+        internals: null,
         error: null,
       },
     },

@@ -6,35 +6,30 @@ import { useRunsStore } from "@entities/run";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
-import { Checkbox, Panel, Select } from "@shared/ui";
+import { Checkbox, Select } from "@shared/ui";
 
 import { buildConvergenceTraces, collectAvailableMetrics } from "./build-traces";
 import { metricLabel } from "./metric-labels";
 
-/** Мини-график «значение функции и learning rate от шага».
- * Значение и lr наложены на один график одновременно: значение — сплошной
- * линией по левой оси, lr — пунктиром по правой (y2), у обеих линий одного
- * запуска общий цвет slot.color. Показывает полную кривую последнего
- * посчитанного результата каждого видимого запуска, не привязан к состоянию
- * проигрывания анимации. lr есть не у всех оптимизаторов (например, у LBFGS
- * или Ньютона его нет) — такие запуски молча остаются без пунктирной линии.
- * Ховер собран в один блок (hovermode: "x unified") — наведение в любой точке
- * графика сразу показывает значения всех видимых линий на этом шаге, а не
- * только той, что под курсором. Кривые обрезаны до текущего кадра
- * usePlaybackStore — во время автовоспроизведения и при ручной перемотке
- * таймлайна график остаётся синхронным с основным графиком, а не показывает
- * сразу всю финальную кривую. */
+const VALUE_OPTION = { value: "__value__", label: "f(x,y) — значение функции" };
+
 export function ConvergenceChart() {
   const { slots, results } = useRunsStore();
   const frame = usePlaybackStore((state) => state.frame);
   const resolvedTheme = useResolvedTheme();
-  const [logScale, setLogScale] = useState(false);
   const [primaryMetric, setPrimaryMetric] = useState("__value__");
   const [secondaryMetric, setSecondaryMetric] = useState<string | null>("lr");
+  const [logLeft, setLogLeft] = useState(false);
+  const [logRight, setLogRight] = useState(false);
 
   const availableMetrics = useMemo(
     () => collectAvailableMetrics(slots, results),
     [slots, results],
+  );
+
+  const metricOptions = useMemo(
+    () => [VALUE_OPTION, ...availableMetrics.map((key) => ({ value: key, label: metricLabel(key) }))],
+    [availableMetrics],
   );
 
   const data = useMemo(
@@ -48,7 +43,7 @@ export function ConvergenceChart() {
       paper_bgcolor: theme.paper,
       plot_bgcolor: theme.paper,
       font: { color: theme.fontColor, family: "Space Grotesk, Inter, system-ui, sans-serif", size: 11 },
-      margin: { l: 44, r: 44, t: 10, b: 32 },
+      margin: { l: 44, r: secondaryMetric ? 44 : 16, t: 10, b: 32 },
       showlegend: false,
       uirevision: "keep",
       hovermode: "x unified",
@@ -59,56 +54,57 @@ export function ConvergenceChart() {
       },
       xaxis: { title: { text: "Шаг" }, gridcolor: theme.gridColor, color: theme.mutedFontColor, zeroline: false },
       yaxis: {
-        title: { text: primaryMetric === "__value__" ? "Значение" : primaryMetric },
-        type: logScale ? "log" : "linear",
+        type: logLeft ? "log" : "linear",
         gridcolor: theme.gridColor,
         color: theme.mutedFontColor,
         zeroline: false,
       },
       yaxis2: {
-        title: secondaryMetric ? { text: secondaryMetric } : undefined,
         overlaying: "y",
         side: "right",
         showgrid: false,
+        type: logRight ? "log" : "linear",
         color: theme.mutedFontColor,
         zeroline: false,
         visible: !!secondaryMetric,
       },
     };
-  }, [resolvedTheme, logScale, primaryMetric, secondaryMetric]);
+  }, [resolvedTheme, logLeft, logRight, secondaryMetric]);
 
   const plotRef = usePlotlyAutoResize();
 
   return (
-    <Panel
-      heading="Сходимость"
-      actions={
-        <div className="flex items-center gap-2">
+    <div className="flex h-full min-h-0 flex-col border border-border bg-bg-elevated">
+      <div className="relative min-h-0 flex-1">
+        <div className="absolute top-1 left-1 z-10 flex items-center gap-1">
           <Select
             value={primaryMetric}
             onChange={setPrimaryMetric}
-            options={[{ value: "__value__", label: "f(x,y) — значение функции" }, ...availableMetrics.map((key) => ({ value: key, label: metricLabel(key) }))]}
+            options={metricOptions}
             className="w-44"
           />
+          <Checkbox checked={logLeft} onChange={setLogLeft} label="лог" />
+        </div>
+
+        <div className="absolute top-1 right-1 z-10 flex items-center gap-1">
+          <Checkbox checked={logRight} onChange={setLogRight} label="лог" disabled={!secondaryMetric} />
           <Select
             value={secondaryMetric ?? "__none__"}
             onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
-            options={[{ value: "__none__", label: "—" }, ...availableMetrics.map((key) => ({ value: key, label: metricLabel(key) }))]}
+            options={[{ value: "__none__", label: "—" }, ...metricOptions]}
             className="w-44"
           />
-          <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />
         </div>
-      }
-      className="h-full min-h-0"
-    >
-      <Plot
-        ref={plotRef}
-        data={data}
-        layout={layout}
-        config={{ displayModeBar: false, responsive: true }}
-        useResizeHandler
-        style={{ width: "100%", height: "100%" }}
-      />
-    </Panel>
+
+        <Plot
+          ref={plotRef}
+          data={data}
+          layout={layout}
+          config={{ displayModeBar: false, responsive: true }}
+          useResizeHandler
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
+    </div>
   );
 }
