@@ -255,8 +255,8 @@ export function buildTrajectoryTrace(
   return traces;
 }
 
-const GRADIENT_GRID = 15;
-const ARROW_SCALE = 0.8;
+const GRADIENT_GRID = 20;
+const ARROW_SCALE = 0.35;
 const ARROWHEAD_SIZE = 0.25;
 const GRADIENT_COLOR = "rgba(80, 80, 80, 0.55)";
 

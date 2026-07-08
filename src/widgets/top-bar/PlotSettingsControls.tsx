@@ -47,7 +47,7 @@ export function PlotSettingsControls() {
         <Slider value={contourLevels} onChange={setContourLevels} min={MIN_CONTOUR_LEVELS} max={MAX_CONTOUR_LEVELS} />
       </div>
 
-      {!is3D && <Checkbox checked={showGradientField} onChange={setShowGradientField} label="Градиент" className="pb-1.5" />}
+      {!is3D && <Checkbox checked={showGradientField} onChange={setShowGradientField} label="Поле направлений" className="pb-1.5" />}
     </div>
   );
 }
