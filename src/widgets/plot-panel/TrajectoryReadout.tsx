@@ -6,13 +6,10 @@ interface TrajectoryReadoutProps {
   slots: RunConfig[];
   results: Record<string, RunResult>;
   frame: number;
+  showCoords?: boolean;
 }
 
-/** HTML-оверлей поверх графика — замена отключённой Plotly-легенды
- * (showlegend: false везде в build-traces.ts, см. buildTrajectoryTrace).
- * Формат "Name = 1.234, lr: 0.01", читает value/lr на текущем кадре
- * анимации, а не последнее значение прогона. */
-export function TrajectoryReadout({ slots, results, frame }: TrajectoryReadoutProps) {
+export function TrajectoryReadout({ slots, results, frame, showCoords }: TrajectoryReadoutProps) {
   const visibleSlots = slots.filter((slot) => slot.visible);
   if (visibleSlots.length === 0) return null;
 
@@ -26,6 +23,8 @@ export function TrajectoryReadout({ slots, results, frame }: TrajectoryReadoutPr
         const idx = result && !result.error ? Math.min(frame, result.value.length - 1) : -1;
         const value = idx >= 0 ? result?.value[idx] : undefined;
         const lr = idx >= 0 ? (result?.lr?.[idx] ?? null) : null;
+        const x = idx >= 0 ? result?.x[idx] : undefined;
+        const y = idx >= 0 ? result?.y[idx] : undefined;
 
         return (
           <div key={slot.slotId} className="flex items-center gap-1.5 py-0.5 whitespace-nowrap">
@@ -37,6 +36,9 @@ export function TrajectoryReadout({ slots, results, frame }: TrajectoryReadoutPr
               <span className="font-mono text-xs text-text-muted">
                 {`= ${formatSignificant(value, 4)}`}
                 {lr !== null && `, lr: ${formatSignificant(lr, 3)}`}
+                {showCoords && x !== undefined && y !== undefined && (
+                  <>, x: {formatSignificant(x, 4)}, y: {formatSignificant(y, 4)}</>
+                )}
               </span>
             ) : null}
           </div>

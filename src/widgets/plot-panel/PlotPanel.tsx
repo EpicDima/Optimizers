@@ -16,7 +16,6 @@ import { formatCompactCount } from "./format-value";
 import { buildLayout } from "./layout";
 import { plotDivRef } from "./plot-ref";
 import { plotlyThemeColors } from "./plotly-theme";
-import { StepInfoOverlay } from "./StepInfoOverlay";
 import { TrajectoryReadout } from "./TrajectoryReadout";
 
 export function PlotPanel() {
@@ -106,8 +105,7 @@ export function PlotPanel() {
             useResizeHandler
             style={{ width: "100%", height: "100%" }}
           />
-          {(!preview.data || preview.data.valid) && <TrajectoryReadout slots={slots} results={results} frame={frame} />}
-          {stepMode && (!preview.data || preview.data.valid) && <StepInfoOverlay slots={slots} results={results} frame={frame} />}
+          {(!preview.data || preview.data.valid) && <TrajectoryReadout slots={slots} results={results} frame={frame} showCoords={stepMode} />}
         </div>
         <div className="flex shrink-0 items-center gap-3 border-t border-border px-3 py-2">
           {stepMode ? (
