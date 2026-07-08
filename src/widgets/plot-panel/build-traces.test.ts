@@ -12,6 +12,7 @@ function makeResult(length: number, withLr: boolean): RunResult {
     y: Array.from({ length }, (_, i) => i * 2),
     value: Array.from({ length }, (_, i) => i * 3),
     lr: withLr ? Array.from({ length }, (_, i) => i * 0.1) : null,
+    internals: null,
     error: null,
   };
 }

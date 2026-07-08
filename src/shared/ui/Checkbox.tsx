@@ -9,12 +9,14 @@ interface CheckboxProps {
   onChange: (checked: boolean) => void;
   label?: ReactNode;
   className?: string;
+  disabled?: boolean;
 }
 
-export function Checkbox({ checked, onChange, label, className }: CheckboxProps) {
+export function Checkbox({ checked, onChange, label, className, disabled }: CheckboxProps) {
   return (
-    <label className={cn("inline-flex cursor-pointer items-center gap-2 font-sans text-xs text-text", className)}>
+    <label className={cn("inline-flex cursor-pointer items-center gap-2 font-sans text-xs text-text", disabled && "pointer-events-none opacity-50", className)}>
       <RadixCheckbox.Root
+        disabled={disabled}
         checked={checked}
         onCheckedChange={(value) => onChange(value === true)}
         className={cn(

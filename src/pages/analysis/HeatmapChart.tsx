@@ -114,7 +114,7 @@ export function HeatmapChart() {
       },
       hovertemplate: "x₀=%{x:.2f}<br>y₀=%{y:.2f}<br>z=%{customdata:.4g}<extra></extra>",
       customdata: rawZ,
-    });
+    } as Data);
 
     return traces;
   }, [heatmapData, baseColorscale, zDisplay, rawZ, zRange, showBase, overlayOpacity, logScale]);

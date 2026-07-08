@@ -312,7 +312,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   canvas.height = height;
   const ctx = canvas.getContext("2d")!;
 
-  const gifFrames: Array<{ data: Uint8Array; delay: number }> = [];
+  const gifFrames: Array<{ data: Uint8ClampedArray; delay: number }> = [];
 
   for (let f = 0, idx = 0; f <= maxFrame; f += frameStep, idx++) {
     ctx.drawImage(bgWithLegend, 0, 0);
@@ -360,8 +360,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
       ctx.stroke();
     }
 
-    const imgData = ctx.getImageData(0, 0, width, height).data;
-    gifFrames.push({ data: new Uint8Array(imgData.buffer as ArrayBuffer), delay });
+    gifFrames.push({ data: ctx.getImageData(0, 0, width, height).data, delay });
     onProgress?.(idx + 1, totalFrames);
 
     if (idx % 20 === 0) await new Promise<void>((r) => setTimeout(r, 0));
@@ -374,7 +373,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
     height,
     maxColors: 255,
     workerUrl: gifWorkerUrl,
-    frames: gifFrames,
+    frames: gifFrames as never,
     format: "blob",
   })) as unknown as Blob;
 }
