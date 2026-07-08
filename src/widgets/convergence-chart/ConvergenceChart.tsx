@@ -6,7 +6,7 @@ import { useRunsStore } from "@entities/run";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
-import { Checkbox, Select } from "@shared/ui";
+import { Checkbox, Panel, Select } from "@shared/ui";
 
 import { buildConvergenceTraces, collectAvailableMetrics } from "./build-traces";
 import { metricLabel } from "./metric-labels";
@@ -74,37 +74,34 @@ export function ConvergenceChart() {
   const plotRef = usePlotlyAutoResize();
 
   return (
-    <div className="flex h-full min-h-0 flex-col border border-border bg-bg-elevated">
-      <div className="relative min-h-0 flex-1">
-        <div className="absolute top-1 left-1 z-10 flex items-center gap-1">
-          <Select
-            value={primaryMetric}
-            onChange={setPrimaryMetric}
-            options={metricOptions}
-            className="w-44"
-          />
-          <Checkbox checked={logLeft} onChange={setLogLeft} label="лог" />
+    <Panel
+      actions={
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <Select value={primaryMetric} onChange={setPrimaryMetric} options={metricOptions} className="w-44" />
+            <Checkbox checked={logLeft} onChange={setLogLeft} label="Лог. шкала" />
+          </div>
+          <div className="flex items-center gap-1">
+            <Select
+              value={secondaryMetric ?? "__none__"}
+              onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
+              options={[{ value: "__none__", label: "—" }, ...metricOptions]}
+              className="w-44"
+            />
+            <Checkbox checked={logRight} onChange={setLogRight} label="Лог. шкала" disabled={!secondaryMetric} />
+          </div>
         </div>
-
-        <div className="absolute top-1 right-1 z-10 flex items-center gap-1">
-          <Checkbox checked={logRight} onChange={setLogRight} label="лог" disabled={!secondaryMetric} />
-          <Select
-            value={secondaryMetric ?? "__none__"}
-            onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
-            options={[{ value: "__none__", label: "—" }, ...metricOptions]}
-            className="w-44"
-          />
-        </div>
-
-        <Plot
-          ref={plotRef}
-          data={data}
-          layout={layout}
-          config={{ displayModeBar: false, responsive: true }}
-          useResizeHandler
-          style={{ width: "100%", height: "100%" }}
-        />
-      </div>
-    </div>
+      }
+      className="h-full min-h-0"
+    >
+      <Plot
+        ref={plotRef}
+        data={data}
+        layout={layout}
+        config={{ displayModeBar: false, responsive: true }}
+        useResizeHandler
+        style={{ width: "100%", height: "100%" }}
+      />
+    </Panel>
   );
 }
