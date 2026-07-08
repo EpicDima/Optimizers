@@ -9,13 +9,6 @@ import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
 import { Checkbox, Panel, Slider } from "@shared/ui";
 
-const OVERLAY_SCALE: [number, string][] = [
-  [0, "rgb(34,139,34)"],
-  [0.3, "rgb(255,255,80)"],
-  [0.6, "rgb(255,140,0)"],
-  [1, "rgb(180,0,0)"],
-];
-
 export function HeatmapChart() {
   const heatmapData = useAnalysisStore((s) => s.heatmapData);
   const colormap = usePlotSettingsStore((s) => s.colormap);
@@ -58,7 +51,7 @@ export function HeatmapChart() {
       x: heatmapData.xs,
       y: heatmapData.ys,
       z,
-      colorscale: OVERLAY_SCALE,
+      colorscale: baseColorscale,
       opacity: showBase ? overlayOpacity : 1,
       colorbar: {
         title: { text: logScale ? "log₁₀ f" : "f(x,y)", side: "right" as const },
@@ -102,8 +95,8 @@ export function HeatmapChart() {
           <Checkbox checked={showBase} onChange={setShowBase} label="Подложка" />
           {showBase && (
             <Slider
-              min={0.2}
-              max={0.9}
+              min={0}
+              max={1}
               step={0.05}
               value={overlayOpacity}
               onChange={setOverlayOpacity}
