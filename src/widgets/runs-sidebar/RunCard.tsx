@@ -1,10 +1,11 @@
-import { Trash2 } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 
 import { useOptimizers } from "@entities/optimizer";
 import type { RunConfig } from "@entities/run";
 import { useRunsStore } from "@entities/run";
 import { useSchedulers } from "@entities/scheduler";
 import { defaultParams } from "@shared/lib/algorithm";
+import { MAX_RUNS } from "@shared/config/constants";
 import { Button, Checkbox, ColorSwatch, NumberField, Select } from "@shared/ui";
 
 import { ParamForm } from "./ParamForm";
@@ -18,7 +19,9 @@ export function RunCard({ slot, canRemove }: RunCardProps) {
   const { data: optimizers } = useOptimizers();
   const { data: schedulers } = useSchedulers();
   const updateSlot = useRunsStore((state) => state.updateSlot);
+  const duplicateSlot = useRunsStore((state) => state.duplicateSlot);
   const removeSlot = useRunsStore((state) => state.removeSlot);
+  const slotsCount = useRunsStore((state) => state.slots.length);
 
   const optimizerMeta = optimizers?.find((option) => option.name === slot.optimizer);
   const schedulerMeta = schedulers?.find((option) => option.name === slot.scheduler);
@@ -46,6 +49,9 @@ export function RunCard({ slot, canRemove }: RunCardProps) {
           options={optimizers?.map((option) => option.name) ?? []}
           className="flex-1"
         />
+        <Button variant="ghost" size="sm" onClick={() => duplicateSlot(slot.slotId)} disabled={slotsCount >= MAX_RUNS} aria-label="Дублировать оптимизатор">
+          <Copy size={14} />
+        </Button>
         <Button variant="ghost" size="sm" onClick={() => removeSlot(slot.slotId)} disabled={!canRemove} aria-label="Удалить оптимизатор">
           <Trash2 size={14} />
         </Button>

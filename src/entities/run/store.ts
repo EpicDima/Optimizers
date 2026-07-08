@@ -26,6 +26,7 @@ interface RunsState {
   error: string | null;
 
   addSlot: (defaults: NewSlotDefaults) => void;
+  duplicateSlot: (slotId: string) => void;
   removeSlot: (slotId: string) => void;
   updateSlot: (slotId: string, patch: Partial<RunConfig>) => void;
   setGlobalStart: (start: [number, number]) => void;
@@ -62,6 +63,18 @@ export const useRunsStore = create<RunsState>((set, get) => ({
         visible: true,
       };
       return { slots: [...state.slots, slot] };
+    }),
+
+  duplicateSlot: (slotId) =>
+    set((state) => {
+      const source = state.slots.find((s) => s.slotId === slotId);
+      if (!source) return state;
+      const newSlot: RunConfig = {
+        ...source,
+        slotId: crypto.randomUUID(),
+        color: colorForSlot(state.slots.length),
+      };
+      return { slots: [...state.slots, newSlot] };
     }),
 
   removeSlot: (slotId) =>
