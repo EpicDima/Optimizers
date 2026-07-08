@@ -94,7 +94,12 @@ export function RunsSidebar() {
             <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
           </div>
           <NumberField label="Шагов" value={steps} onChange={setSteps} />
-          <NumberField label="Шум градиента (σ)" value={gradientNoise} onChange={setGradientNoise} />
+          <NumberField
+            label="Шум градиента (σ)"
+            value={gradientNoise}
+            onChange={setGradientNoise}
+            description="Стандартное отклонение гауссова шума, добавляемого к градиенту на каждом шаге. Типичные значения: 0.01–1.0. Чем больше σ, тем сильнее стохастичность."
+          />
           <Checkbox checked={resetOnStart} onChange={setResetOnStart} label="Сбрасывать позицию" />
           {error && <p className="font-body text-xs text-danger">{error}</p>}
           <Button variant="solid" onClick={() => void runAll(formula)} disabled={isRunning || slots.length === 0}>
