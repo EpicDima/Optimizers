@@ -48,8 +48,8 @@ export function AnalysisConfig() {
   }));
 
   return (
-    <Panel heading="Конфигурация" className="h-full">
-      <div className="flex flex-col gap-3 p-3">
+    <Panel heading="Конфигурация" className="h-full min-h-0">
+      <div className="flex h-full flex-col gap-3 overflow-y-auto p-3">
         <label className="flex flex-col gap-1">
           <span className="font-sans text-[11px] text-text-muted">Пресет</span>
           <Select
