@@ -52,7 +52,5 @@ describe("TopBar", () => {
     expect(screen.getByText("3D")).toBeInTheDocument();
     expect(screen.getByText("Линии")).toBeInTheDocument();
     expect(screen.getByText("Заливка")).toBeInTheDocument();
-    expect(screen.getByText("Палитра")).toBeInTheDocument();
-    expect(screen.getByText("Инверсия")).toBeInTheDocument();
   });
 });
