@@ -2,9 +2,11 @@ import { useAnalysisStore } from "@entities/analysis";
 
 import { AnalysisConvergenceChart } from "./ConvergenceChart";
 import { FinalValueChart } from "./FinalValueChart";
+import { HeatmapChart } from "./HeatmapChart";
 import { AnalysisConfig } from "./AnalysisConfig";
 
 export function AnalysisPage() {
+  const mode = useAnalysisStore((s) => s.mode);
   const error = useAnalysisStore((s) => s.error);
 
   return (
@@ -18,12 +20,20 @@ export function AnalysisPage() {
             {error}
           </div>
         )}
-        <div className="min-h-0 flex-1">
-          <AnalysisConvergenceChart />
-        </div>
-        <div className="min-h-0 flex-1">
-          <FinalValueChart />
-        </div>
+        {mode === "sweep" ? (
+          <>
+            <div className="min-h-0 flex-1">
+              <AnalysisConvergenceChart />
+            </div>
+            <div className="min-h-0 flex-1">
+              <FinalValueChart />
+            </div>
+          </>
+        ) : (
+          <div className="min-h-0 flex-1">
+            <HeatmapChart />
+          </div>
+        )}
       </div>
     </div>
   );

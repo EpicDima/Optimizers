@@ -2,26 +2,37 @@ import { Play } from "lucide-react";
 
 import { useRunsStore } from "@entities/run";
 import { useAnalysisStore } from "@entities/analysis";
+import type { AnalysisMode } from "@entities/analysis";
 import { useFunctionPresets, useFunctionStore } from "@entities/test-function";
 import { getOptimizerDescriptor, optimizerNames } from "@shared/lib/optimization-engine/optimizers/registry";
-import { Button, NumberField, Panel, Select } from "@shared/ui";
+import { Button, NumberField, Panel, Select, ToggleGroup } from "@shared/ui";
+
+const MODE_OPTIONS = [
+  { value: "sweep", label: "Развёртка" },
+  { value: "heatmap", label: "Тепловая карта" },
+] as const;
 
 export function AnalysisConfig() {
   const {
+    mode,
     optimizerName,
     paramName,
     paramFrom,
     paramTo,
     sampleCount,
     steps,
+    heatmapResolution,
     isRunning,
+    setMode,
     setOptimizerName,
     setParamName,
     setParamFrom,
     setParamTo,
     setSampleCount,
     setSteps,
+    setHeatmapResolution,
     runSweep,
+    runHeatmap,
   } = useAnalysisStore();
 
   const { data: presets } = useFunctionPresets();
@@ -47,9 +58,18 @@ export function AnalysisConfig() {
     label: descriptor ? `${key} (${descriptor.params[key].default})` : key,
   }));
 
+  const handleRun = mode === "sweep" ? runSweep : runHeatmap;
+
   return (
     <Panel heading="Конфигурация" className="h-full min-h-0">
       <div className="flex h-full flex-col gap-3 overflow-y-auto p-3">
+        <ToggleGroup
+          value={mode}
+          onChange={(v) => setMode(v as AnalysisMode)}
+          options={MODE_OPTIONS}
+          className="w-full [&>*]:flex-1"
+        />
+
         <label className="flex flex-col gap-1">
           <span className="font-sans text-[11px] text-text-muted">Пресет</span>
           <Select
@@ -70,10 +90,12 @@ export function AnalysisConfig() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
-          <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
-        </div>
+        {mode === "sweep" && (
+          <div className="grid grid-cols-2 gap-2">
+            <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
+            <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
+          </div>
+        )}
 
         <NumberField label="Шаги" value={steps} onChange={setSteps} />
 
@@ -93,21 +115,27 @@ export function AnalysisConfig() {
           />
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="font-sans text-[11px] text-text-muted">Параметр</span>
-          <Select
-            value={paramName}
-            onChange={setParamName}
-            options={paramOptions}
-            disabled={paramOptions.length === 0}
-          />
-        </label>
+        {mode === "sweep" ? (
+          <>
+            <label className="flex flex-col gap-1">
+              <span className="font-sans text-[11px] text-text-muted">Параметр</span>
+              <Select
+                value={paramName}
+                onChange={setParamName}
+                options={paramOptions}
+                disabled={paramOptions.length === 0}
+              />
+            </label>
 
-        <NumberField label="От" value={paramFrom} onChange={setParamFrom} />
-        <NumberField label="До" value={paramTo} onChange={setParamTo} />
-        <NumberField label="Точек" value={sampleCount} onChange={setSampleCount} />
+            <NumberField label="От" value={paramFrom} onChange={setParamFrom} />
+            <NumberField label="До" value={paramTo} onChange={setParamTo} />
+            <NumberField label="Точек" value={sampleCount} onChange={setSampleCount} />
+          </>
+        ) : (
+          <NumberField label="Разрешение сетки" value={heatmapResolution} onChange={setHeatmapResolution} />
+        )}
 
-        <Button variant="solid" size="md" disabled={isRunning} onClick={() => void runSweep()}>
+        <Button variant="solid" size="md" disabled={isRunning} onClick={() => void handleRun()}>
           <Play size={14} />
           {isRunning ? "Вычисление..." : "Запустить"}
         </Button>

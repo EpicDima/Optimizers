@@ -15,7 +15,16 @@ export interface AnalysisResult {
   finalValue: number;
 }
 
+export type AnalysisMode = "sweep" | "heatmap";
+
+export interface HeatmapData {
+  xs: number[];
+  ys: number[];
+  z: number[][];
+}
+
 interface AnalysisState {
+  mode: AnalysisMode;
   optimizerName: string;
   paramName: string;
   paramFrom: number;
@@ -23,16 +32,21 @@ interface AnalysisState {
   sampleCount: number;
   steps: number;
   results: AnalysisResult[];
+  heatmapResolution: number;
+  heatmapData: HeatmapData | null;
   isRunning: boolean;
   error: string | null;
 
+  setMode: (mode: AnalysisMode) => void;
   setOptimizerName: (name: string) => void;
   setParamName: (name: string) => void;
   setParamFrom: (value: number) => void;
   setParamTo: (value: number) => void;
   setSampleCount: (count: number) => void;
   setSteps: (steps: number) => void;
+  setHeatmapResolution: (n: number) => void;
   runSweep: () => Promise<void>;
+  runHeatmap: () => Promise<void>;
 }
 
 function firstOptimizerName(): string {
@@ -66,6 +80,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
   const initRange = defaultRange(initOptimizer, initParam);
 
   return {
+    mode: "sweep" as AnalysisMode,
     optimizerName: initOptimizer,
     paramName: initParam,
     paramFrom: initRange.from,
@@ -73,9 +88,12 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
     sampleCount: 10,
     steps: 200,
     results: [],
+    heatmapResolution: 30,
+    heatmapData: null,
     isRunning: false,
     error: null,
 
+    setMode: (mode) => set({ mode }),
     setOptimizerName: (optimizerName) => {
       const param = firstParamName(optimizerName);
       const range = defaultRange(optimizerName, param);
@@ -92,6 +110,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
     setParamTo: (paramTo) => set({ paramTo }),
     setSampleCount: (sampleCount) => set({ sampleCount }),
     setSteps: (steps) => set({ steps }),
+    setHeatmapResolution: (heatmapResolution) => set({ heatmapResolution }),
 
     runSweep: async () => {
       const { optimizerName, paramName, paramFrom, paramTo, sampleCount, steps, isRunning } = get();
@@ -151,6 +170,79 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
         }));
 
         set({ isRunning: false, results });
+      } catch (err) {
+        set({ isRunning: false, error: err instanceof Error ? err.message : String(err) });
+      }
+    },
+
+    runHeatmap: async () => {
+      const { optimizerName, steps, heatmapResolution, isRunning } = get();
+      if (isRunning) return;
+
+      const { presetName, formula } = useFunctionStore.getState();
+      const { gradientNoise } = useRunsStore.getState();
+      const preset = functionPresets.find((p) => p.name === presetName);
+      if (!preset) {
+        set({ error: "неизвестная функция" });
+        return;
+      }
+
+      const descriptor = getOptimizerDescriptor(optimizerName);
+      if (!descriptor) {
+        set({ error: "неизвестный оптимизатор" });
+        return;
+      }
+
+      set({ isRunning: true, error: null, heatmapData: null });
+
+      try {
+        const defaultParams: Record<string, number> = {};
+        for (const [key, meta] of Object.entries(descriptor.params)) {
+          defaultParams[key] = meta.default;
+        }
+
+        const [xMin, xMax, yMin, yMax] = preset.range;
+        const n = heatmapResolution;
+        const xs: number[] = [];
+        const ys: number[] = [];
+        for (let i = 0; i < n; i++) {
+          xs.push(xMin + (i / (n - 1)) * (xMax - xMin));
+          ys.push(yMin + (i / (n - 1)) * (yMax - yMin));
+        }
+
+        const slots: EngineSlotInput[] = [];
+        for (let iy = 0; iy < n; iy++) {
+          for (let ix = 0; ix < n; ix++) {
+            slots.push({
+              slotId: `heatmap-${iy}-${ix}`,
+              optimizer: optimizerName,
+              optimizerParams: defaultParams,
+              scheduler: "Constant",
+              schedulerParams: {},
+              start: [xs[ix], ys[iy]],
+              reset: true,
+            });
+          }
+        }
+
+        const engineResults = await runInWorker(formula, slots, steps, gradientNoise);
+
+        const z: number[][] = [];
+        for (let iy = 0; iy < n; iy++) {
+          const row: number[] = [];
+          for (let ix = 0; ix < n; ix++) {
+            const r = engineResults[iy * n + ix];
+            if (r.error) {
+              row.push(NaN);
+            } else {
+              const vals = r.value;
+              row.push(vals.length > 0 ? vals[vals.length - 1] : NaN);
+            }
+          }
+          z.push(row);
+        }
+
+        set({ isRunning: false, heatmapData: { xs, ys, z } });
       } catch (err) {
         set({ isRunning: false, error: err instanceof Error ? err.message : String(err) });
       }
