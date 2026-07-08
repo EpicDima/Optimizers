@@ -109,6 +109,10 @@ export function AnalysisConfig() {
             description="Лёгкий шум: 1e-5–1e-4, сильный: 1e-3–1e-2."
           />
 
+          {mode === "heatmap" && (
+            <NumberField label="Разрешение сетки" value={heatmapResolution} onChange={setHeatmapResolution} />
+          )}
+
           <label className="flex flex-col gap-1">
             <span className="font-sans text-[11px] text-text-muted">Оптимизатор</span>
             <Select
@@ -135,17 +139,14 @@ export function AnalysisConfig() {
               <NumberField label="Точек" value={sampleCount} onChange={setSampleCount} />
             </>
           ) : (
-            <>
-              {paramKeys.map((key) => (
-                <NumberField
-                  key={key}
-                  label={key}
-                  value={heatmapParams[key] ?? descriptor!.params[key].default}
-                  onChange={(v) => setHeatmapParam(key, v)}
-                />
-              ))}
-              <NumberField label="Разрешение сетки" value={heatmapResolution} onChange={setHeatmapResolution} />
-            </>
+            paramKeys.map((key) => (
+              <NumberField
+                key={key}
+                label={key}
+                value={heatmapParams[key] ?? descriptor!.params[key].default}
+                onChange={(v) => setHeatmapParam(key, v)}
+              />
+            ))
           )}
         </div>
 
