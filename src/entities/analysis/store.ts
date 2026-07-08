@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 import { colorForSlot } from "@shared/config/colors";
 import { useRunsStore } from "@entities/run";
@@ -77,7 +78,7 @@ function defaultRange(optimizerName: string, paramName: string): { from: number;
   return { from: def * 0.1, to: def * 10 };
 }
 
-export const useAnalysisStore = create<AnalysisState>((set, get) => {
+export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
   const initOptimizer = firstOptimizerName();
   const initParam = firstParamName(initOptimizer);
   const initRange = defaultRange(initOptimizer, initParam);
@@ -260,4 +261,7 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
       }
     },
   };
-});
+}, {
+  name: "optimizers-analysis",
+  partialize: (s) => ({ mode: s.mode, heatmapResolution: s.heatmapResolution }),
+}));
