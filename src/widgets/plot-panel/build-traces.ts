@@ -208,19 +208,23 @@ export function buildTrajectoryTrace(
   const zs = value.slice(start);
   const lineWidth = is3D ? 4 : 2;
 
+  const customdata = zs.map((v) => formatValue(v));
+  const hovertemplate = "x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{customdata}<extra></extra>";
+
   const shared = {
     type: is3D ? ("scatter3d" as const) : ("scatter" as const),
     mode: "lines" as const,
     x: xs,
     y: ys,
     ...(is3D ? { z: zs } : {}),
+    customdata,
     visible: config.visible,
     showlegend: false,
   };
 
   const traces: Data[] = [
     { ...shared, line: { color: "#000000", width: lineWidth + 2 }, hoverinfo: "skip" },
-    { ...shared, line: { color: config.color, width: lineWidth }, name: config.optimizer, hoverinfo: "x+y" },
+    { ...shared, line: { color: config.color, width: lineWidth }, name: config.optimizer, hovertemplate },
   ];
 
   if (xs.length > 0) {

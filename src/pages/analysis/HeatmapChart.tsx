@@ -58,7 +58,7 @@ export function HeatmapChart() {
         thickness: 12,
         len: 0.9,
       },
-      hovertemplate: "x₀=%{x:.2f}<br>y₀=%{y:.2f}<br>f=%{customdata:.4g}<extra></extra>",
+      hovertemplate: "x₀=%{x:.2f}<br>y₀=%{y:.2f}<br>z=%{customdata:.4g}<extra></extra>",
       customdata: heatmapData.z,
     });
 

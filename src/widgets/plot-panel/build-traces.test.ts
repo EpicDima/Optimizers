@@ -150,7 +150,7 @@ describe("buildTrajectoryTrace", () => {
       x: [0, 1, 2, 3],
       line: { color: slot.color, width: 2 },
       name: slot.optimizer,
-      hoverinfo: "x+y",
+      hovertemplate: "x=%{x:.4f}<br>y=%{y:.4f}<br>z=%{customdata}<extra></extra>",
     });
     expect(headMarker).toMatchObject({
       type: "scatter",
