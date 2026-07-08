@@ -190,8 +190,8 @@ function bakeBackground(p: BakeParams): HTMLCanvasElement {
   ctx.lineWidth = 1;
   ctx.strokeRect(cbX, cbY, COLORBAR_W, cbH);
 
-  ctx.fillStyle = mutedFontColor;
-  ctx.font = "14px sans-serif";
+  ctx.fillStyle = fontColor;
+  ctx.font = "15px sans-serif";
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
   const cbLabelX = cbX + COLORBAR_W + 6;
