@@ -22,6 +22,7 @@ export function AnalysisConfig() {
     sampleCount,
     steps,
     heatmapResolution,
+    heatmapParams,
     isRunning,
     setMode,
     setOptimizerName,
@@ -31,6 +32,7 @@ export function AnalysisConfig() {
     setSampleCount,
     setSteps,
     setHeatmapResolution,
+    setHeatmapParam,
     runSweep,
     runHeatmap,
   } = useAnalysisStore();
@@ -62,83 +64,97 @@ export function AnalysisConfig() {
 
   return (
     <Panel heading="Конфигурация" className="h-full min-h-0">
-      <div className="flex h-full flex-col gap-3 overflow-y-auto p-3">
-        <ToggleGroup
-          value={mode}
-          onChange={(v) => setMode(v as AnalysisMode)}
-          options={MODE_OPTIONS}
-          className="w-full [&>*]:flex-1"
-        />
-
-        <label className="flex flex-col gap-1">
-          <span className="font-sans text-[11px] text-text-muted">Пресет</span>
-          <Select
-            value={presetName ?? ""}
-            onChange={handlePresetChange}
-            options={presets?.map((p) => p.name) ?? []}
-            placeholder="Своя формула"
+      <div className="flex h-full flex-col">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
+          <ToggleGroup
+            value={mode}
+            onChange={(v) => setMode(v as AnalysisMode)}
+            options={MODE_OPTIONS}
+            className="w-full [&>*]:flex-1"
           />
-        </label>
 
-        <div className="flex flex-col gap-1">
-          <span className="font-sans text-[11px] text-text-muted">Формула f(x, y)</span>
-          <p
-            className="flex h-7 items-center overflow-x-auto whitespace-nowrap rounded-sm border border-border bg-bg-sunken px-2 font-mono text-xs text-text-muted [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            title={formula}
-          >
-            {formula}
-          </p>
+          <label className="flex flex-col gap-1">
+            <span className="font-sans text-[11px] text-text-muted">Пресет</span>
+            <Select
+              value={presetName ?? ""}
+              onChange={handlePresetChange}
+              options={presets?.map((p) => p.name) ?? []}
+              placeholder="Своя формула"
+            />
+          </label>
+
+          <div className="flex flex-col gap-1">
+            <span className="font-sans text-[11px] text-text-muted">Формула f(x, y)</span>
+            <p
+              className="flex h-7 items-center overflow-x-auto whitespace-nowrap rounded-sm border border-border bg-bg-sunken px-2 font-mono text-xs text-text-muted [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              title={formula}
+            >
+              {formula}
+            </p>
+          </div>
+
+          {mode === "sweep" && (
+            <div className="grid grid-cols-2 gap-2">
+              <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
+              <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
+            </div>
+          )}
+
+          <NumberField label="Шаги" value={steps} onChange={setSteps} />
+
+          <NumberField
+            label="Шум градиента (σ)"
+            value={gradientNoise}
+            onChange={setGradientNoise}
+            description="Лёгкий шум: 1e-5–1e-4, сильный: 1e-3–1e-2."
+          />
+
+          <label className="flex flex-col gap-1">
+            <span className="font-sans text-[11px] text-text-muted">Оптимизатор</span>
+            <Select
+              value={optimizerName}
+              onChange={setOptimizerName}
+              options={optimizerNames()}
+            />
+          </label>
+
+          {mode === "sweep" ? (
+            <>
+              <label className="flex flex-col gap-1">
+                <span className="font-sans text-[11px] text-text-muted">Параметр</span>
+                <Select
+                  value={paramName}
+                  onChange={setParamName}
+                  options={paramOptions}
+                  disabled={paramOptions.length === 0}
+                />
+              </label>
+
+              <NumberField label="От" value={paramFrom} onChange={setParamFrom} />
+              <NumberField label="До" value={paramTo} onChange={setParamTo} />
+              <NumberField label="Точек" value={sampleCount} onChange={setSampleCount} />
+            </>
+          ) : (
+            <>
+              {paramKeys.map((key) => (
+                <NumberField
+                  key={key}
+                  label={key}
+                  value={heatmapParams[key] ?? descriptor!.params[key].default}
+                  onChange={(v) => setHeatmapParam(key, v)}
+                />
+              ))}
+              <NumberField label="Разрешение сетки" value={heatmapResolution} onChange={setHeatmapResolution} />
+            </>
+          )}
         </div>
 
-        {mode === "sweep" && (
-          <div className="grid grid-cols-2 gap-2">
-            <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
-            <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
-          </div>
-        )}
-
-        <NumberField label="Шаги" value={steps} onChange={setSteps} />
-
-        <NumberField
-          label="Шум градиента (σ)"
-          value={gradientNoise}
-          onChange={setGradientNoise}
-          description="Лёгкий шум: 1e-5–1e-4, сильный: 1e-3–1e-2."
-        />
-
-        <label className="flex flex-col gap-1">
-          <span className="font-sans text-[11px] text-text-muted">Оптимизатор</span>
-          <Select
-            value={optimizerName}
-            onChange={setOptimizerName}
-            options={optimizerNames()}
-          />
-        </label>
-
-        {mode === "sweep" ? (
-          <>
-            <label className="flex flex-col gap-1">
-              <span className="font-sans text-[11px] text-text-muted">Параметр</span>
-              <Select
-                value={paramName}
-                onChange={setParamName}
-                options={paramOptions}
-                disabled={paramOptions.length === 0}
-              />
-            </label>
-
-            <NumberField label="От" value={paramFrom} onChange={setParamFrom} />
-            <NumberField label="До" value={paramTo} onChange={setParamTo} />
-            <NumberField label="Точек" value={sampleCount} onChange={setSampleCount} />
-          </>
-        ) : (
-          <NumberField label="Разрешение сетки" value={heatmapResolution} onChange={setHeatmapResolution} />
-        )}
-
-        <Button variant="solid" size="md" disabled={isRunning} onClick={() => void handleRun()}>
-          <Play size={14} />
-          {isRunning ? "Вычисление..." : "Запустить"}
-        </Button>
+        <div className="shrink-0 border-t border-border p-3">
+          <Button variant="solid" size="md" disabled={isRunning} onClick={() => void handleRun()} className="w-full">
+            <Play size={14} />
+            {isRunning ? "Вычисление..." : "Запустить"}
+          </Button>
+        </div>
       </div>
     </Panel>
   );

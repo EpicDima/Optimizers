@@ -37,6 +37,7 @@ interface AnalysisState {
   steps: number;
   results: AnalysisResult[];
   heatmapResolution: number;
+  heatmapParams: Record<string, number>;
   heatmapData: HeatmapData | null;
   isRunning: boolean;
   error: string | null;
@@ -49,6 +50,7 @@ interface AnalysisState {
   setSampleCount: (count: number) => void;
   setSteps: (steps: number) => void;
   setHeatmapResolution: (n: number) => void;
+  setHeatmapParam: (key: string, value: number) => void;
   runSweep: () => Promise<void>;
   runHeatmap: () => Promise<void>;
 }
@@ -78,6 +80,16 @@ function defaultRange(optimizerName: string, paramName: string): { from: number;
   return { from: def * 0.1, to: def * 10 };
 }
 
+function defaultParams(optimizerName: string): Record<string, number> {
+  const descriptor = getOptimizerDescriptor(optimizerName);
+  if (!descriptor) return {};
+  const params: Record<string, number> = {};
+  for (const [key, meta] of Object.entries(descriptor.params)) {
+    params[key] = meta.default;
+  }
+  return params;
+}
+
 export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
   const initOptimizer = firstOptimizerName();
   const initParam = firstParamName(initOptimizer);
@@ -93,6 +105,7 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
     steps: 200,
     results: [],
     heatmapResolution: 30,
+    heatmapParams: defaultParams(initOptimizer),
     heatmapData: null,
     isRunning: false,
     error: null,
@@ -101,7 +114,7 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
     setOptimizerName: (optimizerName) => {
       const param = firstParamName(optimizerName);
       const range = defaultRange(optimizerName, param);
-      set({ optimizerName, paramName: param, paramFrom: range.from, paramTo: range.to });
+      set({ optimizerName, paramName: param, paramFrom: range.from, paramTo: range.to, heatmapParams: defaultParams(optimizerName) });
     },
 
     setParamName: (paramName) => {
@@ -115,6 +128,7 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
     setSampleCount: (sampleCount) => set({ sampleCount }),
     setSteps: (steps) => set({ steps }),
     setHeatmapResolution: (heatmapResolution) => set({ heatmapResolution }),
+    setHeatmapParam: (key, value) => set((s) => ({ heatmapParams: { ...s.heatmapParams, [key]: value } })),
 
     runSweep: async () => {
       const { optimizerName, paramName, paramFrom, paramTo, sampleCount, steps, isRunning } = get();
@@ -180,7 +194,7 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
     },
 
     runHeatmap: async () => {
-      const { optimizerName, steps, heatmapResolution, isRunning } = get();
+      const { optimizerName, steps, heatmapResolution, heatmapParams, isRunning } = get();
       if (isRunning) return;
 
       const { presetName, formula } = useFunctionStore.getState();
@@ -200,11 +214,6 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
       set({ isRunning: true, error: null, heatmapData: null });
 
       try {
-        const defaultParams: Record<string, number> = {};
-        for (const [key, meta] of Object.entries(descriptor.params)) {
-          defaultParams[key] = meta.default;
-        }
-
         const [xMin, xMax, yMin, yMax] = preset.range;
         const n = heatmapResolution;
         const xs: number[] = [];
@@ -220,7 +229,7 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
             slots.push({
               slotId: `heatmap-${iy}-${ix}`,
               optimizer: optimizerName,
-              optimizerParams: defaultParams,
+              optimizerParams: { ...heatmapParams },
               scheduler: "Constant",
               schedulerParams: {},
               start: [xs[ix], ys[iy]],
