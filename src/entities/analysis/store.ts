@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { colorForSlot } from "@shared/config/colors";
+import { useRunsStore } from "@entities/run";
 import { useFunctionStore } from "@entities/test-function";
 import { functionPresets } from "@shared/lib/optimization-engine/functions";
 import { getOptimizerDescriptor, optimizerNames } from "@shared/lib/optimization-engine/optimizers/registry";
@@ -35,6 +36,8 @@ interface AnalysisState {
 }
 
 function firstOptimizerName(): string {
+  const slots = useRunsStore.getState().slots;
+  if (slots.length > 0) return slots[0].optimizer;
   return optimizerNames()[0];
 }
 
