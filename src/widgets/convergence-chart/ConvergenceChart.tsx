@@ -29,6 +29,7 @@ export function ConvergenceChart() {
   const frame = usePlaybackStore((state) => state.frame);
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(false);
+  const [primaryMetric, setPrimaryMetric] = useState("__value__");
   const [secondaryMetric, setSecondaryMetric] = useState<string | null>("lr");
 
   const availableMetrics = useMemo(
@@ -37,8 +38,8 @@ export function ConvergenceChart() {
   );
 
   const data = useMemo(
-    () => buildConvergenceTraces(slots, results, frame, secondaryMetric),
-    [slots, results, frame, secondaryMetric],
+    () => buildConvergenceTraces(slots, results, frame, primaryMetric, secondaryMetric),
+    [slots, results, frame, primaryMetric, secondaryMetric],
   );
 
   const layout = useMemo((): Partial<Layout> => {
@@ -58,7 +59,7 @@ export function ConvergenceChart() {
       },
       xaxis: { title: { text: "Шаг" }, gridcolor: theme.gridColor, color: theme.mutedFontColor, zeroline: false },
       yaxis: {
-        title: { text: "Значение" },
+        title: { text: primaryMetric === "__value__" ? "Значение" : primaryMetric },
         type: logScale ? "log" : "linear",
         gridcolor: theme.gridColor,
         color: theme.mutedFontColor,
@@ -74,7 +75,7 @@ export function ConvergenceChart() {
         visible: !!secondaryMetric,
       },
     };
-  }, [resolvedTheme, logScale, secondaryMetric]);
+  }, [resolvedTheme, logScale, primaryMetric, secondaryMetric]);
 
   const plotRef = usePlotlyAutoResize();
 
@@ -84,12 +85,18 @@ export function ConvergenceChart() {
       actions={
         <div className="flex items-center gap-2">
           <Select
+            value={primaryMetric}
+            onChange={setPrimaryMetric}
+            options={[{ value: "__value__", label: "f(x,y) — значение функции" }, ...availableMetrics.map((key) => ({ value: key, label: metricLabel(key) }))]}
+            className="w-44"
+          />
+          <Select
             value={secondaryMetric ?? "__none__"}
             onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
             options={[{ value: "__none__", label: "—" }, ...availableMetrics.map((key) => ({ value: key, label: metricLabel(key) }))]}
             className="w-44"
           />
-          <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала (значение)" />
+          <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />
         </div>
       }
       className="h-full min-h-0"

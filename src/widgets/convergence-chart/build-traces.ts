@@ -2,41 +2,24 @@ import type { Data } from "plotly.js";
 
 import type { RunConfig, RunResult } from "@entities/run";
 
-/** Обрезает плоскую серию (value или lr) до текущего кадра анимации [0, frame]
- * включительно. Логика та же, что у sliceResultToFrame из plot-panel/build-traces,
- * но здесь нечего переиспользовать напрямую: виджеты — отдельные, независимые
- * друг от друга модули, а этому графику не нужны ни x/y, ни хвостовое окно —
- * только усечение одного числового массива. */
 function sliceToFrame(series: number[], frame: number): number[] {
   const end = Math.max(0, Math.min(frame + 1, series.length));
   return series.slice(0, end);
 }
 
-/** По одному трейсу «значение» (левая ось) и, если у оптимизатора есть
- * learning rate, трейсу lr (правая ось y2, пунктиром) на каждый видимый
- * запуск — наложены на один график, чтобы сравнивать динамику значения и lr
- * без переключения вкладок. Обе линии одного запуска красятся в slot.color
- * (связь с траекторией на основном графике), пунктир — единственное, что
- * отличает lr от значения при таком же цвете. Обе серии обрезаются до текущего
- * кадра анимации (frame из usePlaybackStore) — график остаётся синхронным и
- * с автовоспроизведением, и с ручной перемоткой таймлайна на основном графике,
- * а не всегда показывает целиком последний посчитанный результат. lr есть не
- * у всех оптимизаторов (например, у LBFGS или Ньютона его нет) — такие запуски
- * молча остаются без второй линии.
- *
- * hoverinfo включает "name": в едином (hovermode: "x unified") тултипе
- * Plotly обнуляет trace.name у точек, чей hoverinfo не перечисляет "name" —
- * без этого строки «значение» и «lr» в общем окне навести было бы нечем
- * различить.
- *
- * showLr — чекбокс «lr» в ConvergenceChart: при выключении lr-трейсы совсем
- * не строятся (а не просто скрываются через visible), чтобы правая ось не
- * маячила пустой шкалой поверх чужого масштаба значений.
- */
+function resolveSeries(result: RunResult, metric: string, frame: number): number[] | undefined {
+  let raw: number[] | undefined;
+  if (metric === "__value__") raw = result.value;
+  else if (metric === "lr") raw = result.lr ?? undefined;
+  else raw = result.internals?.[metric];
+  return raw ? sliceToFrame(raw, frame) : undefined;
+}
+
 export function buildConvergenceTraces(
   slots: RunConfig[],
   results: Record<string, RunResult>,
   frame: number,
+  primaryMetric: string,
   secondaryMetric: string | null,
 ): Data[] {
   const traces: Data[] = [];
@@ -46,25 +29,25 @@ export function buildConvergenceTraces(
     const result = results[slot.slotId];
     if (!result || result.error) continue;
 
-    const value = sliceToFrame(result.value, frame);
-    traces.push({
-      type: "scatter",
-      mode: "lines",
-      x: value.map((_, i) => i),
-      y: value,
-      line: { color: slot.color, width: 2, dash: "solid" },
-      name: slot.optimizer,
-      showlegend: false,
-      hoverinfo: "x+y+name",
-    });
+    const primary = resolveSeries(result, primaryMetric, frame);
+    if (primary && primary.length > 0) {
+      traces.push({
+        type: "scatter",
+        mode: "lines",
+        x: primary.map((_, i) => i),
+        y: primary,
+        line: { color: slot.color, width: 2, dash: "solid" },
+        name: slot.optimizer,
+        showlegend: false,
+        hoverinfo: "x+y+name",
+      });
 
-    if (value.length > 0) {
-      const headIndex = value.length - 1;
+      const headIndex = primary.length - 1;
       traces.push({
         type: "scatter",
         mode: "markers",
         x: [headIndex],
-        y: [value[headIndex]],
+        y: [primary[headIndex]],
         marker: { size: 8, color: slot.color },
         showlegend: false,
         hoverinfo: "skip",
@@ -73,20 +56,14 @@ export function buildConvergenceTraces(
 
     if (!secondaryMetric) continue;
 
-    let series: number[] | undefined;
-    if (secondaryMetric === "lr") {
-      series = result.lr ?? undefined;
-    } else if (result.internals?.[secondaryMetric]) {
-      series = result.internals[secondaryMetric];
-    }
-    if (!series) continue;
+    const secondary = resolveSeries(result, secondaryMetric, frame);
+    if (!secondary || secondary.length === 0) continue;
 
-    const sliced = sliceToFrame(series, frame);
     traces.push({
       type: "scatter",
       mode: "lines",
-      x: sliced.map((_, i) => secondaryMetric === "lr" ? i : i + 1),
-      y: sliced,
+      x: secondary.map((_, i) => i),
+      y: secondary,
       yaxis: "y2",
       line: { color: slot.color, width: 2, dash: "dot" },
       name: `${slot.optimizer} · ${secondaryMetric}`,
@@ -113,6 +90,8 @@ export function collectAvailableMetrics(
       for (const key of Object.keys(result.internals)) keys.add(key);
     }
   }
+  keys.delete("t");
+  keys.delete("step");
   const sorted = [...keys].sort();
   if (hasLr) sorted.unshift("lr");
   return sorted;
