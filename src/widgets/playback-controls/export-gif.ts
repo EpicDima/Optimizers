@@ -22,9 +22,12 @@ export interface ExportGifOptions {
 
 const SURFACE_GRID = 300;
 const PAD_TOP = 16;
-const PAD_RIGHT = 16;
 const PAD_BOTTOM = 36;
 const PAD_LEFT = 50;
+const COLORBAR_W = 14;
+const COLORBAR_GAP = 10;
+const COLORBAR_LABEL_W = 50;
+const PAD_RIGHT = COLORBAR_GAP + COLORBAR_W + 4 + COLORBAR_LABEL_W;
 const MIN_GIF_DELAY = 20;
 
 type Stops = [number, string][];
@@ -72,26 +75,38 @@ function formatTick(v: number): string {
   return Math.abs(v) < 1e-10 ? "0" : Number.isInteger(v) ? String(v) : v.toFixed(1);
 }
 
-function bakeBackground(
-  z: number[][],
-  stops: Stops,
-  cx: number,
-  cy: number,
-  cw: number,
-  ch: number,
-  totalW: number,
-  totalH: number,
-  bgColor: string,
-  fontColor: string,
-  gridColor: string,
-  range: readonly [number, number, number, number],
-): HTMLCanvasElement {
+function formatColorbarTick(v: number): string {
+  const abs = Math.abs(v);
+  if (abs < 1e-10) return "0";
+  if (abs >= 1e4 || (abs > 0 && abs < 0.01)) return v.toExponential(1);
+  if (Number.isInteger(v)) return String(v);
+  return v.toPrecision(3);
+}
+
+interface BakeParams {
+  z: number[][];
+  stops: Stops;
+  cx: number;
+  cy: number;
+  cw: number;
+  ch: number;
+  totalW: number;
+  totalH: number;
+  bgColor: string;
+  fontColor: string;
+  mutedFontColor: string;
+  gridColor: string;
+  range: readonly [number, number, number, number];
+}
+
+function bakeBackground(p: BakeParams): HTMLCanvasElement {
+  const { z, stops, cx, cy, cw, ch, totalW, totalH, bgColor, fontColor, mutedFontColor, gridColor, range } = p;
   const rows = z.length;
   const cols = z[0].length;
-  let min = Infinity;
-  let max = -Infinity;
-  for (const row of z) for (const v of row) { if (v < min) min = v; if (v > max) max = v; }
-  const span = max > min ? max - min : 1;
+  let zMin = Infinity;
+  let zMax = -Infinity;
+  for (const row of z) for (const v of row) { if (v < zMin) zMin = v; if (v > zMax) zMax = v; }
+  const zSpan = zMax > zMin ? zMax - zMin : 1;
 
   const tile = document.createElement("canvas");
   tile.width = cols;
@@ -100,7 +115,7 @@ function bakeBackground(
   const img = tCtx.createImageData(cols, rows);
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const t = (z[r][c] - min) / span;
+      const t = (z[r][c] - zMin) / zSpan;
       const [rv, gv, bv] = lerpColor(stops, t);
       const i = ((rows - 1 - r) * cols + c) * 4;
       img.data[i] = rv;
@@ -123,13 +138,14 @@ function bakeBackground(
 
   const [x0, x1, y0, y1] = range;
 
+  // Axis ticks
   ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   ctx.fillStyle = fontColor;
   ctx.font = "12px sans-serif";
+
   ctx.textBaseline = "top";
   ctx.textAlign = "center";
-
   for (const v of niceTicks(x0, x1, 8)) {
     const px = cx + ((v - x0) / (x1 - x0)) * cw;
     ctx.beginPath();
@@ -141,7 +157,6 @@ function bakeBackground(
 
   ctx.textBaseline = "middle";
   ctx.textAlign = "right";
-
   for (const v of niceTicks(y0, y1, 6)) {
     const py = cy + ch - ((v - y0) / (y1 - y0)) * ch;
     ctx.beginPath();
@@ -154,6 +169,49 @@ function bakeBackground(
   ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   ctx.strokeRect(cx, cy, cw, ch);
+
+  // Colorbar
+  const cbX = cx + cw + COLORBAR_GAP;
+  const cbH = Math.round(ch * 0.7);
+  const cbY = cy + Math.round((ch - cbH) / 2);
+
+  const cbCanvas = document.createElement("canvas");
+  cbCanvas.width = 1;
+  cbCanvas.height = cbH;
+  const cbCtx = cbCanvas.getContext("2d")!;
+  const cbImg = cbCtx.createImageData(1, cbH);
+  for (let row = 0; row < cbH; row++) {
+    const t = 1 - row / (cbH - 1);
+    const [rv, gv, bv] = lerpColor(stops, t);
+    const i = row * 4;
+    cbImg.data[i] = rv;
+    cbImg.data[i + 1] = gv;
+    cbImg.data[i + 2] = bv;
+    cbImg.data[i + 3] = 255;
+  }
+  cbCtx.putImageData(cbImg, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(cbCanvas, cbX, cbY, COLORBAR_W, cbH);
+  ctx.imageSmoothingEnabled = true;
+
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cbX, cbY, COLORBAR_W, cbH);
+
+  ctx.fillStyle = mutedFontColor;
+  ctx.font = "11px sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+  const cbLabelX = cbX + COLORBAR_W + 4;
+  for (const v of niceTicks(zMin, zMax, 5)) {
+    const t = (v - zMin) / zSpan;
+    const py = cbY + cbH - t * cbH;
+    ctx.beginPath();
+    ctx.moveTo(cbX + COLORBAR_W, py);
+    ctx.lineTo(cbX + COLORBAR_W + 3, py);
+    ctx.stroke();
+    ctx.fillText(formatColorbarTick(v), cbLabelX, py);
+  }
 
   return out;
 }
@@ -209,10 +267,15 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   const cw = width - PAD_LEFT - PAD_RIGHT;
   const ch = height - PAD_TOP - PAD_BOTTOM;
 
-  const bg = bakeBackground(surface.z, stops, cx, cy, cw, ch, width, height, colors.paper, colors.fontColor, colors.lineColor, range);
+  const bg = bakeBackground({
+    z: surface.z, stops, cx, cy, cw, ch, totalW: width, totalH: height,
+    bgColor: colors.paper, fontColor: colors.fontColor,
+    mutedFontColor: colors.mutedFontColor, gridColor: colors.lineColor, range,
+  });
 
   const visibleSlots = slots.filter((s) => s.visible && results[s.slotId]);
 
+  // Legend: inside chart, top-right, with background panel
   const bgWithLegend = document.createElement("canvas");
   bgWithLegend.width = width;
   bgWithLegend.height = height;
@@ -222,29 +285,38 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   if (visibleSlots.length > 0) {
     bgCtx.font = "bold 13px sans-serif";
     bgCtx.textBaseline = "middle";
-
-    const labels = visibleSlots.map((s) => ({ name: s.optimizer, color: s.color }));
     const dotR = 5;
-    const gap = 6;
-    const itemGap = 14;
-    const measurements = labels.map((l) => bgCtx.measureText(l.name).width);
-    const totalLegendW = measurements.reduce((s, w, i) => s + dotR * 2 + gap + w + (i < labels.length - 1 ? itemGap : 0), 0);
-    const lx = cx + cw - totalLegendW - 6;
-    const ly = cy - 2;
+    const lineH = 20;
+    const padH = 6;
+    const padW = 10;
+    const labels = visibleSlots.map((s) => ({ name: s.optimizer, color: s.color, w: bgCtx.measureText(s.optimizer).width }));
+    const maxLabelW = Math.max(...labels.map((l) => l.w));
+    const boxW = padW + dotR * 2 + 8 + maxLabelW + padW;
+    const boxH = padH + labels.length * lineH + padH;
+    const bx = cx + cw - boxW - 8;
+    const by = cy + 8;
 
-    let curX = lx;
+    bgCtx.fillStyle = colors.paper;
+    bgCtx.globalAlpha = 0.75;
+    bgCtx.beginPath();
+    bgCtx.roundRect(bx, by, boxW, boxH, 4);
+    bgCtx.fill();
+    bgCtx.globalAlpha = 1;
+    bgCtx.strokeStyle = colors.lineColor;
+    bgCtx.lineWidth = 1;
+    bgCtx.stroke();
+
     for (let i = 0; i < labels.length; i++) {
+      const ly = by + padH + i * lineH + lineH / 2;
       bgCtx.fillStyle = labels[i].color;
       bgCtx.beginPath();
-      bgCtx.arc(curX + dotR, ly, dotR, 0, Math.PI * 2);
+      bgCtx.arc(bx + padW + dotR, ly, dotR, 0, Math.PI * 2);
       bgCtx.fill();
       bgCtx.strokeStyle = "#000";
       bgCtx.lineWidth = 0.8;
       bgCtx.stroke();
-      curX += dotR * 2 + gap;
       bgCtx.fillStyle = colors.fontColor;
-      bgCtx.fillText(labels[i].name, curX, ly);
-      curX += measurements[i] + itemGap;
+      bgCtx.fillText(labels[i].name, bx + padW + dotR * 2 + 8, ly);
     }
   }
 
