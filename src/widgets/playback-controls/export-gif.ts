@@ -20,14 +20,14 @@ export interface ExportGifOptions {
   onProgress?: (current: number, total: number) => void;
 }
 
-const SURFACE_GRID = 300;
-const PAD_TOP = 16;
-const PAD_BOTTOM = 36;
-const PAD_LEFT = 50;
-const COLORBAR_W = 14;
-const COLORBAR_GAP = 10;
-const COLORBAR_LABEL_W = 50;
-const PAD_RIGHT = COLORBAR_GAP + COLORBAR_W + 4 + COLORBAR_LABEL_W;
+const SURFACE_GRID = 400;
+const PAD_TOP = 24;
+const PAD_BOTTOM = 52;
+const PAD_LEFT = 72;
+const COLORBAR_W = 20;
+const COLORBAR_GAP = 14;
+const COLORBAR_LABEL_W = 64;
+const PAD_RIGHT = COLORBAR_GAP + COLORBAR_W + 6 + COLORBAR_LABEL_W;
 const MIN_GIF_DELAY = 20;
 
 type Stops = [number, string][];
@@ -86,16 +86,9 @@ function formatColorbarTick(v: number): string {
 interface BakeParams {
   z: number[][];
   stops: Stops;
-  cx: number;
-  cy: number;
-  cw: number;
-  ch: number;
-  totalW: number;
-  totalH: number;
-  bgColor: string;
-  fontColor: string;
-  mutedFontColor: string;
-  gridColor: string;
+  cx: number; cy: number; cw: number; ch: number;
+  totalW: number; totalH: number;
+  bgColor: string; fontColor: string; mutedFontColor: string; gridColor: string;
   range: readonly [number, number, number, number];
 }
 
@@ -138,32 +131,31 @@ function bakeBackground(p: BakeParams): HTMLCanvasElement {
 
   const [x0, x1, y0, y1] = range;
 
-  // Axis ticks
   ctx.strokeStyle = gridColor;
   ctx.lineWidth = 1;
   ctx.fillStyle = fontColor;
-  ctx.font = "12px sans-serif";
+  ctx.font = "16px sans-serif";
 
   ctx.textBaseline = "top";
   ctx.textAlign = "center";
-  for (const v of niceTicks(x0, x1, 8)) {
+  for (const v of niceTicks(x0, x1, 10)) {
     const px = cx + ((v - x0) / (x1 - x0)) * cw;
     ctx.beginPath();
     ctx.moveTo(px, cy + ch);
-    ctx.lineTo(px, cy + ch + 4);
+    ctx.lineTo(px, cy + ch + 5);
     ctx.stroke();
-    ctx.fillText(formatTick(v), px, cy + ch + 6);
+    ctx.fillText(formatTick(v), px, cy + ch + 8);
   }
 
   ctx.textBaseline = "middle";
   ctx.textAlign = "right";
-  for (const v of niceTicks(y0, y1, 6)) {
+  for (const v of niceTicks(y0, y1, 8)) {
     const py = cy + ch - ((v - y0) / (y1 - y0)) * ch;
     ctx.beginPath();
-    ctx.moveTo(cx - 4, py);
+    ctx.moveTo(cx - 5, py);
     ctx.lineTo(cx, py);
     ctx.stroke();
-    ctx.fillText(formatTick(v), cx - 7, py);
+    ctx.fillText(formatTick(v), cx - 9, py);
   }
 
   ctx.strokeStyle = gridColor;
@@ -199,16 +191,16 @@ function bakeBackground(p: BakeParams): HTMLCanvasElement {
   ctx.strokeRect(cbX, cbY, COLORBAR_W, cbH);
 
   ctx.fillStyle = mutedFontColor;
-  ctx.font = "11px sans-serif";
+  ctx.font = "14px sans-serif";
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
-  const cbLabelX = cbX + COLORBAR_W + 4;
+  const cbLabelX = cbX + COLORBAR_W + 6;
   for (const v of niceTicks(zMin, zMax, 5)) {
     const t = (v - zMin) / zSpan;
     const py = cbY + cbH - t * cbH;
     ctx.beginPath();
     ctx.moveTo(cbX + COLORBAR_W, py);
-    ctx.lineTo(cbX + COLORBAR_W + 3, py);
+    ctx.lineTo(cbX + COLORBAR_W + 4, py);
     ctx.stroke();
     ctx.fillText(formatColorbarTick(v), cbLabelX, py);
   }
@@ -217,13 +209,9 @@ function bakeBackground(p: BakeParams): HTMLCanvasElement {
 }
 
 function toPixel(
-  wx: number,
-  wy: number,
+  wx: number, wy: number,
   range: readonly [number, number, number, number],
-  cx: number,
-  cy: number,
-  cw: number,
-  ch: number,
+  cx: number, cy: number, cw: number, ch: number,
 ): [number, number] {
   const [x0, x1, y0, y1] = range;
   return [
@@ -233,7 +221,7 @@ function toPixel(
 }
 
 export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
-  const { width = 1200, height = 800, maxFrames = 200, onProgress } = options;
+  const { width = 1920, height = 1080, maxFrames = 200, onProgress } = options;
 
   const { slots, results } = useRunsStore.getState();
   const { tailLength } = usePlotSettingsStore.getState();
@@ -275,7 +263,6 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
 
   const visibleSlots = slots.filter((s) => s.visible && results[s.slotId]);
 
-  // Legend: inside chart, top-right, with background panel
   const bgWithLegend = document.createElement("canvas");
   bgWithLegend.width = width;
   bgWithLegend.height = height;
@@ -283,23 +270,23 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   bgCtx.drawImage(bg, 0, 0);
 
   if (visibleSlots.length > 0) {
-    bgCtx.font = "bold 13px sans-serif";
+    bgCtx.font = "bold 16px sans-serif";
     bgCtx.textBaseline = "middle";
-    const dotR = 5;
-    const lineH = 20;
-    const padH = 6;
-    const padW = 10;
+    const dotR = 6;
+    const lineH = 24;
+    const padH = 8;
+    const padW = 12;
     const labels = visibleSlots.map((s) => ({ name: s.optimizer, color: s.color, w: bgCtx.measureText(s.optimizer).width }));
     const maxLabelW = Math.max(...labels.map((l) => l.w));
-    const boxW = padW + dotR * 2 + 8 + maxLabelW + padW;
+    const boxW = padW + dotR * 2 + 10 + maxLabelW + padW;
     const boxH = padH + labels.length * lineH + padH;
-    const bx = cx + cw - boxW - 8;
-    const by = cy + 8;
+    const bx = cx + cw - boxW - 10;
+    const by = cy + 10;
 
     bgCtx.fillStyle = colors.paper;
-    bgCtx.globalAlpha = 0.75;
+    bgCtx.globalAlpha = 0.8;
     bgCtx.beginPath();
-    bgCtx.roundRect(bx, by, boxW, boxH, 4);
+    bgCtx.roundRect(bx, by, boxW, boxH, 5);
     bgCtx.fill();
     bgCtx.globalAlpha = 1;
     bgCtx.strokeStyle = colors.lineColor;
@@ -313,10 +300,10 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
       bgCtx.arc(bx + padW + dotR, ly, dotR, 0, Math.PI * 2);
       bgCtx.fill();
       bgCtx.strokeStyle = "#000";
-      bgCtx.lineWidth = 0.8;
+      bgCtx.lineWidth = 1;
       bgCtx.stroke();
       bgCtx.fillStyle = colors.fontColor;
-      bgCtx.fillText(labels[i].name, bx + padW + dotR * 2 + 8, ly);
+      bgCtx.fillText(labels[i].name, bx + padW + dotR * 2 + 10, ly);
     }
   }
 
@@ -343,7 +330,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
 
       if (end - start >= 2) {
         ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         ctx.beginPath();
         for (let i = start; i < end; i++) {
           const [px, py] = toPixel(res.x[i], res.y[i], range, cx, cy, cw, ch);
@@ -353,7 +340,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
         ctx.stroke();
 
         ctx.strokeStyle = slot.color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.beginPath();
         for (let i = start; i < end; i++) {
           const [px, py] = toPixel(res.x[i], res.y[i], range, cx, cy, cw, ch);
@@ -366,10 +353,10 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
       const [mx, my] = toPixel(res.x[end - 1], res.y[end - 1], range, cx, cy, cw, ch);
       ctx.fillStyle = slot.color;
       ctx.beginPath();
-      ctx.arc(mx, my, 6, 0, Math.PI * 2);
+      ctx.arc(mx, my, 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
 
@@ -384,6 +371,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   return (await encode({
     width,
     height,
+    maxColors: 255,
     workerUrl: gifWorkerUrl,
     frames: gifFrames,
     format: "blob",
