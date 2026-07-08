@@ -1,13 +1,13 @@
 import { Play } from "lucide-react";
 
-import { useSensitivityStore } from "@entities/sensitivity";
-import { functionPresets } from "@shared/lib/optimization-engine/functions";
+import { useRunsStore } from "@entities/run";
+import { useAnalysisStore } from "@entities/analysis";
+import { useFunctionPresets, useFunctionStore } from "@entities/test-function";
 import { getOptimizerDescriptor, optimizerNames } from "@shared/lib/optimization-engine/optimizers/registry";
 import { Button, NumberField, Panel, Select } from "@shared/ui";
 
-export function SensitivityConfig() {
+export function AnalysisConfig() {
   const {
-    presetName,
     optimizerName,
     paramName,
     paramFrom,
@@ -15,7 +15,6 @@ export function SensitivityConfig() {
     sampleCount,
     steps,
     isRunning,
-    setPresetName,
     setOptimizerName,
     setParamName,
     setParamFrom,
@@ -23,7 +22,20 @@ export function SensitivityConfig() {
     setSampleCount,
     setSteps,
     runSweep,
-  } = useSensitivityStore();
+  } = useAnalysisStore();
+
+  const { data: presets } = useFunctionPresets();
+  const presetName = useFunctionStore((state) => state.presetName);
+  const formula = useFunctionStore((state) => state.formula);
+  const applyPreset = useFunctionStore((state) => state.applyPreset);
+  const setGlobalStart = useRunsStore((state) => state.setGlobalStart);
+
+  function handlePresetChange(name: string) {
+    const preset = presets?.find((item) => item.name === name);
+    if (!preset) return;
+    applyPreset(preset);
+    setGlobalStart(preset.start);
+  }
 
   const descriptor = getOptimizerDescriptor(optimizerName);
   const paramKeys = descriptor ? Object.keys(descriptor.params) : [];
@@ -36,13 +48,24 @@ export function SensitivityConfig() {
     <Panel heading="Конфигурация" className="h-full">
       <div className="flex flex-col gap-3 p-3">
         <label className="flex flex-col gap-1">
-          <span className="font-sans text-[11px] text-text-muted">Функция</span>
+          <span className="font-sans text-[11px] text-text-muted">Пресет</span>
           <Select
-            value={presetName}
-            onChange={setPresetName}
-            options={functionPresets.map((p) => p.name)}
+            value={presetName ?? ""}
+            onChange={handlePresetChange}
+            options={presets?.map((p) => p.name) ?? []}
+            placeholder="Своя формула"
           />
         </label>
+
+        <div className="flex flex-col gap-1">
+          <span className="font-sans text-[11px] text-text-muted">Формула f(x, y)</span>
+          <p
+            className="flex h-7 items-center overflow-x-auto whitespace-nowrap rounded-sm border border-border bg-bg-sunken px-2 font-mono text-xs text-text-muted [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            title={formula}
+          >
+            {formula}
+          </p>
+        </div>
 
         <label className="flex flex-col gap-1">
           <span className="font-sans text-[11px] text-text-muted">Оптимизатор</span>

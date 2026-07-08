@@ -7,9 +7,9 @@ import { ColormapPicker } from "@widgets/top-bar/ColormapPicker";
 import { ThemeToggle } from "@widgets/top-bar/ThemeToggle";
 
 const tabs = [
-  { to: "/dashboard", label: "Главная", icon: LayoutDashboard },
+  { to: "/main", label: "Главная", icon: LayoutDashboard },
   { to: "/gallery", label: "Галерея", icon: GalleryHorizontalEnd },
-  { to: "/sensitivity", label: "Анализ", icon: SlidersHorizontal },
+  { to: "/analysis", label: "Анализ", icon: SlidersHorizontal },
 ] as const;
 
 export function Navbar() {

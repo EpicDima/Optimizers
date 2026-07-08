@@ -6,18 +6,18 @@ export const router = createHashRouter([
   {
     element: <RootLayout />,
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { index: true, element: <Navigate to="/main" replace /> },
       {
-        path: "dashboard",
-        lazy: () => import("@pages/dashboard/DashboardPage").then((m) => ({ Component: m.DashboardPage })),
+        path: "main",
+        lazy: () => import("@pages/main/MainPage").then((m) => ({ Component: m.MainPage })),
       },
       {
         path: "gallery",
         lazy: () => import("@pages/gallery/GalleryPage").then((m) => ({ Component: m.GalleryPage })),
       },
       {
-        path: "sensitivity",
-        lazy: () => import("@pages/sensitivity/SensitivityPage").then((m) => ({ Component: m.SensitivityPage })),
+        path: "analysis",
+        lazy: () => import("@pages/analysis/AnalysisPage").then((m) => ({ Component: m.AnalysisPage })),
       },
     ],
   },

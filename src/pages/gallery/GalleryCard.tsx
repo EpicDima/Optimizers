@@ -26,7 +26,7 @@ export function GalleryCard({ preset }: GalleryCardProps) {
     useRunsStore.getState().setGlobalStart([...preset.start]);
     useRunsStore.getState().clearResults();
     useRunsStore.getState().resetSlotStarts();
-    navigate("/dashboard");
+    navigate("/main");
   }
 
   return (

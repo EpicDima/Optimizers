@@ -1,16 +1,16 @@
-import { useSensitivityStore } from "@entities/sensitivity";
+import { useAnalysisStore } from "@entities/analysis";
 
-import { SensitivityConvergenceChart } from "./ConvergenceChart";
+import { AnalysisConvergenceChart } from "./ConvergenceChart";
 import { FinalValueChart } from "./FinalValueChart";
-import { SensitivityConfig } from "./SensitivityConfig";
+import { AnalysisConfig } from "./AnalysisConfig";
 
-export function SensitivityPage() {
-  const error = useSensitivityStore((s) => s.error);
+export function AnalysisPage() {
+  const error = useAnalysisStore((s) => s.error);
 
   return (
     <div className="flex h-full gap-3 p-4 pb-3">
       <div className="w-72 shrink-0">
-        <SensitivityConfig />
+        <AnalysisConfig />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         {error && (
@@ -19,7 +19,7 @@ export function SensitivityPage() {
           </div>
         )}
         <div className="min-h-0 flex-1">
-          <SensitivityConvergenceChart />
+          <AnalysisConvergenceChart />
         </div>
         <div className="min-h-0 flex-1">
           <FinalValueChart />

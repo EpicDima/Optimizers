@@ -1,31 +1,30 @@
 import { create } from "zustand";
 
 import { colorForSlot } from "@shared/config/colors";
+import { useFunctionStore } from "@entities/test-function";
 import { functionPresets } from "@shared/lib/optimization-engine/functions";
 import { getOptimizerDescriptor, optimizerNames } from "@shared/lib/optimization-engine/optimizers/registry";
 import { runInWorker } from "@shared/lib/optimization-engine/run";
 import type { EngineSlotInput } from "@shared/lib/optimization-engine/run";
 
-export interface SensitivityResult {
+export interface AnalysisResult {
   paramValue: number;
   color: string;
   values: number[];
   finalValue: number;
 }
 
-interface SensitivityState {
-  presetName: string;
+interface AnalysisState {
   optimizerName: string;
   paramName: string;
   paramFrom: number;
   paramTo: number;
   sampleCount: number;
   steps: number;
-  results: SensitivityResult[];
+  results: AnalysisResult[];
   isRunning: boolean;
   error: string | null;
 
-  setPresetName: (name: string) => void;
   setOptimizerName: (name: string) => void;
   setParamName: (name: string) => void;
   setParamFrom: (value: number) => void;
@@ -58,13 +57,12 @@ function defaultRange(optimizerName: string, paramName: string): { from: number;
   return { from: def * 0.1, to: def * 10 };
 }
 
-export const useSensitivityStore = create<SensitivityState>((set, get) => {
+export const useAnalysisStore = create<AnalysisState>((set, get) => {
   const initOptimizer = firstOptimizerName();
   const initParam = firstParamName(initOptimizer);
   const initRange = defaultRange(initOptimizer, initParam);
 
   return {
-    presetName: functionPresets[0].name,
     optimizerName: initOptimizer,
     paramName: initParam,
     paramFrom: initRange.from,
@@ -74,8 +72,6 @@ export const useSensitivityStore = create<SensitivityState>((set, get) => {
     results: [],
     isRunning: false,
     error: null,
-
-    setPresetName: (presetName) => set({ presetName }),
 
     setOptimizerName: (optimizerName) => {
       const param = firstParamName(optimizerName);
@@ -95,9 +91,10 @@ export const useSensitivityStore = create<SensitivityState>((set, get) => {
     setSteps: (steps) => set({ steps }),
 
     runSweep: async () => {
-      const { presetName, optimizerName, paramName, paramFrom, paramTo, sampleCount, steps, isRunning } = get();
+      const { optimizerName, paramName, paramFrom, paramTo, sampleCount, steps, isRunning } = get();
       if (isRunning) return;
 
+      const { presetName } = useFunctionStore.getState();
       const preset = functionPresets.find((p) => p.name === presetName);
       if (!preset) {
         set({ error: "неизвестная функция" });
@@ -125,7 +122,7 @@ export const useSensitivityStore = create<SensitivityState>((set, get) => {
         }
 
         const slots: EngineSlotInput[] = sampledValues.map((value, i) => ({
-          slotId: `sensitivity-${i}`,
+          slotId: `analysis-${i}`,
           optimizer: optimizerName,
           optimizerParams: { ...defaultParams, [paramName]: value },
           scheduler: "Constant",
@@ -142,7 +139,7 @@ export const useSensitivityStore = create<SensitivityState>((set, get) => {
           return;
         }
 
-        const results: SensitivityResult[] = engineResults.map((r, i) => ({
+        const results: AnalysisResult[] = engineResults.map((r, i) => ({
           paramValue: sampledValues[i],
           color: colorForSlot(i),
           values: r.value,

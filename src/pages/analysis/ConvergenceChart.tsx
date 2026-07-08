@@ -1,34 +1,29 @@
 import { useMemo, useState } from "react";
 import type { Data, Layout } from "plotly.js";
 
-import { useSensitivityStore } from "@entities/sensitivity";
+import { useAnalysisStore } from "@entities/analysis";
 import { plotlyThemeColors } from "@widgets/plot-panel/plotly-theme";
 import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
 import { Checkbox, Panel } from "@shared/ui";
 
-export function FinalValueChart() {
-  const { results, paramName } = useSensitivityStore();
+export function AnalysisConvergenceChart() {
+  const { results, paramName } = useAnalysisStore();
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(true);
   const plotRef = usePlotlyAutoResize();
 
-  const data = useMemo((): Data[] => {
-    if (results.length === 0) return [];
-    return [
-      {
-        type: "scatter" as const,
-        mode: "lines+markers" as const,
-        x: results.map((r) => r.paramValue),
-        y: results.map((r) => r.finalValue),
-        marker: {
-          color: results.map((r) => r.color),
-          size: 7,
-        },
-        line: { color: results[0].color, width: 1.5, dash: "dot" as const },
-      },
-    ];
-  }, [results, paramName]);
+  const data = useMemo((): Data[] =>
+    results.map((r) => ({
+      type: "scatter" as const,
+      mode: "lines" as const,
+      x: r.values.map((_, i) => i),
+      y: r.values,
+      name: `${paramName}=${Number(r.paramValue.toPrecision(4))}`,
+      line: { color: r.color, width: 1.5 },
+    })),
+    [results, paramName],
+  );
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
@@ -37,28 +32,24 @@ export function FinalValueChart() {
       plot_bgcolor: theme.paper,
       font: { color: theme.fontColor, family: "Space Grotesk, Inter, system-ui, sans-serif", size: 11 },
       margin: { l: 50, r: 16, t: 10, b: 36 },
-      showlegend: false,
+      showlegend: true,
+      legend: { font: { size: 10 }, bgcolor: "rgba(0,0,0,0)" },
       uirevision: "keep",
       hovermode: "x unified",
-      xaxis: {
-        title: { text: paramName },
-        gridcolor: theme.gridColor,
-        color: theme.mutedFontColor,
-        zeroline: false,
-      },
+      xaxis: { title: { text: "Шаг" }, gridcolor: theme.gridColor, color: theme.mutedFontColor, zeroline: false },
       yaxis: {
-        title: { text: "Финальное значение" },
+        title: { text: "Значение" },
         type: logScale ? "log" : "linear",
         gridcolor: theme.gridColor,
         color: theme.mutedFontColor,
         zeroline: false,
       },
     };
-  }, [resolvedTheme, paramName, logScale]);
+  }, [resolvedTheme, logScale]);
 
   return (
     <Panel
-      heading="Параметр → финальное значение"
+      heading="Сходимость"
       actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />}
       className="h-full min-h-0"
     >

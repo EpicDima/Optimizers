@@ -13,7 +13,7 @@ const ROOT_DEFAULT_LAYOUT = { "main-column": 76, sidebar: 24 };
 const MAIN_ROWS_DEFAULT_LAYOUT = { plot: 68, "bottom-row": 32 };
 const BOTTOM_ROW_DEFAULT_LAYOUT = { playback: 25, convergence: 75 };
 
-export function DashboardPage() {
+export function MainPage() {
   useUrlStateSync();
   useResetRunsOnFormulaChange();
 
