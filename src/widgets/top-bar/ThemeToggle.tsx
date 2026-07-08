@@ -1,24 +1,35 @@
-import { Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 
-import { useResolvedTheme, useThemeStore } from "@shared/lib/theme";
-import { Button } from "@shared/ui";
+import type { Theme } from "@shared/lib/theme";
+import { useThemeStore } from "@shared/lib/theme";
 
-/** Переключатель темы: чередует light/dark по фактически применённой теме,
- * минуя "system" — как только пользователь коснулся переключателя, выбор
- * персистится явно (useThemeStore уже завязан на zustand/persist). */
+const THEMES: { value: Theme; icon: typeof Sun }[] = [
+  { value: "light", icon: Sun },
+  { value: "system", icon: Monitor },
+  { value: "dark", icon: Moon },
+];
+
 export function ThemeToggle() {
-  const resolved = useResolvedTheme();
-  const setTheme = useThemeStore((state) => state.setTheme);
-  const isDark = resolved === "dark";
+  const theme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Включить светлую тему" : "Включить тёмную тему"}
-    >
-      {isDark ? <Sun size={14} /> : <Moon size={14} />}
-    </Button>
+    <div className="flex items-center rounded-md border border-border bg-bg-sunken p-0.5">
+      {THEMES.map(({ value, icon: Icon }) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => setTheme(value)}
+          className={`rounded-sm p-1 transition-colors ${
+            theme === value
+              ? "bg-bg-elevated text-text shadow-sm"
+              : "text-text-muted hover:text-text"
+          }`}
+          aria-label={value}
+        >
+          <Icon size={13} />
+        </button>
+      ))}
+    </div>
   );
 }
