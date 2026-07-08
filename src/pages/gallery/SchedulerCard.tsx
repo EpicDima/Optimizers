@@ -45,7 +45,7 @@ export function SchedulerCard({ descriptor }: SchedulerCardProps) {
       <div className="flex flex-col gap-2 border-t border-border px-3 py-2">
         <span className="font-sans text-sm font-medium text-text">{descriptor.name}</span>
         <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
-          <NumberField label="Base LR" value={baseLr} onChange={setBaseLr} description="Базовый learning rate" />
+          <NumberField label="lr" value={baseLr} onChange={setBaseLr} description="Базовый learning rate" />
           {paramEntries.map(([key, meta]) => (
             <NumberField
               key={key}
