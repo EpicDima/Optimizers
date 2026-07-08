@@ -11,14 +11,17 @@ export function HeatmapChart() {
   const heatmapData = useAnalysisStore((s) => s.heatmapData);
   const resolvedTheme = useResolvedTheme();
   const [logScale, setLogScale] = useState(true);
+  const [showContour, setShowContour] = useState(true);
   const plotRef = usePlotlyAutoResize();
 
   const data = useMemo((): Data[] => {
     if (!heatmapData) return [];
+
     const z = logScale
       ? heatmapData.z.map((row) => row.map((v) => (v > 0 ? Math.log10(v) : NaN)))
       : heatmapData.z;
-    return [
+
+    const traces: Data[] = [
       {
         type: "heatmap" as const,
         x: heatmapData.xs,
@@ -35,7 +38,23 @@ export function HeatmapChart() {
         customdata: heatmapData.z,
       },
     ];
-  }, [heatmapData, logScale]);
+
+    if (showContour) {
+      const contourColor = resolvedTheme === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)";
+      traces.push({
+        type: "contour" as const,
+        x: heatmapData.xs,
+        y: heatmapData.ys,
+        z: heatmapData.surfaceZ,
+        contours: { coloring: "none" as const },
+        line: { color: contourColor, width: 1 },
+        showscale: false,
+        hoverinfo: "skip" as const,
+      });
+    }
+
+    return traces;
+  }, [heatmapData, logScale, showContour, resolvedTheme]);
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
@@ -62,7 +81,12 @@ export function HeatmapChart() {
   return (
     <Panel
       heading="Финальное f(x,y) от начальной точки"
-      actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />}
+      actions={
+        <div className="flex items-center gap-3">
+          <Checkbox checked={showContour} onChange={setShowContour} label="Рельеф" />
+          <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />
+        </div>
+      }
       className="h-full min-h-0"
     >
       <Plot

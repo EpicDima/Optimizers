@@ -21,6 +21,7 @@ export interface HeatmapData {
   xs: number[];
   ys: number[];
   z: number[][];
+  surfaceZ: number[][];
 }
 
 interface AnalysisState {
@@ -242,7 +243,9 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
           z.push(row);
         }
 
-        set({ isRunning: false, heatmapData: { xs, ys, z } });
+        const surfaceZ = ys.map((yVal) => xs.map((xVal) => preset.fn(xVal, yVal)));
+
+        set({ isRunning: false, heatmapData: { xs, ys, z, surfaceZ } });
       } catch (err) {
         set({ isRunning: false, error: err instanceof Error ? err.message : String(err) });
       }
