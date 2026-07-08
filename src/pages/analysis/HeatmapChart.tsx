@@ -49,14 +49,14 @@ export function HeatmapChart() {
     ];
 
     if (showContour) {
-      const contourColor = resolvedTheme === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)";
+      const contourColor = resolvedTheme === "dark" ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)";
       traces.push({
         type: "contour" as const,
-        x: heatmapData.xs,
-        y: heatmapData.ys,
+        x: heatmapData.surfaceXs,
+        y: heatmapData.surfaceYs,
         z: heatmapData.surfaceZ,
         contours: { coloring: "none" as const },
-        line: { color: contourColor, width: 1 },
+        line: { color: contourColor, width: 1.5 },
         showscale: false,
         hoverinfo: "skip" as const,
       });

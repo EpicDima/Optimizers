@@ -21,6 +21,8 @@ export interface HeatmapData {
   xs: number[];
   ys: number[];
   z: number[][];
+  surfaceXs: number[];
+  surfaceYs: number[];
   surfaceZ: number[][];
 }
 
@@ -243,9 +245,16 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => {
           z.push(row);
         }
 
-        const surfaceZ = ys.map((yVal) => xs.map((xVal) => preset.fn(xVal, yVal)));
+        const surfaceN = 100;
+        const surfaceXs: number[] = [];
+        const surfaceYs: number[] = [];
+        for (let i = 0; i < surfaceN; i++) {
+          surfaceXs.push(xMin + (i / (surfaceN - 1)) * (xMax - xMin));
+          surfaceYs.push(yMin + (i / (surfaceN - 1)) * (yMax - yMin));
+        }
+        const surfaceZ = surfaceYs.map((yVal) => surfaceXs.map((xVal) => preset.fn(xVal, yVal)));
 
-        set({ isRunning: false, heatmapData: { xs, ys, z, surfaceZ } });
+        set({ isRunning: false, heatmapData: { xs, ys, z, surfaceXs, surfaceYs, surfaceZ } });
       } catch (err) {
         set({ isRunning: false, error: err instanceof Error ? err.message : String(err) });
       }
