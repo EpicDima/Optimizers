@@ -49,7 +49,7 @@ export function AnalysisConvergenceChart() {
 
   return (
     <Panel
-      heading="Сходимость"
+      heading={`Сходимость при разных ${paramName}`}
       actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />}
       className="h-full min-h-0"
     >

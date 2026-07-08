@@ -61,7 +61,7 @@ export function HeatmapChart() {
 
   return (
     <Panel
-      heading="Тепловая карта сходимости"
+      heading="Финальное f(x,y) от начальной точки"
       actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />}
       className="h-full min-h-0"
     >

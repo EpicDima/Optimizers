@@ -58,7 +58,7 @@ export function FinalValueChart() {
 
   return (
     <Panel
-      heading="Параметр → финальное значение"
+      heading={`${paramName} → финальное f(x,y)`}
       actions={<Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала" />}
       className="h-full min-h-0"
     >
