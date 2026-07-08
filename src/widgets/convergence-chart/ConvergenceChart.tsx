@@ -9,6 +9,7 @@ import { useResolvedTheme } from "@shared/lib/theme";
 import { Checkbox, Panel, Select } from "@shared/ui";
 
 import { buildConvergenceTraces, collectAvailableMetrics } from "./build-traces";
+import { metricLabel } from "./metric-labels";
 
 /** Мини-график «значение функции и learning rate от шага».
  * Значение и lr наложены на один график одновременно: значение — сплошной
@@ -85,8 +86,8 @@ export function ConvergenceChart() {
           <Select
             value={secondaryMetric ?? "__none__"}
             onChange={(v) => setSecondaryMetric(v === "__none__" ? null : v)}
-            options={[{ value: "__none__", label: "—" }, ...availableMetrics]}
-            className="w-28"
+            options={[{ value: "__none__", label: "—" }, ...availableMetrics.map((key) => ({ value: key, label: metricLabel(key) }))]}
+            className="w-44"
           />
           <Checkbox checked={logScale} onChange={setLogScale} label="Лог. шкала (значение)" />
         </div>
