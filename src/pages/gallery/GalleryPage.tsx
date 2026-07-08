@@ -1,4 +1,5 @@
-import { useSearchParams } from "react-router";
+import { useState } from "react";
+import { useLocation, useSearchParams } from "react-router";
 
 import { functionPresets } from "@shared/lib/optimization-engine/functions";
 import { ToggleGroup } from "@shared/ui";
@@ -13,10 +14,26 @@ const TAB_OPTIONS = [
   { value: "schedulers", label: "Планировщики" },
 ] as const;
 
+function readInitialTab(): Tab {
+  const hash = window.location.hash;
+  const query = hash.split("?")[1];
+  if (query) {
+    const params = new URLSearchParams(query);
+    if (params.get("tab") === "schedulers") return "schedulers";
+  }
+  return "functions";
+}
+
 export function GalleryPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = (searchParams.get("tab") === "schedulers" ? "schedulers" : "functions") as Tab;
-  const setTab = (value: string) => setSearchParams({ tab: value }, { replace: true });
+  const [, setSearchParams] = useSearchParams();
+  const { pathname } = useLocation();
+  const [tab, setTabState] = useState<Tab>(readInitialTab);
+  const setTab = (value: string) => {
+    setTabState(value as Tab);
+    if (pathname === "/gallery") {
+      setSearchParams({ tab: value }, { replace: true });
+    }
+  };
 
   return (
     <div className="h-full overflow-y-auto p-6">
