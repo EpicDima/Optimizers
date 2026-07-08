@@ -28,7 +28,10 @@ export function AnalysisConfig() {
   const presetName = useFunctionStore((state) => state.presetName);
   const formula = useFunctionStore((state) => state.formula);
   const applyPreset = useFunctionStore((state) => state.applyPreset);
+  const globalStart = useRunsStore((state) => state.globalStart);
   const setGlobalStart = useRunsStore((state) => state.setGlobalStart);
+  const gradientNoise = useRunsStore((state) => state.gradientNoise);
+  const setGradientNoise = useRunsStore((state) => state.setGradientNoise);
 
   function handlePresetChange(name: string) {
     const preset = presets?.find((item) => item.name === name);
@@ -85,6 +88,18 @@ export function AnalysisConfig() {
             disabled={paramOptions.length === 0}
           />
         </label>
+
+        <div className="grid grid-cols-2 gap-2">
+          <NumberField label="x₀" value={globalStart[0]} onChange={(x) => setGlobalStart([x, globalStart[1]])} />
+          <NumberField label="y₀" value={globalStart[1]} onChange={(y) => setGlobalStart([globalStart[0], y])} />
+        </div>
+
+        <NumberField
+          label="Шум градиента (σ)"
+          value={gradientNoise}
+          onChange={setGradientNoise}
+          description="Лёгкий шум: 1e-5–1e-4, сильный: 1e-3–1e-2."
+        />
 
         <NumberField label="От" value={paramFrom} onChange={setParamFrom} />
         <NumberField label="До" value={paramTo} onChange={setParamTo} />
