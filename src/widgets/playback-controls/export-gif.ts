@@ -179,7 +179,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   canvas.height = height;
   const ctx = canvas.getContext("2d")!;
 
-  const gifFrames: Array<{ data: ImageBitmap; delay: number }> = [];
+  const gifFrames: Array<{ data: Uint8ClampedArray; delay: number }> = [];
   const delay = Math.round(1000 / fps);
 
   for (let f = 0, idx = 0; f <= maxFrame; f += frameStep, idx++) {
@@ -228,8 +228,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
       ctx.stroke();
     }
 
-    const bitmap = await createImageBitmap(canvas);
-    gifFrames.push({ data: bitmap, delay });
+    gifFrames.push({ data: ctx.getImageData(0, 0, width, height).data, delay });
     onProgress?.(idx + 1, totalFrames);
 
     if (idx % 20 === 0) await new Promise<void>((r) => setTimeout(r, 0));
@@ -237,14 +236,11 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
 
   onProgress?.(totalFrames, totalFrames);
 
-  const blob = (await encode({
+  return (await encode({
     width,
     height,
     workerUrl: gifWorkerUrl,
-    frames: gifFrames.map((f) => ({ data: f.data, delay: f.delay })),
+    frames: gifFrames,
     format: "blob",
   })) as unknown as Blob;
-
-  for (const f of gifFrames) f.data.close();
-  return blob;
 }
