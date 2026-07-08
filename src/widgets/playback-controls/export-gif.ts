@@ -88,12 +88,12 @@ interface BakeParams {
   stops: Stops;
   cx: number; cy: number; cw: number; ch: number;
   totalW: number; totalH: number;
-  bgColor: string; fontColor: string; mutedFontColor: string; gridColor: string;
+  bgColor: string; fontColor: string; gridColor: string;
   range: readonly [number, number, number, number];
 }
 
 function bakeBackground(p: BakeParams): HTMLCanvasElement {
-  const { z, stops, cx, cy, cw, ch, totalW, totalH, bgColor, fontColor, mutedFontColor, gridColor, range } = p;
+  const { z, stops, cx, cy, cw, ch, totalW, totalH, bgColor, fontColor, gridColor, range } = p;
   const rows = z.length;
   const cols = z[0].length;
   let zMin = Infinity;
@@ -258,7 +258,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   const bg = bakeBackground({
     z: surface.z, stops, cx, cy, cw, ch, totalW: width, totalH: height,
     bgColor: colors.paper, fontColor: colors.fontColor,
-    mutedFontColor: colors.mutedFontColor, gridColor: colors.lineColor, range,
+    gridColor: colors.lineColor, range,
   });
 
   const visibleSlots = slots.filter((s) => s.visible && results[s.slotId]);
@@ -312,7 +312,7 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
   canvas.height = height;
   const ctx = canvas.getContext("2d")!;
 
-  const gifFrames: Array<{ data: Uint8ClampedArray; delay: number }> = [];
+  const gifFrames: Array<{ data: Uint8Array; delay: number }> = [];
 
   for (let f = 0, idx = 0; f <= maxFrame; f += frameStep, idx++) {
     ctx.drawImage(bgWithLegend, 0, 0);
@@ -360,7 +360,8 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
       ctx.stroke();
     }
 
-    gifFrames.push({ data: ctx.getImageData(0, 0, width, height).data, delay });
+    const imgData = ctx.getImageData(0, 0, width, height).data;
+    gifFrames.push({ data: new Uint8Array(imgData.buffer as ArrayBuffer), delay });
     onProgress?.(idx + 1, totalFrames);
 
     if (idx % 20 === 0) await new Promise<void>((r) => setTimeout(r, 0));
