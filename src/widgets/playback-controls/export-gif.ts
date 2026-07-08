@@ -1,4 +1,5 @@
 import { encode } from "modern-gif";
+import gifWorkerUrl from "modern-gif/worker?url";
 
 import { computeMaxFrame } from "@entities/playback";
 import { usePlotSettingsStore } from "@entities/plot-settings";
@@ -234,9 +235,12 @@ export async function exportGif(options: ExportGifOptions = {}): Promise<Blob> {
     if (idx % 20 === 0) await new Promise<void>((r) => setTimeout(r, 0));
   }
 
+  onProgress?.(totalFrames, totalFrames);
+
   const blob = (await encode({
     width,
     height,
+    workerUrl: gifWorkerUrl,
     frames: gifFrames.map((f) => ({ data: f.data, delay: f.delay })),
     format: "blob",
   })) as unknown as Blob;
