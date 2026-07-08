@@ -62,6 +62,7 @@ export function useFunctionPreview(params: PreviewParams | null) {
     queryKey: ["function-preview", params],
     queryFn: () => fetchFunctionPreview(params!),
     enabled: params !== null,
+    staleTime: Infinity,
     placeholderData: keepPreviousData,
   });
 }

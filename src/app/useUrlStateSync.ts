@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useLocation, useSearchParams } from "react-router";
 
 import { usePlotSettingsStore } from "@entities/plot-settings";
 import { useRunsStore } from "@entities/run";
@@ -13,6 +13,7 @@ const WRITE_DEBOUNCE_MS = 350;
 
 export function useUrlStateSync() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { pathname } = useLocation();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export function useUrlStateSync() {
   const slots = useRunsStore((state) => state.slots);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || pathname !== "/main") return;
 
     const runs: DashboardRunUrlState[] = slots.map((slot) => ({
       optimizer: slot.optimizer,
@@ -95,5 +96,5 @@ export function useUrlStateSync() {
     }, WRITE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
-  }, [hydrated, formula, presetName, range, globalStart, is3D, contourMode, contourLevels, colormap, colormapReversed, slots, setSearchParams]);
+  }, [hydrated, pathname, formula, presetName, range, globalStart, is3D, contourMode, contourLevels, colormap, colormapReversed, slots, setSearchParams]);
 }
