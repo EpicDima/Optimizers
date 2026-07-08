@@ -98,7 +98,7 @@ export function RunsSidebar() {
             label="Шум градиента (σ)"
             value={gradientNoise}
             onChange={setGradientNoise}
-            description="σ гауссова шума к значению функции (влияет на градиент через конечные разности). Типичные значения: 1e-7–1e-5. Значения ≥0.01 забивают градиент шумом."
+            description="Имитация стохастического градиента (SGD на мини-батчах): в реальном обучении градиент зашумлён, потому что считается не по всем данным, а по выборке. σ — стандартное отклонение гауссова шума к f(x,y). Типичные значения: 1e-7–1e-5. Значения ≥0.01 забивают градиент."
           />
           <Checkbox checked={resetOnStart} onChange={setResetOnStart} label="Сбрасывать позицию" />
           {error && <p className="font-body text-xs text-danger">{error}</p>}
