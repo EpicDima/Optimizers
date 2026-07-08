@@ -21,7 +21,8 @@ export type AnalysisMode = "sweep" | "heatmap";
 export interface HeatmapData {
   xs: number[];
   ys: number[];
-  z: number[][];
+  values: number[][][];
+  totalSteps: number;
   surfaceXs: number[];
   surfaceYs: number[];
   surfaceZ: number[][];
@@ -240,19 +241,14 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
 
         const engineResults = await runInWorker(formula, slots, steps, gradientNoise);
 
-        const z: number[][] = [];
+        const values: number[][][] = [];
         for (let iy = 0; iy < n; iy++) {
-          const row: number[] = [];
+          const row: number[][] = [];
           for (let ix = 0; ix < n; ix++) {
             const r = engineResults[iy * n + ix];
-            if (r.error) {
-              row.push(NaN);
-            } else {
-              const vals = r.value;
-              row.push(vals.length > 0 ? vals[vals.length - 1] : NaN);
-            }
+            row.push(r.error ? [] : r.value);
           }
-          z.push(row);
+          values.push(row);
         }
 
         const surfaceN = 100;
@@ -264,7 +260,7 @@ export const useAnalysisStore = create<AnalysisState>()(persist((set, get) => {
         }
         const surfaceZ = surfaceYs.map((yVal) => surfaceXs.map((xVal) => preset.fn(xVal, yVal)));
 
-        set({ isRunning: false, heatmapData: { xs, ys, z, surfaceXs, surfaceYs, surfaceZ } });
+        set({ isRunning: false, heatmapData: { xs, ys, values, totalSteps: steps, surfaceXs, surfaceYs, surfaceZ } });
       } catch (err) {
         set({ isRunning: false, error: err instanceof Error ? err.message : String(err) });
       }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Data, Layout } from "plotly.js";
 
 import { useAnalysisStore } from "@entities/analysis";
@@ -9,6 +9,24 @@ import { Plot, usePlotlyAutoResize } from "@shared/lib/plotly";
 import { useResolvedTheme } from "@shared/lib/theme";
 import { Checkbox, Panel, Slider } from "@shared/ui";
 
+function zAtStep(values: number[][][], step: number): { z: number[][]; raw: number[][] } {
+  const z: number[][] = [];
+  const raw: number[][] = [];
+  for (const row of values) {
+    const zRow: number[] = [];
+    const rawRow: number[] = [];
+    for (const trajectory of row) {
+      const idx = Math.min(step, trajectory.length - 1);
+      const v = trajectory.length > 0 ? trajectory[idx] : NaN;
+      rawRow.push(v);
+      zRow.push(v);
+    }
+    z.push(zRow);
+    raw.push(rawRow);
+  }
+  return { z, raw };
+}
+
 export function HeatmapChart() {
   const heatmapData = useAnalysisStore((s) => s.heatmapData);
   const colormap = usePlotSettingsStore((s) => s.colormap);
@@ -18,19 +36,32 @@ export function HeatmapChart() {
   const [logScale, setLogScale] = useState(true);
   const [showBase, setShowBase] = useState(true);
   const [overlayOpacity, setOverlayOpacity] = useState(0.65);
+  const [step, setStep] = useState(Infinity);
   const plotRef = usePlotlyAutoResize();
+
+  const totalSteps = heatmapData?.totalSteps ?? 0;
+  const displayStep = Math.min(step, totalSteps);
+
+  useEffect(() => {
+    setStep(Infinity);
+  }, [heatmapData]);
 
   const baseColorscale = useMemo(
     () => (catalog ? toPlotlyColorscale(catalog, colormap, colormapReversed) : undefined),
     [catalog, colormap, colormapReversed],
   );
 
-  const data = useMemo((): Data[] => {
-    if (!heatmapData || !baseColorscale) return [];
+  const { zDisplay, rawZ } = useMemo(() => {
+    if (!heatmapData) return { zDisplay: [], rawZ: [] };
+    const { z, raw } = zAtStep(heatmapData.values, displayStep);
+    const zDisplay = logScale
+      ? z.map((row) => row.map((v) => (v > 0 ? Math.log10(v) : NaN)))
+      : z;
+    return { zDisplay, rawZ: raw };
+  }, [heatmapData, displayStep, logScale]);
 
-    const z = logScale
-      ? heatmapData.z.map((row) => row.map((v) => (v > 0 ? Math.log10(v) : NaN)))
-      : heatmapData.z;
+  const data = useMemo((): Data[] => {
+    if (!heatmapData || !baseColorscale || zDisplay.length === 0) return [];
 
     const traces: Data[] = [];
 
@@ -50,20 +81,20 @@ export function HeatmapChart() {
       type: "heatmap" as const,
       x: heatmapData.xs,
       y: heatmapData.ys,
-      z,
+      z: zDisplay,
       colorscale: baseColorscale,
       opacity: showBase ? overlayOpacity : 1,
       colorbar: {
-        title: { text: logScale ? "log₁₀ f" : "f(x,y)", side: "right" as const },
+        title: { text: logScale ? "log₁₀ z" : "z", side: "right" as const },
         thickness: 12,
         len: 0.9,
       },
       hovertemplate: "x₀=%{x:.2f}<br>y₀=%{y:.2f}<br>z=%{customdata:.4g}<extra></extra>",
-      customdata: heatmapData.z,
+      customdata: rawZ,
     });
 
     return traces;
-  }, [heatmapData, baseColorscale, logScale, showBase, overlayOpacity]);
+  }, [heatmapData, baseColorscale, zDisplay, rawZ, showBase, overlayOpacity, logScale]);
 
   const layout = useMemo((): Partial<Layout> => {
     const theme = plotlyThemeColors(resolvedTheme);
@@ -89,7 +120,7 @@ export function HeatmapChart() {
 
   return (
     <Panel
-      heading="Финальное f(x,y) от начальной точки"
+      heading={`Значение на шаге ${displayStep} из ${totalSteps}`}
       actions={
         <div className="flex items-center gap-3">
           <Checkbox checked={showBase} onChange={setShowBase} label="Подложка" />
@@ -108,14 +139,29 @@ export function HeatmapChart() {
       }
       className="h-full min-h-0"
     >
-      <Plot
-        ref={plotRef}
-        data={data}
-        layout={layout}
-        config={{ displayModeBar: false, responsive: true }}
-        useResizeHandler
-        style={{ width: "100%", height: "100%" }}
-      />
+      <div className="flex h-full flex-col">
+        <div className="min-h-0 flex-1">
+          <Plot
+            ref={plotRef}
+            data={data}
+            layout={layout}
+            config={{ displayModeBar: false, responsive: true }}
+            useResizeHandler
+            style={{ width: "100%", height: "100%" }}
+          />
+        </div>
+        {totalSteps > 0 && (
+          <div className="shrink-0 px-4 pb-2">
+            <Slider
+              min={0}
+              max={totalSteps}
+              step={1}
+              value={displayStep}
+              onChange={setStep}
+            />
+          </div>
+        )}
+      </div>
     </Panel>
   );
 }
