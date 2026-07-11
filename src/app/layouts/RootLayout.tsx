@@ -1,5 +1,5 @@
 import { lazy, Suspense, useRef } from "react";
-import { useLocation } from "react-router";
+import { Outlet, useLocation } from "react-router";
 
 import { Navbar } from "@widgets/navbar";
 
@@ -21,6 +21,7 @@ export function RootLayout() {
   return (
     <div className="flex h-screen flex-col bg-bg">
       <Navbar />
+      <Outlet />
       <div className="min-h-0 flex-1 overflow-hidden">
         {pages.map(({ path, Component }) =>
           visited.current.has(path) && (
